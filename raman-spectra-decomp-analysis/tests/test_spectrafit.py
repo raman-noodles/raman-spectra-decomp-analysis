@@ -160,3 +160,9 @@ def test_export_fit_data():
         spectrafit.export_fit_data(mod)
     except TypeError:
         print('A str was passed to the function, and was handled well with a TypeError.')
+        
+        
+# def test_fit_data():
+#     """docstring"""
+    
+    
