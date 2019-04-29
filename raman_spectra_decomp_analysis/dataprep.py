@@ -137,6 +137,7 @@ def view_hdf5(filename):
                     print('|    {}'.format(layer_2))
         else:
             print('{}'.format(layer_1))
+    hdf5.close()
 
 
 def plot_fit(hdf5_filename, key):
@@ -173,3 +174,4 @@ def plot_fit(hdf5_filename, key):
     plt.ylabel('counts', fontsize=14)
     plt.title('{} spectra from {}'.format(key, hdf5_filename), fontsize=16)
     plt.legend(fontsize=12)
+    hdf5.close()

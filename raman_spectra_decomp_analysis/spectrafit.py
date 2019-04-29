@@ -17,7 +17,7 @@ from peakutils.baseline import baseline
 from scipy.signal import find_peaks
 
 
-def peak_detect(x_data, y_data, height=0.1, prominence=0.1, distance=10):
+def peak_detect(x_data, y_data, height=None, prominence=None, distance=None):
     """
     Function that utilizes scipy to find peak maxima from input spectral data. Default
     detection parameters are chosen for the user based upon values that worked well during
@@ -54,15 +54,28 @@ def peak_detect(x_data, y_data, height=0.1, prominence=0.1, distance=10):
     if not isinstance(y_data, (list, np.ndarray)):
         raise TypeError('Passed value of `y_data` is not a list or numpy.ndarray! Instead, it is: '
                         + str(type(y_data)))
-    if not isinstance(height, (int, float)):
+    if not isinstance(height, (int, float, type(None))):
         raise TypeError('Passed value of `height` is not a int or a float! Instead, it is: '
                         + str(type(height)))
-    if not isinstance(prominence, (int, float)):
+    if not isinstance(prominence, (int, float, type(None))):
         raise TypeError('Passed value of `prominence` is not a int or a float! Instead, it is: '
                         + str(type(prominence)))
-    if not isinstance(distance, (int, float)):
+    if not isinstance(distance, (int, float, type(None))):
         raise TypeError('Passed value of `distance` is not a int or a float! Instead, it is: '
                         + str(type(distance)))
+    # parse inputs
+    if height == None:
+        height = (0.02*max(y_data))
+    else:
+        pass
+    if prominence == None:
+        prominence = (0.02*max(y_data))
+    else:
+        pass
+    if distance == None:
+        distance = 10
+    else:
+        pass
     # find peaks
     peak_list = find_peaks(y_data, height=height, prominence=prominence, distance=distance)
     # convert peak indexes to data values
@@ -118,7 +131,7 @@ def set_params(peaks):
             pars.update(peak.make_params())
         pars[prefix+'center'].set(peaks[i][0], vary=False)
         pars[prefix+'height'].set(peaks[i][1], vary=False)
-        pars[prefix+'sigma'].set(50, min=0, max=500)
+        pars[prefix+'sigma'].set(100, min=0, max=350)
         pars[prefix+'amplitude'].set(min=0)
         peak_list.append(peak)
         if i == 0:
