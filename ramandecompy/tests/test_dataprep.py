@@ -22,7 +22,7 @@ def test_add_calibration():
     """docstring"""
     dataprep.new_hdf5('test')
     dataprep.add_calibration('test.hdf5',
-                             'raman_spectra_decomp_analysis/tests/test_files/Methane_Baseline_Calibration.xlsx',
+                             'ramandecompy/tests/test_files/Methane_Baseline_Calibration.xlsx',
                              label='Methane')
     cal_file = h5py.File('test.hdf5', 'r')
     assert list(cal_file.keys())[0] == 'Methane', 'custom label not applied correctly'
@@ -33,12 +33,12 @@ def test_add_calibration():
     # test that function assigns filename correctly as compound label
     dataprep.new_hdf5('test1')
     dataprep.add_calibration('test1.hdf5',
-                             'raman_spectra_decomp_analysis/tests/test_files/Methane_Baseline_Calibration.xlsx')
+                             'ramandecompy/tests/test_files/Methane_Baseline_Calibration.xlsx')
     cal_file1 = h5py.File('test1.hdf5', 'r')
     assert list(cal_file1.keys())[0] == 'Methane_Baseline_Calibration', 'filename label not applied correctly'
     # test inputs
     try:
-        dataprep.add_calibration(4.2, 'raman_spectra_decomp_analysis/tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx')
+        dataprep.add_calibration(4.2, 'ramandecompy/tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx')
     except TypeError:
         print('A float was passed to the function, and it was handled well with a TypeError.')
     try:
@@ -46,7 +46,7 @@ def test_add_calibration():
     except TypeError:
         print('A float was passed to the function, and it was handled well with a TypeError.')
     try:
-        dataprep.add_calibration('test.txt', 'raman_spectra_decomp_analysis/tests/test_files/CarbonMonoxide_Baseline_Calibration')
+        dataprep.add_calibration('test.txt', 'ramandecompy/tests/test_files/CarbonMonoxide_Baseline_Calibration')
     except TypeError:
         print('A .txt file was passed to the function, and it was handled will with a TypeError.')
     os.remove('test.hdf5')
@@ -56,7 +56,7 @@ def test_add_calibration():
 def test_add_experiment():
     """docstring"""
     dataprep.new_hdf5('exp_test')
-    dataprep.add_experiment('exp_test.hdf5', 'raman_spectra_decomp_analysis/tests/test_files/FA_3.6wt__300C_25s.csv')
+    dataprep.add_experiment('exp_test.hdf5', 'ramandecompy/tests/test_files/FA_3.6wt__300C_25s.csv')
     exp_file = h5py.File('exp_test.hdf5', 'r')
     # test generated file
     assert len(exp_file) == 1, 'incorrect number of 1st order groups'
@@ -68,7 +68,7 @@ def test_add_experiment():
     assert len(exp_file['300C/25s']) == 18, 'incorrect number of peaks + raw_data stored'
     # test inputs
     try:
-        dataprep.add_experiment(4.2, 'raman_spectra_decomp_analysis/tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx')
+        dataprep.add_experiment(4.2, 'ramandecompy/tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx')
     except TypeError:
         print('A float was passed to the function, and it was handled well with a TypeError.')
     try:
@@ -76,7 +76,7 @@ def test_add_experiment():
     except TypeError:
         print('A float was passed to the function, and it was handled well with a TypeError.')
     try:
-        dataprep.add_experiment('test.txt', 'raman_spectra_decomp_analysis/tests/test_files/CarbonMonoxide_Baseline_Calibration')
+        dataprep.add_experiment('test.txt', 'ramandecompy/tests/test_files/CarbonMonoxide_Baseline_Calibration')
     except TypeError:
         print('A .txt file was passed to the function, and it was handled will with a TypeError.')
     os.remove('exp_test.hdf5')
@@ -85,7 +85,7 @@ def test_add_experiment():
 def test_view_hdf5():
     """docstring"""
     # test inputs
-    dataprep.view_hdf5('dataprep_experiment.hdf5')
+    dataprep.view_hdf5('ramandecompy/tests/test_files/dataprep_experiment.hdf5')
     try:
         dataprep.view_hdf5(4.2)
     except TypeError:
@@ -98,7 +98,7 @@ def test_view_hdf5():
 
 def test_plot_fit():
     """docstring"""
-    hdf5_filename = 'raman_spectra_decomp_analysis/tests/test_files/dataprep_experiment.hdf5'
+    hdf5_filename = 'ramandecompy/tests/test_files/dataprep_experiment.hdf5'
     key = '300C/25s'
     hdf5 = h5py.File(hdf5_filename, 'r')
     dataprep.plot_fit(hdf5_filename, key)
@@ -112,7 +112,7 @@ def test_plot_fit():
     except TypeError:
         print('A .txt was passed to the function, and it was handled well with a TypeError.')
     try:
-        dataprep.plot_fit('raman_spectra_decomp_analysis/tests/test_files/dataprep_experiment.hdf5', 4.2)
+        dataprep.plot_fit('ramandecompy/tests/test_files/dataprep_experiment.hdf5', 4.2)
     except TypeError:
         print('A float was passed to the function, and it was handled well with a TypeError.')
     assert key in hdf5, 'input key does not exist within the specified .hdf5 file'
