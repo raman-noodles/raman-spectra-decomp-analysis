@@ -1,10 +1,10 @@
 from setuptools import setup
 
-setup(name='raman-spectra-decomp-analysis',
+setup(name='ramandecompy',
       version='1.0.beta',
       description='A python package for analyzing raman spectroscopy decomposition data.',
-      url='https://github.com/raman-noodles/raman-specrta-decomp-analysis',
+      url='https://github.com/raman-noodles/raman-spectra-decomp-analysis',
       author='Raman Noodles Group, University of Washington (2019)',
       license='MIT',
-      packages=['raman_spectra_decomp_analysis'],
+      packages=['ramandecompy'],
       install_requires=['numpy', 'jcamp', 'requests', 'matplotlib', 'scipy', 'lmfit', 'peakutils', 'h5py', 'pandas', 'xlrd'])
