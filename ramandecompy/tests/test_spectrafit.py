@@ -9,7 +9,7 @@ import lmfit
 from ramannoodles import spectrafit
 
 
-data_filename = 'raman-spectra-decomp-analysis/tests/test_files/Hydrogen_Baseline_Calibration.xlsx'
+data_filename = 'ramandecompy/tests/test_files/Hydrogen_Baseline_Calibration.xlsx'
 DATA = pd.read_excel(data_filename, header=None, names=('x', 'y'))
 X_TEST = DATA['x'].values
 Y_TEST = DATA['y'].values
@@ -157,7 +157,7 @@ def test_export_fit_data():
     output is not the correct shape"""
     assert len(fit_peak_data) == int(len(out.values)/6), 'incorrect number of peaks exported'
     try:
-        spectrafit.export_fit_data(mod)
+        spectrafit.export_fit_data('out')
     except TypeError:
         print('A str was passed to the function, and was handled well with a TypeError.')
         

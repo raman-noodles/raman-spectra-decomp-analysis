@@ -11,4 +11,4 @@ raman_spectra_decomp_analysis.egg-info
 *.p
 *.ipynb_checkpoints
 *.hdf5
-*.DS_Store
+.DS_Store
