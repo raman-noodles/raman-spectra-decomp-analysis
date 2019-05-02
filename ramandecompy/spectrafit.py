@@ -12,6 +12,7 @@ Developed by the Raman-Noodles team.
 import matplotlib.pyplot as plt
 import numpy as np
 import lmfit
+from sklearn.metrics import auc
 from lmfit.models import PseudoVoigtModel
 from peakutils.baseline import baseline
 from scipy.signal import find_peaks
@@ -245,7 +246,7 @@ def plot_fit(x_data, y_data, fit_result, plot_components=False):
     plt.show()
 
 
-def export_fit_data(out):
+def export_fit_data(x_data, out):
     """
     This function returns fit information for an input lmfit model set.
 
@@ -271,7 +272,7 @@ def export_fit_data(out):
                         + str(type(out)))
     fit_peak_data = []
     for i in range(int(len(out.values)/6)):
-        peak = np.zeros(6)
+        peak = np.zeros(7)
         prefix = 'p{}_'.format(i+1)
         peak[0] = out.values[prefix+'fraction']
         peak[1] = out.values[prefix+'sigma']
@@ -279,6 +280,7 @@ def export_fit_data(out):
         peak[3] = out.values[prefix+'amplitude']
         peak[4] = out.values[prefix+'fwhm']
         peak[5] = out.values[prefix+'height']
+        peak[6] = auc(x_data, out.eval_components(x=x_data)[prefix])
         fit_peak_data.append(peak)
     return fit_peak_data
 
@@ -292,5 +294,5 @@ def fit_data(x_data, y_data):
     peaks = peak_detect(x_data, y_data, height=10, prominence=20)[0]
     mod, pars = set_params(peaks)
     out = model_fit(x_data, y_data, mod, pars)
-    fit_result = export_fit_data(out)
+    fit_result = export_fit_data(x_data, out)
     return fit_result
