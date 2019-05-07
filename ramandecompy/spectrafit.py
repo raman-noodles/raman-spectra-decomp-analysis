@@ -291,7 +291,7 @@ def fit_data(x_data, y_data):
     can remove height/prominence values once the peak_detect
     function is updated to be proportional to the data
     """
-    peaks = peak_detect(x_data, y_data, height=10, prominence=20)[0]
+    peaks = peak_detect(x_data, y_data)[0]
     mod, pars = set_params(peaks)
     out = model_fit(x_data, y_data, mod, pars)
     fit_result = export_fit_data(x_data, out)

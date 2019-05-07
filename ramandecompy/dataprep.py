@@ -2,7 +2,7 @@
 import h5py
 import pandas as pd
 import matplotlib.pyplot as plt
-from ramannoodles import spectrafit
+from ramandecompy import spectrafit
 
 
 def new_hdf5(new_filename):
@@ -30,7 +30,6 @@ def add_calibration(hdf5_filename, data_filename, label=None):
                         + str(type(data_filename)))
     # r+ is read/write mode and will fail if the file does not exist
     cal_file = h5py.File(hdf5_filename, 'r+')
-    data = pd.read_excel(data_filename, header=None, names=('x', 'y'))
     if data_filename.split('.')[-1] == 'xlsx':
         data = pd.read_excel(data_filename, header=None, names=('x', 'y'))
     elif data_filename.split('.')[-1] == 'csv':
