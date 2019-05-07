@@ -14,7 +14,6 @@ import numpy as np
 import lmfit
 from sklearn.metrics import auc
 from lmfit.models import PseudoVoigtModel
-from peakutils.baseline import baseline
 from scipy.signal import find_peaks
 
 
