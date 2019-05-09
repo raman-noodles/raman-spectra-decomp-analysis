@@ -1,5 +1,6 @@
 """docstring"""
 import h5py
+import lineid_plot
 import pandas as pd
 import matplotlib.pyplot as plt
 from ramandecompy import spectrafit
@@ -49,7 +50,10 @@ def add_calibration(hdf5_filename, data_filename, label=None):
         cal_file['{}/wavenumber'.format(label)] = data['x']
         cal_file['{}/counts'.format(label)] = data['y']
         for i, _ in enumerate(fit_result):
-            cal_file['{}/Peak_{}'.format(label, i+1)] = fit_result[i]
+            if i < 9:
+                cal_file['{}/Peak_0{}'.format(label, i+1)] = fit_result[i]
+            else:
+                cal_file['{}/Peak_{}'.format(label, i+1)] = fit_result[i]
     else:
         label = (data_filename.split('/')[-1]).split('.')[0]
         cal_file['{}/wavenumber'.format(label)] = data['x']
@@ -139,7 +143,7 @@ def view_hdf5(filename):
     hdf5.close()
 
 
-def plot_fit(hdf5_filename, key):
+def plot_fit(hdf5_filename, key, color='blue'):
     """docstring"""
     # handling input errors
     if not isinstance(hdf5_filename, str):
@@ -158,19 +162,21 @@ def plot_fit(hdf5_filename, key):
     y_data = list(hdf5['{}/counts'.format(key)])
     # extract fitted peak center values
     peak_centers = []
+    peak_labels = []
     for _,peak in enumerate(list(hdf5[key])[:-2]):
         peak_centers.append(list(hdf5['{}/{}'.format(key, peak)])[2])
-    # plot spectra and peak center values
-    plt.figure(figsize=(16,5))
-    plt.plot(x_data, y_data, label = 'spectra data')
-    for i,peak in enumerate(peak_centers):
-        if i == 0:
-            plt.axvline(x=peak, color='orange', alpha=0.6, label='detected peak')
-        else:
-            plt.axvline(x=peak, color='orange', alpha=0.6)
+        peak_labels.append(peak)
+    # plot spectra and peak labels
+    fig, ax = lineid_plot.plot_line_ids(x_data, y_data, peak_centers, peak_labels,
+                                        box_axes_space=0.12, plot_kwargs={'linewidth':0.75})
+    fig.set_size_inches(15,5)
+    # lock the scale so that additional plots do not warp the labels
+    ax.set_autoscale_on(False)
+    # reset the data plot color
+    plt.gca().get_lines()[0].set_color(color)
     plt.xlabel('wavenumber ($cm^{-1}$)', fontsize=14)
     plt.xlim(min(x_data), max(x_data))
     plt.ylabel('counts', fontsize=14)
-    plt.title('{} spectra from {}'.format(key, hdf5_filename), fontsize=16)
-    plt.legend(fontsize=12)
+    plt.title('{} spectra from {}'.format(key, hdf5_filename.split('/')[-1]), fontsize=18, pad=80)
     hdf5.close()
+    return fig, ax
