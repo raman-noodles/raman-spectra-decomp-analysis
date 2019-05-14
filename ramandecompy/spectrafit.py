@@ -264,6 +264,7 @@ def export_fit_data(x_data, out):
                             fit_peak_data[i][3] = p[i]_amplitude
                             fit_peak_data[i][4] = p[i]_fwhm
                             fit_peak_data[i][5] = p[i]_height
+                            fit_park_data[i][6] = p[i]_area under the curve
     """
     # handling errors in inputs
     if not isinstance(out, lmfit.model.ModelResult):
@@ -271,16 +272,16 @@ def export_fit_data(x_data, out):
                         + str(type(out)))
     fit_peak_data = []
     for i in range(int(len(out.values)/6)):
-        peak = np.zeros(7)
+        peak_param = np.zeros(7)
         prefix = 'p{}_'.format(i+1)
-        peak[0] = out.values[prefix+'fraction']
-        peak[1] = out.values[prefix+'sigma']
-        peak[2] = out.values[prefix+'center']
-        peak[3] = out.values[prefix+'amplitude']
-        peak[4] = out.values[prefix+'fwhm']
-        peak[5] = out.values[prefix+'height']
-        peak[6] = auc(x_data, out.eval_components(x=x_data)[prefix])
-        fit_peak_data.append(peak)
+        peak_param[0] = out.values[prefix+'fraction']
+        peak_param[1] = out.values[prefix+'sigma']
+        peak_param[2] = out.values[prefix+'center']
+        peak_param[3] = out.values[prefix+'amplitude']
+        peak_param[4] = out.values[prefix+'fwhm']
+        peak_param[5] = out.values[prefix+'height']
+        peak_param[6] = auc(x_data, out.eval_components(x=x_data)[prefix])
+        fit_peak_data.append(peak_param)
     return fit_peak_data
 
 
