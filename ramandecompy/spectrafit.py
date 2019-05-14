@@ -130,8 +130,8 @@ def set_params(peaks):
         else:
             pars.update(peak.make_params())
         pars[prefix+'center'].set(peaks[i][0], vary=False)
-        pars[prefix+'height'].set(peaks[i][1], vary=False)
-        pars[prefix+'sigma'].set(100, min=0, max=350)
+        pars[prefix+'height'].set(min=0.1*peaks[i][1])
+        pars[prefix+'sigma'].set(100, min=1, max=150)
         pars[prefix+'amplitude'].set(min=0)
         peak_list.append(peak)
         if i == 0:
