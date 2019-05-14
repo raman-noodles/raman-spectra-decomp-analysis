@@ -4,6 +4,7 @@ __pycache__/
 dist/
 build/
 ramannoodles.egg-info
+raman_spectra_decomp_analysis.egg-info
 
 # do not track these file types
 *.jdx
