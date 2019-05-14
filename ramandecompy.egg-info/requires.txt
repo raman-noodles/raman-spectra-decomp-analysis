@@ -1,0 +1,8 @@
+numpy
+matplotlib
+scipy
+lmfit
+peakutils
+h5py
+pandas
+xlrd
