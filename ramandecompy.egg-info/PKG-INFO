@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: ramandecompy
+Version: 1.0b0
+Summary: A python package for analyzing raman spectroscopy decomposition data.
+Home-page: https://github.com/raman-noodles/raman-spectra-decomp-analysis
+Author: Raman Noodles Group, University of Washington (2019)
+Author-email: UNKNOWN
+License: MIT
+Description: UNKNOWN
+Platform: UNKNOWN
