@@ -270,6 +270,9 @@ def export_fit_data(x_data, out):
     if not isinstance(out, lmfit.model.ModelResult):
         raise TypeError('Passed value of `out` is not a lmfit.model.ModelResult! Instead, it is: '
                         + str(type(out)))
+    if not isinstance(x_data, (list, np.ndarray)):
+        raise TypeError('Passed value of `x_data` is not a list or numpy.ndarray! Instead, it is: '
+                        + str(type(x_data)))
     fit_peak_data = []
     for i in range(int(len(out.values)/6)):
         peak_param = np.zeros(7)
@@ -288,9 +291,17 @@ def export_fit_data(x_data, out):
 def fit_data(x_data, y_data):
     """
     small wrapper function used in dataprep.py
-    can remove height/prominence values once the peak_detect
-    function is updated to be proportional to the data
     """
+    # handling errors in inputs
+    if not isinstance(x_data, (list, np.ndarray)):
+        raise TypeError('Passed value of `x_data` is not a list or numpy.ndarray! Instead, it is: '
+                        + str(type(x_data)))
+    if not isinstance(y_data, (list, np.ndarray)):
+        raise TypeError('Passed value of `y_data` is not a list or numpy.ndarray! Instead, it is: '
+                        + str(type(y_data)))
+    # force inputs to np.ndarray
+    x_data = np.asarray(x_data)
+    y_data = np.asarray(y_data)
     peaks = peak_detect(x_data, y_data)[0]
     mod, pars = set_params(peaks)
     out = model_fit(x_data, y_data, mod, pars)
