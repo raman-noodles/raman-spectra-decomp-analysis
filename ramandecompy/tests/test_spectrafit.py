@@ -170,10 +170,10 @@ def test_fit_data():
     """docstring"""
     fit_result = spectrafit.fit_data(X_TEST, Y_TEST)
     assert isinstance(fit_result, list), 'output is not a list'
-    for i,_ in enumerate(fit_result)
+    for i,_ in enumerate(fit_result):
         assert isinstance(fit_result[i], np.ndarray), 'output element {} is not a np.ndarray'.format(i)
         assert len(fit_result[i]) == 7, 'output element {} contains an incorrect number of values'.format(i)
-    assert len(fit_result) == 4 'output contains an incorrect amount of detected peaks'
+    assert len(fit_result) == 4, 'output contains an incorrect amount of detected peaks'
     try:
         spectrafit.fit_data(X_TEST, 'Y_TEST')
     except TypeError:

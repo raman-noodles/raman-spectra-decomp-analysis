@@ -100,7 +100,6 @@ def test_plot_fit():
     """docstring"""
     hdf5_filename = 'ramandecompy/tests/test_files/dataprep_experiment.hdf5'
     key = '300C/25s'
-    hdf5 = h5py.File(hdf5_filename, 'r')
     dataprep.plot_fit(hdf5_filename, key)
     #test inputs
     try:
