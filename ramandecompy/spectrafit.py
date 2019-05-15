@@ -197,37 +197,6 @@ def model_fit(x_data, y_data, mod, pars, report=False):
     return out
 
 
-def build_custom_model(x_data, y_data, peaks, peaks_add, plot_fit):
-    # add new list of peaks to model
-    mod, pars = spectrafit.set_params(peaks)
-    peak_list = []
-    for i, _ in enumerate(peaks_add):
-        prefix = 'p{}_'.format(i+1+len(peaks))
-        peak = PseudoVoigtModel(prefix=prefix)
-        pars.update(peak.make_params())
-        pars[prefix+'center'].set(peaks_add[i][0], vary=True, min=(peaks_add[i][0]-10), max=(peaks_add[i][0]+10))
-        pars[prefix+'height'].set(min=0.1*peaks_add[i][1])
-        pars[prefix+'sigma'].set(100, min=1, max=150)
-        pars[prefix+'amplitude'].set(min=0)
-        peak_list.append(peak)
-        mod = mod + peak_list[i]
-    # run the fit
-    out = spectrafit.model_fit(x_data, y_data, mod, pars)
-    # plot_fit option
-    if plot_fit is True:
-        spectrafit.plot_fit(x_data, y_data, out, plot_components=True)
-    else:
-        pass
-    # save fit data
-    fit_result = spectrafit.export_fit_data(x_data, out)
-    # add 'user_added' label as 8th term to user added peaks
-    for i in range(len(peaks), len(fit_result)):
-        fit_result[i].append('user_added')
-    # sort peaks by center location for saving
-    fit_result = sorted(fit_result, key=lambda x: int(x[2]))
-    return fit_result
-
-
 def plot_fit(x_data, y_data, fit_result, plot_components=False):
     """
     This function plots the fit, each individual Lorentzian, and the orginal data for
@@ -338,4 +307,35 @@ def fit_data(x_data, y_data):
     mod, pars = set_params(peaks)
     out = model_fit(x_data, y_data, mod, pars)
     fit_result = export_fit_data(x_data, out)
+    return fit_result
+
+
+def build_custom_model(x_data, y_data, peaks, peaks_add, plot_fits):
+    # add new list of peaks to model
+    mod, pars = set_params(peaks)
+    peak_list = []
+    for i, _ in enumerate(peaks_add):
+        prefix = 'p{}_'.format(i+1+len(peaks))
+        peak = PseudoVoigtModel(prefix=prefix)
+        pars.update(peak.make_params())
+        pars[prefix+'center'].set(peaks_add[i][0], vary=True, min=(peaks_add[i][0]-10), max=(peaks_add[i][0]+10))
+        pars[prefix+'height'].set(min=0.1*peaks_add[i][1])
+        pars[prefix+'sigma'].set(100, min=1, max=150)
+        pars[prefix+'amplitude'].set(min=0)
+        peak_list.append(peak)
+        mod = mod + peak_list[i]
+    # run the fit
+    out = model_fit(x_data, y_data, mod, pars)
+    # plot_fits option
+    if plot_fits is True:
+        plot_fit(x_data, y_data, out, plot_components=True)
+    else:
+        pass
+    # save fit data
+    fit_result = export_fit_data(x_data, out)
+    # add 'user_added' label as 8th term to user added peaks
+    for i in range(len(peaks), len(fit_result)):
+        fit_result[i].append('user_added')
+    # sort peaks by center location for saving
+    fit_result = sorted(fit_result, key=lambda x: int(x[2]))
     return fit_result

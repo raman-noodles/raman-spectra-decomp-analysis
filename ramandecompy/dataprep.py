@@ -4,7 +4,9 @@ import lineid_plot
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+from scipy import interpolate
 from ramandecompy import spectrafit
+
 
 
 def new_hdf5(new_filename):
@@ -114,7 +116,7 @@ def add_experiment(hdf5_filename, exp_filename):
     exp_file.close()
 
     
-def adjust_peaks(hdf5_file, key, add_list, drop_list=None, plot_fit=False):
+def adjust_peaks(hdf5_file, key, add_list=None, drop_list=None, plot_fits=False):
     """docstring"""
     # open hdf5_file
     hdf5 = h5py.File(hdf5_file, 'r+')
@@ -134,15 +136,18 @@ def adjust_peaks(hdf5_file, key, add_list, drop_list=None, plot_fit=False):
             peaks.pop(index-i)      
     else:
         pass
-    # interpolate data
-    comp_int = interpolate.interp1d(x_data, y_data, kind='cubic')
-    # iterate through add_list
-    peaks_add = []
-    for _,guess in enumerate(add_list):
-        height = comp_int(int(guess))
-        peaks_add.append((int(guess), int(height)))
+    if add_list is not None:
+        # interpolate data
+        comp_int = interpolate.interp1d(x_data, y_data, kind='cubic')
+        # iterate through add_list
+        peaks_add = []
+        for _,guess in enumerate(add_list):
+            height = comp_int(int(guess))
+            peaks_add.append((int(guess), int(height)))
+    else:
+        peaks_add = []
     # build new model
-    fit_result = spectrafit.build_custom_model(x_data, y_data, peaks, peaks_add, plot_fit)
+    fit_result = spectrafit.build_custom_model(x_data, y_data, peaks, peaks_add, plot_fits)
     # delete old fit data
     del hdf5['300C/25s']
     # write data to .hdf5
