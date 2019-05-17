@@ -6,7 +6,7 @@ import pickle
 import numpy as np
 import pandas as pd
 import lmfit
-from ramannoodles import spectrafit
+from ramandecompy import spectrafit
 
 
 data_filename = 'ramandecompy/tests/test_files/Hydrogen_Baseline_Calibration.xlsx'
@@ -151,9 +151,9 @@ def test_export_fit_data():
     peaks = spectrafit.peak_detect(X_TEST, Y_TEST)[0]
     mod, pars = spectrafit.set_params(peaks)
     out = spectrafit.model_fit(X_TEST, Y_TEST, mod, pars)
-    fit_peak_data = spectrafit.export_fit_data(out)
+    fit_peak_data = spectrafit.export_fit_data(X_TEST, out)
     assert isinstance(fit_peak_data, list), 'output is not a list'
-    assert np.asarray(fit_peak_data).shape == (int(len(out.values)/6), 6), """
+    assert np.asarray(fit_peak_data).shape == (int(len(out.values)/6), 7), """
     output is not the correct shape"""
     assert len(fit_peak_data) == int(len(out.values)/6), 'incorrect number of peaks exported'
     try:
@@ -170,9 +170,9 @@ def test_fit_data():
     """docstring"""
     fit_result = spectrafit.fit_data(X_TEST, Y_TEST)
     assert isinstance(fit_result, list), 'output is not a list'
-    for i,_ in enumerate(fit_result):
-        assert isinstance(fit_result[i], np.ndarray), 'output element {} is not a np.ndarray'.format(i)
-        assert len(fit_result[i]) == 7, 'output element {} contains an incorrect number of values'.format(i)
+    for i,peak in enumerate(fit_result):
+        assert isinstance(peak, list), 'output element {} is not a np.ndarray'.format(i)
+        assert len(peak) in [7, 8], 'output element {} contains an incorrect number of values ({})'.format(i, len(peak))
     assert len(fit_result) == 4, 'output contains an incorrect amount of detected peaks'
     try:
         spectrafit.fit_data(X_TEST, 'Y_TEST')
