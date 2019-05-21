@@ -1,30 +1,27 @@
 """
-This module allows for baseline subtraction using polynomial subtraction at a user-specified
-degree, peak detection using scipy.signal find_peaks module, and then utilizes
-Lorentzian fitting of spectra data, enabling extraction of full-width, half-max peak data.
-Note that Lorentzian fitting was chosen explicitly as it is the proper descriptor of peak
-shapes from Raman spectra.
+This module constains a set of functions designed to fit a model consisting of a sum
+of pseudo-Voigt profiles to already baseline subtracted Raman spectroscopy data. These
+functions are primarily accessed in an automated fashion via the dataprep.py module.
 
-Developed by the Raman-Noodles team.
+Developed by the Raman-Noodles team (2019 DIRECT Cohort, University of Washington)
 """
 
 
 import matplotlib.pyplot as plt
 import numpy as np
 import lmfit
-from sklearn.metrics import auc
 from lmfit.models import PseudoVoigtModel
 from scipy.signal import find_peaks
+from sklearn.metrics import auc
 
 
 def peak_detect(x_data, y_data, height=None, prominence=None, distance=None):
     """
-    Function that utilizes scipy to find peak maxima from input spectral data. Default
-    detection parameters are chosen for the user based upon values that worked well during
-    initial testing of the function; however, the option remains to adjust the parameters
-    to achieve the best fit, if the user so chooses.
-    WARNING: This function may return unexpected results or unreliable results for data
-    that contains NaNs. Please remove any NaN values prior to passing data.
+    Function that utilizes scipy to identify local maxima from input spectral data. Default
+    detection criteria are based upon normalized values for the y axis (counts) spectra data;
+    however, the option remains to adjust the parameters to achieve the best fit, if the user
+    so chooses. WARNING: This function may return unexpected results or unreliable results
+    for data that contains NaNs. Please remove any NaN values prior to passing data.
 
     Args:
         x_data (list like): The x-values of the spectra from which peaks will be detected.
@@ -64,15 +61,15 @@ def peak_detect(x_data, y_data, height=None, prominence=None, distance=None):
         raise TypeError('Passed value of `distance` is not a int or a float! Instead, it is: '
                         + str(type(distance)))
     # parse inputs
-    if height == None:
+    if height is None:
         height = (0.02*max(y_data))
     else:
         pass
-    if prominence == None:
+    if prominence is None:
         prominence = (0.02*max(y_data))
     else:
         pass
-    if distance == None:
+    if distance is None:
         distance = 10
     else:
         pass
@@ -93,25 +90,17 @@ def set_params(peaks):
     There is a single model for every peak.
 
     Args:
-        peaks (list): A list containing the x and y-values (in tuples) of the peaks.
+        peaks (list): A list containing tuples of the x_data (wavenumber) and y_data (counts)
+                      values of the peaks.
 
     Returns:
         mod (lmfit.models.PseudoVoigtModel or lmfit.model.CompositeModel): This is an array of
-                        the initialized Pseudo-Voigt models. The array contains all of the values
+                        the initialized pseudo-Voigt models. The array contains all of the values
                         that are found in `pars` that are fed to an lmfit lorentzian model class.
         pars (lmfit.parameter.Parameters): An array containing the parameters for each peak
                         that were generated through the use of a Lorentzian fit. The pars
-                        array contains a center value, a height, a sigma, and an amplitude
-                        value. The center value is allowed to vary +- 10 wavenumber from
-                        the peak max that was detected in scipy. Some wiggle room was allowed
-                        to help mitigate problems from slight issues in the peakdetect
-                        algorithm for peaks that might have relatively flat maxima. The height
-                        value was allowed to vary between 0 and 1, as it is assumed the y-values
-                        are normalized. Sigma is set to a maximum of 500, as we found that
-                        giving it an unbound maximum led to a number of peaks that were
-                        unrealistic for Raman spectra (ie, they were far too broad, and shallow,
-                        to correspond to real data. Finally, the amplitude for the peak was set
-                        to a minimum of 0, to prevent negatives.
+                        array contains values for fraction, center, height, sigma, the full width
+                        at half maximum (fwhm = 2*sigma), and amplitude.
     """
     # handling errors in inputs
     if not isinstance(peaks, list):
@@ -119,7 +108,7 @@ def set_params(peaks):
                         + str(type(peaks)))
     for i, _ in enumerate(peaks):
         if not isinstance(peaks[i], tuple):
-            raise TypeError("""Passed value of `peaks` is not a tuple.
+            raise TypeError("""The {} value of `peaks` is not a tuple.
              Instead, it is: """.format(i) + str(type(peaks[i])))
     peak_list = []
     for i, _ in enumerate(peaks):
@@ -144,27 +133,19 @@ def set_params(peaks):
 def model_fit(x_data, y_data, mod, pars, report=False):
     """
     This function takes in the x and y data for the spectrum being analyzed, as well as the model
-    parameters that were generated in `lorentz_params` for a single peak, and uses it to generate
-    a fit for the model at that one single peak position, then returns that fit.
+    parameters that were generated in `set_params` for each individual peak, and uses it to generate
+    a fit for the model at each peak position, then returns that fit.
 
     Args:
         x_data (list like): The x-values for the spectrum that is being fit.
         y_data (list like): The y-values for the spectrum that is being fit.
-        mod (lmfit.model.CompositeModel): This is an array of the initialized Lorentzian models
-                        from the `lorentz_params` function. This array contains all of the values
+        mod (lmfit.model.CompositeModel): This is an array of the initialized pseudo-Voigt models
+                        from the `set_params` function. This array contains all of the values
                         that are found in pars, that are fed to an lmfit Lorentzian model class.
-        pars (lmfit.parameter.Parameters): An array containing the parameters for each peak that
-                        were generated through the use of a Lorentzian fit. The pars array contains
-                        a center value, a height, a sigma, and an amplitude value. The center value
-                        is allowed to vary +- 10 wavenumber from the peak max that was detected in
-                        scipy. Some wiggle room was allowed to help mitigate problems from slight
-                        issues in the peakdetect algorithm for peaks that might have relatively
-                        flat maxima. The height value was allowed to vary between 0 and 1, as it is
-                        assumed the y-values are normalized. Sigma is set to a maximum of 500, as we
-                        found that giving it an unbound maximum led to a number of peaks that were
-                        unrealistic for Raman spectra (ie, they were far too broad, and shallow, to
-                        correspond to real data. Finally, the amplitude for the peak was set to a
-                        minimum of 0, to prevent negatives.
+        pars (lmfit.parameter.Parameters): An array containing the parameters for each peak
+                        that were generated through the use of a pseudo-Voigt fit. The pars
+                        array contains values for fraction, center, height, sigma, the full width
+                        at half maximum (fwhm = 2*sigma), and amplitude.
         report (boolean): (Optional) This value details whether or not the users wants to receive
                         a report of the fit values. If True, the function will print a report of
                         the fit.
@@ -180,7 +161,7 @@ def model_fit(x_data, y_data, mod, pars, report=False):
         raise TypeError('Passed value of `y_data` is not a list or numpy.ndarray! Instead, it is: '
                         + str(type(y_data)))
     if not isinstance(mod, (lmfit.models.PseudoVoigtModel, lmfit.model.CompositeModel)):
-        raise TypeError("""Passed value of `mod` is not a lmfit.models.PseudoVoigtModel or a 
+        raise TypeError("""Passed value of `mod` is not a lmfit.models.PseudoVoigtModel or a
         lmfit.model.CompositeModel! Instead, it is: """ + str(type(mod)))
     if not isinstance(pars, lmfit.parameter.Parameters):
         raise TypeError("""Passed value of `pars` is not a lmfit.parameter.Parameters!
@@ -199,7 +180,7 @@ def model_fit(x_data, y_data, mod, pars, report=False):
 
 def plot_fit(x_data, y_data, fit_result, plot_components=False):
     """
-    This function plots the fit, each individual Lorentzian, and the orginal data for
+    This function plots the fit, each individual pseudo-Voigt profile, and the orginal data for
     visual examination.
 
     Args:
@@ -247,17 +228,18 @@ def plot_fit(x_data, y_data, fit_result, plot_components=False):
 
 def export_fit_data(x_data, out):
     """
-    This function returns fit information for an input lmfit model set.
+    This function returns fit information for an input lmfit model set as well as calculates
+    the area under each individual pseudo-Voigt profile.
 
     Args:
         out (lmfit.model.ModelResult): An lmfit model class that contains all of the
                         fitted values for the input model class.
 
     Returns:
-        fit_peak_data (numpy array): An array containing both the peak number, as well as the
+        fit_peak_data (list): An array containing both the peak number, as well as the
                         fraction Lorentzian character, sigma, center, amplitude, full-width,
-                        half-max, and the height of the peaks. The data can be accessed by the
-                        array positions shown here:
+                        half-max, and the height of the peaks. The data for peak i can be
+                        accessed by the array positions shown here:
                             fit_peak_data[i][0] = p[i]_fraction
                             fit_peak_data[i][1] = p[i]_simga
                             fit_peak_data[i][2] = p[i]_center
@@ -291,7 +273,26 @@ def export_fit_data(x_data, out):
 
 def fit_data(x_data, y_data):
     """
-    small wrapper function used in dataprep.py
+    This wrapper function takes as an input only the x_data and y_data for a Raman spectra
+    and returns a list of the fit result values in the form of the output of the
+    spectrafit.export_fit_data function.
+
+    Args:
+        x_data (list like): The x-values of the spectra from which peaks will be detected.
+        y_data (list like): The y-values of the spectra from which peaks will be detected.
+
+    Returns:
+        fit_result (list): An array containing both the peak number, as well as the
+                        fraction Lorentzian character, sigma, center, amplitude, full-width,
+                        half-max, and the height of the peaks. The data for peak i can be
+                        accessed by the array positions shown here:
+                            fit_result[i][0] = p[i]_fraction
+                            fit_result[i][1] = p[i]_simga
+                            fit_result[i][2] = p[i]_center
+                            fit_result[i][3] = p[i]_amplitude
+                            fit_result[i][4] = p[i]_fwhm
+                            fit_result[i][5] = p[i]_height
+                            fit_result[i][6] = p[i]_area under the curve
     """
     # handling errors in inputs
     if not isinstance(x_data, (list, np.ndarray)):
@@ -311,6 +312,37 @@ def fit_data(x_data, y_data):
 
 
 def build_custom_model(x_data, y_data, peaks, peaks_add, plot_fits):
+    """
+    This function is primarily utilized via the dataprep.adjust_peaks function. It allows a custom
+    lmfit.model.CompositeModel to be generated using a list of accepted peak values and a list of
+    new peak values to be added based on user experience and expertise. User input peaks are
+    slightly less constrained than those automatically detected using local maximia and therefore
+    their center (wavenumber) value may shift slighty to optimize the fit.
+
+    Args:
+        x_data (list like): The x-values of the spectra from which peaks will be detected.
+        y_data (list like): The y-values of the spectra from which peaks will be detected.
+        peaks (list): A list containing tuples of the x_data (wavenumber) and y_data (counts)
+                      values of the peaks.
+        peaks_add (list): A list containing user specified peak locations to be added to the fit
+                      as well as interpolated values to provide an initial height guess.
+        plot_fits (boolean): A simple True/False boolean input that determins if the plot_fit
+                      function should be used to display the resulting fit for visual inspection.
+
+    Returns:
+        fit_result (list): An array containing both the peak number, as well as the
+                        fraction Lorentzian character, sigma, center, amplitude, full-width,
+                        half-max, and the height of the peaks. The data for peak i can be
+                        accessed by the array positions shown here:
+                            fit_result[i][0] = p[i]_fraction
+                            fit_result[i][1] = p[i]_simga
+                            fit_result[i][2] = p[i]_center
+                            fit_result[i][3] = p[i]_amplitude
+                            fit_result[i][4] = p[i]_fwhm
+                            fit_result[i][5] = p[i]_height
+                            fit_result[i][6] = p[i]_area under the curve
+
+    """
     # add new list of peaks to model
     mod, pars = set_params(peaks)
     peak_list = []
@@ -318,7 +350,8 @@ def build_custom_model(x_data, y_data, peaks, peaks_add, plot_fits):
         prefix = 'p{}_'.format(i+1+len(peaks))
         peak = PseudoVoigtModel(prefix=prefix)
         pars.update(peak.make_params())
-        pars[prefix+'center'].set(peaks_add[i][0], vary=True, min=(peaks_add[i][0]-10), max=(peaks_add[i][0]+10))
+        pars[prefix+'center'].set(peaks_add[i][0], vary=True,
+                                  min=(peaks_add[i][0]-10), max=(peaks_add[i][0]+10))
         pars[prefix+'height'].set(min=0.1*peaks_add[i][1])
         pars[prefix+'sigma'].set(100, min=1, max=150)
         pars[prefix+'amplitude'].set(min=0)
