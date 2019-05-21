@@ -4,14 +4,18 @@ docstring
 
 
 import h5py
+import lineid_plot
 import numpy as np
 import matplotlib.pyplot as plt
 
 
 def pseudo_voigt(x_data, amplitude, center, sigma, fraction):
-    """docstring"""
+    """
+    Function that calculates a pseudo-voigt distribution over a given x_data range 
+    """
     sigma_g = sigma/(np.sqrt(2*np.log(2)))
-    gaussian = (((1-fraction)*(amplitude))/(sigma_g*np.sqrt(2*np.pi)))*np.exp((-((x_data-center)**2))/(2*(sigma_g**2)))
+    gaussian = ((((1-fraction)*(amplitude))/(sigma_g*np.sqrt(2*np.pi)))
+                *np.exp((-((x_data-center)**2))/(2*(sigma_g**2))))
     lorentzian = ((fraction*amplitude)/(np.pi))*(sigma/(((x_data-center)**2)+sigma**2))
     pseudo_voigt = gaussian+lorentzian
     return pseudo_voigt
