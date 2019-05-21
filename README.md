@@ -1,6 +1,6 @@
 # raman-spectra-decomp-analysis
 Code to calculate decomposition of materials using Raman spectroscopy. For the common good, and for our 2019 UW DIRECT Capstone Project.
-<img src="https://travis-ci.org/raman-noodles/Raman-noodles.svg?branch=master">
+<img src="https://travis-ci.org/raman-noodles/raman-spectra-decomp-analysis.svg?branch=master">
 <p align="center">
  <img src="https://github.com/raman-noodles/Raman-noodles/blob/master/docs/Raman%20Noodles%20Logo.PNG">
 </p>
