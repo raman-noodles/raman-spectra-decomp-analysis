@@ -22,7 +22,7 @@ def new_hdf5(new_filename):
     """
     This function creates a new hdf5 file in the active directory taking as the sole
     argument a string name for the file.
-    
+
     Args:
         new_filename (str): Filename for the new hdf5 file such that the created empty
                             file will have the name new_filename.hdf5.
@@ -44,7 +44,7 @@ def add_calibration(hdf5_filename, data_filename, label=None):
     This function adds Raman calibration data to an existing hdf5 file. It uses the
     spectrafit.fit_data function to fit the data before saving the fit result and
     the raw data to the hdf5 file.
-    
+
     Args:
         hdf5_filename (str): the filename and location of an existing hdf5 file to add the
                              calibration data too.
@@ -113,7 +113,7 @@ def add_experiment(hdf5_filename, exp_filename):
     to interact properly with this function. It must take the form anyname_temp_time.xlsx
     (or .csv) since this function will parse the the temp and time from the filename to
     label the data and fit result in the hdf5 file.
-    
+
     Args:
         hdf5_filename (str): the filename and location of an existing hdf5 file to add the
                              experiment data too.
@@ -161,11 +161,10 @@ def add_experiment(hdf5_filename, exp_filename):
     specs = exp_filename.split('/')[-1].split('.')[:-1]
     if len(specs) > 1:
         spec = ''
-        for _,element in enumerate(specs):
+        for _, element in enumerate(specs):
             spec = str(spec+element)
         specs = spec
     specs = specs.split('_')
-    specs
     time = specs[-1]
     temp = specs[-2]
     # write data to .hdf5
@@ -178,13 +177,13 @@ def add_experiment(hdf5_filename, exp_filename):
             exp_file['{}/{}/Peak_{}'.format(temp, time, i+1)] = fit_result[i]
     exp_file.close()
 
-    
+
 def adjust_peaks(hdf5_file, key, add_list=None, drop_list=None, plot_fits=False):
     """
     Function that allows the user to manually add or remove peaks from the automatic spectra
     fitting by inputing an add_list and/or a drop_list. The function pulls some data from
     the existing fit and overwrites it with the new results.
-    
+
     Args:
         hdf5_filename (str): the filename and location of an existing hdf5 file that contains
                              the fit the user wants to adjust.
@@ -196,7 +195,7 @@ def adjust_peaks(hdf5_file, key, add_list=None, drop_list=None, plot_fits=False)
                           in the existing fit that should be dropped from the new model.
         plot_fits (boolean): (optional) if set equal to True, the fit result will be plotted
                              for visual inspection by the user.
-    
+
     Returns:
         None
     """
@@ -204,9 +203,9 @@ def adjust_peaks(hdf5_file, key, add_list=None, drop_list=None, plot_fits=False)
     if not isinstance(hdf5_file, str):
         raise TypeError('Passed value of `hdf5_file` is not a string! Instead, it is: '
                         + str(type(hdf5_file)))
-    if not hdf5_filename.split('/')[-1].split('.')[-1] == 'hdf5':
-        raise TypeError('`hdf5_filename` is not type = .hdf5! Instead, it is: '
-                        + hdf5_filename.split('/')[-1].split('.')[-1])
+    if not hdf5_file.split('/')[-1].split('.')[-1] == 'hdf5':
+        raise TypeError('`hdf5_file` is not type = .hdf5! Instead, it is: '
+                        + hdf5_file.split('/')[-1].split('.')[-1])
     if not isinstance(key, str):
         raise TypeError('Passed value of `key` is not a string! Instead, it is: '
                         + str(type(key)))
@@ -231,15 +230,16 @@ def adjust_peaks(hdf5_file, key, add_list=None, drop_list=None, plot_fits=False)
     y_data = np.asarray(hdf5['{}/{}'.format(key, 'counts')])
     # extract peak center and height locations from hdf5
     peaks = []
-    for _,peak in enumerate(list(hdf5[key])[:-2]):
-        peaks.append((list(hdf5['{}/{}'.format(key, peak)])[2], list(hdf5['{}/{}'.format(key, peak)])[5]))
+    for _, peak in enumerate(list(hdf5[key])[:-2]):
+        peaks.append((list(hdf5['{}/{}'.format(key, peak)])[2],
+                      list(hdf5['{}/{}'.format(key, peak)])[5]))
     # drop desired tuples from peaks
     if drop_list is not None:
         drop_index = []
-        for _,name in enumerate(drop_list):
+        for _, name in enumerate(drop_list):
             drop_index.append(int(name.split('_')[-1])-1)
-        for i,index in enumerate(drop_index):
-            peaks.pop(index-i)      
+        for i, index in enumerate(drop_index):
+            peaks.pop(index-i)
     else:
         pass
     if add_list is not None:
@@ -247,7 +247,7 @@ def adjust_peaks(hdf5_file, key, add_list=None, drop_list=None, plot_fits=False)
         comp_int = interpolate.interp1d(x_data, y_data, kind='cubic')
         # iterate through add_list
         peaks_add = []
-        for _,guess in enumerate(add_list):
+        for _, guess in enumerate(add_list):
             height = comp_int(int(guess))
             peaks_add.append((int(guess), int(height)))
     else:
@@ -280,10 +280,10 @@ def view_hdf5(filename):
     This function prints out a display of the contents of any hdf5 file. It prints the filename
     followed by a list of the groups and datasets in a familiar directory/file format. Groups
     (folders appear bold) while datasets (files) appear in a standard font.
-    
+
     Args:
         filename (str): the filename and location of an existing hdf5 file for inspection.
-    
+
     Returns:
         None
     """
@@ -297,14 +297,15 @@ def view_hdf5(filename):
     # pring groups and datasets in first three layers
     print('**** {} ****'.format(filename))
     hdf5 = h5py.File(filename, 'r')
-    for _,layer_1 in enumerate(list(hdf5.keys())):
+    for _, layer_1 in enumerate(list(hdf5.keys())):
         if isinstance(hdf5[layer_1], h5py.Group):
             print('\033[1m{}\033[0m'.format(layer_1))
-            for _,layer_2 in enumerate(list(hdf5[layer_1].keys())):
+            for _, layer_2 in enumerate(list(hdf5[layer_1].keys())):
                 if isinstance(hdf5['{}/{}'.format(layer_1, layer_2)], h5py.Group):
                     print('|    \033[1m{}\033[0m'.format(layer_2))
-                    for _,layer_3 in enumerate(list(hdf5['{}/{}'.format(layer_1, layer_2)])):
-                        if isinstance(hdf5['{}/{}/{}'.format(layer_1, layer_2, layer_3)], h5py.Group):
+                    for _, layer_3 in enumerate(list(hdf5['{}/{}'.format(layer_1, layer_2)])):
+                        if isinstance(hdf5['{}/{}/{}'.format(layer_1, layer_2, layer_3)],
+                                      h5py.Group):
                             print('|    |    \033[1m{}\033[0m/...'.format(layer_3))
                         else:
                             print('|    |    {}'.format(layer_3))
@@ -319,13 +320,19 @@ def plot_fit(hdf5_filename, key, color='blue'):
     """
     This function produces a graph of a spectra contained within an hdf5 file along with labels
     showing the center location of each pseudo-Voigt profile and their corresponding dataset key.
-    
+
     Args:
         hdf5_filename (str): the filename and location of an existing hdf5 file containing the
                              spectra of interest.
         key (str): the hdf5 key which contains the datasets describing the existing fit and the
                    raw spectra data.
         color (str): (optional) a different color can be used to produce the plot.
+
+    Returns:
+        fig (matplotlib.figure.Figure): Returns the figure so that the plot can be customized
+                                        as needed.
+        ax (matplotlib.axes._axes.Axes): Returns the figure axes so that the plot can be
+                                         customized as needed.
     """
     # handling input errors
     if not isinstance(hdf5_filename, str):
@@ -345,13 +352,13 @@ def plot_fit(hdf5_filename, key, color='blue'):
     # extract fitted peak center values
     peak_centers = []
     peak_labels = []
-    for _,peak in enumerate(list(hdf5[key])[:-2]):
+    for _, peak in enumerate(list(hdf5[key])[:-2]):
         peak_centers.append(list(hdf5['{}/{}'.format(key, peak)])[2])
         peak_labels.append(peak)
     # plot spectra and peak labels
     fig, ax = lineid_plot.plot_line_ids(x_data, y_data, peak_centers, peak_labels,
                                         box_axes_space=0.12, plot_kwargs={'linewidth':0.75})
-    fig.set_size_inches(15,5)
+    fig.set_size_inches(15, 5)
     # lock the scale so that additional plots do not warp the labels
     ax.set_autoscale_on(False)
     # reset the data plot color
