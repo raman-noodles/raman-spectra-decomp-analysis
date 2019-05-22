@@ -21,7 +21,7 @@ def pseudo_voigt(x_data, amplitude, center, sigma, fraction):
     return pseudo_voigt
 
 
-def plot_component(hdf5_file, key, peak_number):
+def plot_component(ax, hdf5_file, key, peak_number, color=None):
     """docstring"""
     # open hdf5 file
     hdf5 = h5py.File(hdf5_file, 'r')
@@ -37,10 +37,16 @@ def plot_component(hdf5_file, key, peak_number):
     fraction, sigma, center, amplitude = peak_params[0:4]
     # calculate pseudo voigt distribution from peak_params
     y_data = pseudo_voigt(x_data, amplitude, center, sigma, fraction)
-    plt.plot(x_data, y_data, linestyle='--')
+    if color is None:
+        color = next(ax._get_lines.prop_cycler)['color']
+    else:
+        color = color
+    plt.plot(x_data, y_data, linestyle='--', color=color)
+    plt.fill_between(x_data, y_data, alpha=0.3, color=color)
+    hdf5.close()
 
 
-def plot_components(hdf5_file, key, peak_list):
+def plot_components(ax, hdf5_file, key, peak_list):
     """docstring"""
     # will turn int or float into list
     if isinstance(peak_list, (int, float)):
@@ -48,5 +54,5 @@ def plot_components(hdf5_file, key, peak_list):
     else:
         pass
     for _,peak_number in enumerate(peak_list):
-        plot_component(hdf5_file, key, peak_number)
+        plot_component(ax, hdf5_file, key, peak_number)
 

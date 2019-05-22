@@ -344,7 +344,24 @@ def build_custom_model(x_data, y_data, peaks, peaks_add, plot_fits):
 
     """
     # add new list of peaks to model
-    mod, pars = set_params(peaks)
+    old_peak_list = []
+    for i, old_peak in enumerate(peaks):
+        prefix = 'p{}_'.format(i+1)
+        peak = PseudoVoigtModel(prefix=prefix)
+        if i == 0:
+            pars = peak.make_params()
+        else:
+            pars.update(peak.make_params())
+        pars[prefix+'fraction'].set(old_peak[0])
+        pars[prefix+'center'].set(old_peak[2], vary=False)
+        pars[prefix+'height'].set(min=0.1*old_peak[4])
+        pars[prefix+'sigma'].set(old_peak[1], min=1, max=150)
+        pars[prefix+'amplitude'].set(0.5*old_peak[3], min=0)
+        old_peak_list.append(peak)
+        if i == 0:
+            mod = old_peak_list[i]
+        else:
+            mod = mod + old_peak_list[i]
     peak_list = []
     for i, _ in enumerate(peaks_add):
         prefix = 'p{}_'.format(i+1+len(peaks))
