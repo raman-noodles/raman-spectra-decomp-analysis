@@ -221,8 +221,8 @@ def adjust_peaks(hdf5_file, key, add_list=None, drop_list=None, plot_fits=False)
         if not isinstance(drop_list, list):
             raise TypeError('Passed value of `drop_list` is not a list! Instead, it is: '
                             + str(type(drop_list)))
-    if not isinstance(plot_fit, bool):
-        raise TypeError('Passed value of `drop_list` is not a list! Instead, it is: '
+    if not isinstance(plot_fits, bool):
+        raise TypeError('Passed value of `plot_fits` is not a boolean! Instead, it is: '
                         + str(type(plot_fit)))
     hdf5 = h5py.File(hdf5_file, 'r+')
     # extract raw x-y data
@@ -231,7 +231,10 @@ def adjust_peaks(hdf5_file, key, add_list=None, drop_list=None, plot_fits=False)
     # extract peak center and height locations from hdf5
     peaks = []
     for _, peak in enumerate(list(hdf5[key])[:-2]):
-        peaks.append((list(hdf5['{}/{}'.format(key, peak)])[2],
+        peaks.append((list(hdf5['{}/{}'.format(key, peak)])[0],
+                      list(hdf5['{}/{}'.format(key, peak)])[1],
+                      list(hdf5['{}/{}'.format(key, peak)])[2],
+                      list(hdf5['{}/{}'.format(key, peak)])[3],
                       list(hdf5['{}/{}'.format(key, peak)])[5]))
     # drop desired tuples from peaks
     if drop_list is not None:
@@ -255,7 +258,7 @@ def adjust_peaks(hdf5_file, key, add_list=None, drop_list=None, plot_fits=False)
     # build new model
     fit_result = spectrafit.build_custom_model(x_data, y_data, peaks, peaks_add, plot_fits)
     # delete old fit data
-    del hdf5['300C/25s']
+    del hdf5[key]
     # write data to .hdf5
     hdf5['{}/wavenumber'.format(key)] = x_data
     hdf5['{}/counts'.format(key)] = y_data
