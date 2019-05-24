@@ -86,11 +86,12 @@ def add_calibration(hdf5_filename, data_filename, label=None):
     else:
         pass
     # peak detection and data fitting
-    fit_result = spectrafit.fit_data(data['wavenumber'].values, data['counts'].values)
+    fit_result, residuals = spectrafit.fit_data(data['wavenumber'].values, data['counts'].values)
     # write data to .hdf5 using custom label if provided
     if label is not None:
         cal_file['{}/wavenumber'.format(label)] = data['wavenumber']
         cal_file['{}/counts'.format(label)] = data['counts']
+        cal_file['{}/residuals'.format(lable)] = residuals
         for i, _ in enumerate(fit_result):
             if i < 9:
                 cal_file['{}/Peak_0{}'.format(label, i+1)] = fit_result[i]
@@ -100,6 +101,7 @@ def add_calibration(hdf5_filename, data_filename, label=None):
         label = (data_filename.split('/')[-1]).split('.')[0]
         cal_file['{}/wavenumber'.format(label)] = data['wavenumber']
         cal_file['{}/counts'.format(label)] = data['counts']
+        cal_file['{}/residuals'.format(lable)] = residuals
         for i, _ in enumerate(fit_result):
             cal_file['{}/Peak_{}'.format(label, i+1)] = fit_result[i]
     cal_file.close()
@@ -156,7 +158,7 @@ def add_experiment(hdf5_filename, exp_filename):
     else:
         pass
     # peak detection and data fitting
-    fit_result = spectrafit.fit_data(data['wavenumber'].values, data['counts'].values)
+    fit_result, residuals = spectrafit.fit_data(data['wavenumber'].values, data['counts'].values)
     # extract experimental parameters from filename
     specs = exp_filename.split('/')[-1].split('.')[:-1]
     if len(specs) > 1:
@@ -170,6 +172,7 @@ def add_experiment(hdf5_filename, exp_filename):
     # write data to .hdf5
     exp_file['{}/{}/wavenumber'.format(temp, time)] = data['wavenumber']
     exp_file['{}/{}/counts'.format(temp, time)] = data['counts']
+    exp_file['{}/{}/residuals'.format(temp, time)] = residuals
     for i, _ in enumerate(fit_result):
         if i < 9:
             exp_file['{}/{}/Peak_0{}'.format(temp, time, i+1)] = fit_result[i]

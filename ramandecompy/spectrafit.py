@@ -226,7 +226,7 @@ def plot_fit(x_data, y_data, fit_result, plot_components=False):
     plt.show()
 
 
-def export_fit_data(x_data, out):
+def export_fit_data(x_data, y_data, out):
     """
     This function returns fit information for an input lmfit model set as well as calculates
     the area under each individual pseudo-Voigt profile.
@@ -268,7 +268,10 @@ def export_fit_data(x_data, out):
         peak_param[5] = out.values[prefix+'height']
         peak_param[6] = auc(x_data, out.eval_components(x=x_data)[prefix])
         fit_peak_data.append(peak_param)
-    return fit_peak_data
+    # calclate residuals 
+    y_fit = out.best_fit
+    residuals = y_fit - y_data
+    return fit_peak_data, residuals
 
 
 def fit_data(x_data, y_data):
@@ -307,8 +310,8 @@ def fit_data(x_data, y_data):
     peaks = peak_detect(x_data, y_data)[0]
     mod, pars = set_params(peaks)
     out = model_fit(x_data, y_data, mod, pars)
-    fit_result = export_fit_data(x_data, out)
-    return fit_result
+    fit_result, residuals = export_fit_data(x_data, y_data, out)
+    return fit_result, residuals
 
 
 def build_custom_model(x_data, y_data, peaks, peaks_add, plot_fits):
