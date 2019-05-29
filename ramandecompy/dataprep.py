@@ -91,7 +91,7 @@ def add_calibration(hdf5_filename, data_filename, label=None):
     if label is not None:
         cal_file['{}/wavenumber'.format(label)] = data['wavenumber']
         cal_file['{}/counts'.format(label)] = data['counts']
-        cal_file['{}/residuals'.format(lable)] = residuals
+        cal_file['{}/residuals'.format(label)] = residuals
         for i, _ in enumerate(fit_result):
             if i < 9:
                 cal_file['{}/Peak_0{}'.format(label, i+1)] = fit_result[i]
