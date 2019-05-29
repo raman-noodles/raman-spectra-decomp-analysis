@@ -151,7 +151,7 @@ def test_export_fit_data():
     peaks = spectrafit.peak_detect(X_TEST, Y_TEST)[0]
     mod, pars = spectrafit.set_params(peaks)
     out = spectrafit.model_fit(X_TEST, Y_TEST, mod, pars)
-    fit_peak_data = spectrafit.export_fit_data(X_TEST, out)
+    fit_peak_data, residuals = spectrafit.export_fit_data(X_TEST, Y_TEST, out)
     assert isinstance(fit_peak_data, list), 'output is not a list'
     assert np.asarray(fit_peak_data).shape == (int(len(out.values)/6), 7), """
     output is not the correct shape"""
@@ -168,7 +168,7 @@ def test_export_fit_data():
         
 def test_fit_data():
     """docstring"""
-    fit_result = spectrafit.fit_data(X_TEST, Y_TEST)
+    fit_result, residuals = spectrafit.fit_data(X_TEST, Y_TEST)
     assert isinstance(fit_result, list), 'output is not a list'
     for i,peak in enumerate(fit_result):
         assert isinstance(peak, list), 'output element {} is not a np.ndarray'.format(i)
