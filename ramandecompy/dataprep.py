@@ -104,6 +104,7 @@ def add_calibration(hdf5_filename, data_filename, label=None):
         cal_file['{}/residuals'.format(lable)] = residuals
         for i, _ in enumerate(fit_result):
             cal_file['{}/Peak_{}'.format(label, i+1)] = fit_result[i]
+    print('Data from {} fit with compound pseudo-Voigt model. Results saved to {}.'.format(data_filename, hdf5_filename))
     cal_file.close()
 
 
@@ -178,6 +179,7 @@ def add_experiment(hdf5_filename, exp_filename):
             exp_file['{}/{}/Peak_0{}'.format(temp, time, i+1)] = fit_result[i]
         else:
             exp_file['{}/{}/Peak_{}'.format(temp, time, i+1)] = fit_result[i]
+    print('Data from {} fit with compound pseudo-Voigt model. Results saved to {}.'.format(exp_filename, hdf5_filename))
     exp_file.close()
 
 
@@ -233,12 +235,8 @@ def adjust_peaks(hdf5_file, key, add_list=None, drop_list=None, plot_fits=False)
     y_data = np.asarray(hdf5['{}/{}'.format(key, 'counts')])
     # extract peak center and height locations from hdf5
     peaks = []
-    for _, peak in enumerate(list(hdf5[key])[:-2]):
-        peaks.append((list(hdf5['{}/{}'.format(key, peak)])[0],
-                      list(hdf5['{}/{}'.format(key, peak)])[1],
-                      list(hdf5['{}/{}'.format(key, peak)])[2],
-                      list(hdf5['{}/{}'.format(key, peak)])[3],
-                      list(hdf5['{}/{}'.format(key, peak)])[5]))
+    for _, peak in enumerate(list(hdf5[key])[:-3]):
+        peaks.append(list(hdf5['{}/{}'.format(key, peak)]))
     # drop desired tuples from peaks
     if drop_list is not None:
         drop_index = []
@@ -259,12 +257,13 @@ def adjust_peaks(hdf5_file, key, add_list=None, drop_list=None, plot_fits=False)
     else:
         peaks_add = []
     # build new model
-    fit_result = spectrafit.build_custom_model(x_data, y_data, peaks, peaks_add, plot_fits)
+    fit_result, residuals = spectrafit.build_custom_model(x_data, y_data, peaks, peaks_add, plot_fits)
     # delete old fit data
     del hdf5[key]
     # write data to .hdf5
     hdf5['{}/wavenumber'.format(key)] = x_data
     hdf5['{}/counts'.format(key)] = y_data
+    hdf5['{}/residuals'.format(key)] = residuals
     for i, _ in enumerate(fit_result):
         if len(fit_result[i]) == 7:
             if i < 9:
@@ -320,58 +319,3 @@ def view_hdf5(filename):
         else:
             print('{}'.format(layer_1))
     hdf5.close()
-
-
-def plot_fit(hdf5_filename, key, color='blue'):
-    """
-    This function produces a graph of a spectra contained within an hdf5 file along with labels
-    showing the center location of each pseudo-Voigt profile and their corresponding dataset key.
-
-    Args:
-        hdf5_filename (str): the filename and location of an existing hdf5 file containing the
-                             spectra of interest.
-        key (str): the hdf5 key which contains the datasets describing the existing fit and the
-                   raw spectra data.
-        color (str): (optional) a different color can be used to produce the plot.
-
-    Returns:
-        fig (matplotlib.figure.Figure): Returns the figure so that the plot can be customized
-                                        as needed.
-        ax (matplotlib.axes._axes.Axes): Returns the figure axes so that the plot can be
-                                         customized as needed.
-    """
-    # handling input errors
-    if not isinstance(hdf5_filename, str):
-        raise TypeError('Passed value of `hdf5_filename` is not a string! Instead, it is: '
-                        + str(type(hdf5_filename)))
-    if not hdf5_filename.split('/')[-1].split('.')[-1] == 'hdf5':
-        raise TypeError('`hdf5_filename` is not type = .hdf5! Instead, it is: '
-                        + hdf5_filename.split('/')[-1].split('.')[-1])
-    if not isinstance(key, str):
-        raise TypeError('Passed value of `key` is not a string! Instead, it is: '
-                        + str(type(key)))
-    # open .hdf5
-    hdf5 = h5py.File(hdf5_filename, 'r')
-    # extract spectra data
-    x_data = list(hdf5['{}/wavenumber'.format(key)])
-    y_data = list(hdf5['{}/counts'.format(key)])
-    # extract fitted peak center values
-    peak_centers = []
-    peak_labels = []
-    for _, peak in enumerate(list(hdf5[key])[:-2]):
-        peak_centers.append(list(hdf5['{}/{}'.format(key, peak)])[2])
-        peak_labels.append(peak)
-    # plot spectra and peak labels
-    fig, ax = lineid_plot.plot_line_ids(x_data, y_data, peak_centers, peak_labels,
-                                        box_axes_space=0.12, plot_kwargs={'linewidth':0.75})
-    fig.set_size_inches(15, 5)
-    # lock the scale so that additional plots do not warp the labels
-    ax.set_autoscale_on(False)
-    # reset the data plot color
-    plt.gca().get_lines()[0].set_color(color)
-    plt.xlabel('wavenumber ($cm^{-1}$)', fontsize=14)
-    plt.xlim(min(x_data), max(x_data))
-    plt.ylabel('counts', fontsize=14)
-    plt.title('{} spectra from {}'.format(key, hdf5_filename.split('/')[-1]), fontsize=18, pad=80)
-    hdf5.close()
-    return fig, ax

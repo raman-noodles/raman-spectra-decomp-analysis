@@ -66,11 +66,11 @@ def peak_detect(x_data, y_data, height=None, prominence=None, distance=None):
     else:
         pass
     if prominence is None:
-        prominence = (0.02*max(y_data))
+        prominence = (0.015*max(y_data))
     else:
         pass
     if distance is None:
-        distance = 10
+        distance = 5
     else:
         pass
     # find peaks
@@ -257,7 +257,7 @@ def export_fit_data(x_data, y_data, out):
                         + str(type(x_data)))
     fit_peak_data = []
     for i in range(int(len(out.values)/6)):
-        # create a list zeroes of length 7
+        # create a list of zeroes of length 7
         peak_param = [0]*7
         prefix = 'p{}_'.format(i+1)
         peak_param[0] = out.values[prefix+'fraction']
@@ -347,6 +347,7 @@ def build_custom_model(x_data, y_data, peaks, peaks_add, plot_fits):
 
     """
     # add new list of peaks to model
+    # first starting with existing peaks
     old_peak_list = []
     for i, old_peak in enumerate(peaks):
         prefix = 'p{}_'.format(i+1)
@@ -356,39 +357,41 @@ def build_custom_model(x_data, y_data, peaks, peaks_add, plot_fits):
         else:
             pars.update(peak.make_params())
         pars[prefix+'fraction'].set(old_peak[0])
-        pars[prefix+'center'].set(old_peak[2], vary=False)
-        pars[prefix+'height'].set(min=0.1*old_peak[4])
+        pars[prefix+'center'].set(old_peak[2], vary=True,
+                                  min=(old_peak[2]-10), max=(old_peak[2]+10))
+        pars[prefix+'height'].set(min=0.1*old_peak[5])
         pars[prefix+'sigma'].set(old_peak[1], min=1, max=150)
-        pars[prefix+'amplitude'].set(0.5*old_peak[3], min=0)
+        pars[prefix+'amplitude'].set(old_peak[3], min=0)
         old_peak_list.append(peak)
         if i == 0:
             mod = old_peak_list[i]
         else:
             mod = mod + old_peak_list[i]
-    peak_list = []
-    for i, _ in enumerate(peaks_add):
+    # then add new peaks with intial guesses
+    new_peak_list = []
+    for i, add_peak in enumerate(peaks_add):
         prefix = 'p{}_'.format(i+1+len(peaks))
         peak = PseudoVoigtModel(prefix=prefix)
         pars.update(peak.make_params())
-        pars[prefix+'center'].set(peaks_add[i][0], vary=True,
-                                  min=(peaks_add[i][0]-10), max=(peaks_add[i][0]+10))
-        pars[prefix+'height'].set(min=0.1*peaks_add[i][1])
-        pars[prefix+'sigma'].set(100, min=1, max=150)
-        pars[prefix+'amplitude'].set(min=0)
-        peak_list.append(peak)
-        mod = mod + peak_list[i]
+        pars[prefix+'center'].set(add_peak[0], vary=True,
+                                  min=(add_peak[0]-10), max=(add_peak[0]+10))
+        pars[prefix+'height'].set(min=0.1*add_peak[1])
+        pars[prefix+'sigma'].set(10, min=1, max=150)
+        pars[prefix+'amplitude'].set(100*add_peak[1], min=0)
+        new_peak_list.append(peak)
+        mod = mod + new_peak_list[i]
     # run the fit
-    out = model_fit(x_data, y_data, mod, pars)
+    out = model_fit(x_data, y_data, mod, pars, report=False)
     # plot_fits option
     if plot_fits is True:
         plot_fit(x_data, y_data, out, plot_components=True)
     else:
         pass
     # save fit data
-    fit_result = export_fit_data(x_data, out)
+    fit_result, residuals = export_fit_data(x_data, y_data, out)
     # add 'user_added' label as 8th term to user added peaks
     for i in range(len(peaks), len(fit_result)):
         fit_result[i].append('user_added')
     # sort peaks by center location for saving
     fit_result = sorted(fit_result, key=lambda x: int(x[2]))
-    return fit_result
+    return fit_result, residuals
