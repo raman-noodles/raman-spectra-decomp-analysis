@@ -1,12 +1,12 @@
 """docstring"""
-from ramannoodles import dataprep
+from ramannoodles import datavis
 
 
 def test_plot_fit():
     """docstring"""
     hdf5_filename = 'ramandecompy/tests/test_files/dataprep_experiment.hdf5'
     key = '300C/25s'
-    dataprep.plot_fit(hdf5_filename, key)
+    datavis.plot_fit(hdf5_filename, key)
     #test inputs
     try:
         dataplot.plot_fit(4.2, '300C/25s')
