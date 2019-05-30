@@ -66,7 +66,7 @@ def peak_detect(x_data, y_data, height=None, prominence=None, distance=None):
     else:
         pass
     if prominence is None:
-        prominence = (0.015*max(y_data))
+        prominence = (0.02*max(y_data))
     else:
         pass
     if distance is None:
