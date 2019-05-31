@@ -106,22 +106,22 @@ def set_params(peaks):
     if not isinstance(peaks, list):
         raise TypeError('Passed value of `peaks` is not a list! Instead, it is: '
                         + str(type(peaks)))
-    for i, _ in enumerate(peaks):
-        if not isinstance(peaks[i], tuple):
+    for i, peak in enumerate(peaks):
+        if not isinstance(peak, tuple):
             raise TypeError("""The {} value of `peaks` is not a tuple.
-             Instead, it is: """.format(i) + str(type(peaks[i])))
+             Instead, it is: """.format(i) + str(type(peak)))
     peak_list = []
-    for i, _ in enumerate(peaks):
+    for i, value in enumerate(peaks):
         prefix = 'p{}_'.format(i+1)
         peak = PseudoVoigtModel(prefix=prefix)
         if i == 0:
             pars = peak.make_params()
         else:
             pars.update(peak.make_params())
-        pars[prefix+'center'].set(peaks[i][0], vary=False)
-        pars[prefix+'height'].set(min=0.1*peaks[i][1])
-        pars[prefix+'sigma'].set(100, min=1, max=150)
-        pars[prefix+'amplitude'].set(min=0)
+        pars[prefix+'center'].set(value[0], vary=False)
+        pars[prefix+'height'].set(min=0.1*value[1])
+        pars[prefix+'sigma'].set(10, min=1, max=100)
+        pars[prefix+'amplitude'].set(100*value[1], min=0)
         peak_list.append(peak)
         if i == 0:
             mod = peak_list[i]
@@ -170,7 +170,7 @@ def model_fit(x_data, y_data, mod, pars, report=False):
         raise TypeError('Passed value of `report` is not a boolean! Instead, it is: '
                         + str(type(report)))
     # fit model
-    out = mod.fit(y_data, pars, x=x_data)
+    out = mod.fit(y_data, pars, method='powell', x=x_data)
     if report:
         print(out.fit_report())
     else:
@@ -377,7 +377,7 @@ def build_custom_model(x_data, y_data, peaks, peaks_add, plot_fits):
                                   min=(add_peak[0]-10), max=(add_peak[0]+10))
         pars[prefix+'height'].set(min=0.1*add_peak[1])
         pars[prefix+'sigma'].set(10, min=1, max=150)
-        pars[prefix+'amplitude'].set(100*add_peak[1], min=0)
+        pars[prefix+'amplitude'].set(20*add_peak[1], min=0)
         new_peak_list.append(peak)
         mod = mod + new_peak_list[i]
     # run the fit
