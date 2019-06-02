@@ -28,7 +28,8 @@ def plot_component(ax, hdf5_file, key, peak_number, color=None):
     # extract wavenumber data
     x_data = list(hdf5[key+'/wavenumber'])
     peak_list = list(hdf5[key].keys())[:-3]
-    peak_params = hdf5['{}/{}'.format(key, peak_list[peak_number-1])]
+    # extract tuple from dataset
+    peak_params = list(list(hdf5['{}/{}'.format(key, peak_list[peak_number-1])])[0])
     fraction, sigma, center, amplitude = peak_params[0:4]
     # calculate pseudo voigt distribution from peak_params
     y_data = pseudo_voigt(x_data, amplitude, center, sigma, fraction)
@@ -88,8 +89,9 @@ def plot_fit(hdf5_filename, key, color='blue'):
     # extract fitted peak center values
     peak_centers = []
     peak_labels = []
-    for _, peak in enumerate(list(hdf5[key])[:-2]):
-        peak_centers.append(list(hdf5['{}/{}'.format(key, peak)])[2])
+    for _, peak in enumerate(list(hdf5[key])[:-3]):
+        center = hdf5['{}/{}'.format(key, peak)][0][2]
+        peak_centers.append(center)
         peak_labels.append(peak)
     # plot spectra and peak labels
     fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, gridspec_kw={'height_ratios': [3, 1]},
