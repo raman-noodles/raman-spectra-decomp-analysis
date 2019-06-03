@@ -6,23 +6,25 @@ import h5py
 import numpy as np
 from ramandecompy import peakidentify
 from ramandecompy import dataprep
+import os
 
-dataprep.new_hdf5('peakidentify_experiment_test')
-dataprep.add_experiment('peakidentify_experiment_test.hdf5', '../tests/test_files/FA_3.6wt%_300C_25s.csv')
-dataprep.new_hdf5('peakidentify_calibration_file')
-dataprep.add_calibration('peakidentify_calibration_file.hdf5',
-                          '../tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
-                          label='Hydrogen')
-dataprep.add_calibration('peakidentify_calibration_file.hdf5',
-                          '../tests/test_files/Methane_Baseline_Calibration.xlsx',
-                          label='Methane')
-dataprep.add_calibration('peakidentify_calibration_file.hdf5','../tests/test_files/CO2_100wt%.csv',label='CO2')
 
 def test_peak_assignment():
     """This function tests the operation of the peak_assignment
     function in peakidentify.py"""
     #First, generate a testing dataset.
-    hdf5_calfilename = 'peakidentify_calibration_file.hdf5'
+    dataprep.new_hdf5('peakidentify_calibration_test')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
+                              '../tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
+                              label='Hydrogen')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
+                              '../tests/test_files/Methane_Baseline_Calibration.xlsx',
+                              label='Methane')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/CO2_100wt%.csv',label='CO2')
+
+    dataprep.new_hdf5('peakidentify_experiment_test')
+    dataprep.add_experiment('peakidentify_experiment_test.hdf5', '../tests/test_files/FA_3.6wt%_300C_25s.csv')
+    hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
     temp = 300
     time = 25
@@ -73,12 +75,25 @@ def test_peak_assignment():
 
     exphdf5.close()
     calhdf5.close()
+    os.remove('peakidentify_calibration_test.hdf5')
+    os.remove('peakidentify_experiment_test.hdf5')
 
 def test_compare_unknown_to_known():
     """This function tests the operation of the compare_unknown_to_known
     function in peakidentify.py"""
     #First, generate a testing dataset.
-    hdf5_calfilename = 'peakidentify_calibration_file.hdf5'
+    dataprep.new_hdf5('peakidentify_calibration_test')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
+                              '../tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
+                              label='Hydrogen')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
+                              '../tests/test_files/Methane_Baseline_Calibration.xlsx',
+                              label='Methane')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/CO2_100wt%.csv',label='CO2')
+
+    dataprep.new_hdf5('peakidentify_experiment_test')
+    dataprep.add_experiment('peakidentify_experiment_test.hdf5', '../tests/test_files/FA_3.6wt%_300C_25s.csv')
+    hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
     temp = 300
     time = 25
@@ -150,6 +165,8 @@ def test_compare_unknown_to_known():
 
     exphdf5.close()
     calhdf5.close()
+    os.remove('peakidentify_calibration_test.hdf5')
+    os.remove('peakidentify_experiment_test.hdf5')
 
 def test_peak_position_comparisons():
     """This function tests the operation of the peak_position_comparisons
@@ -157,7 +174,18 @@ def test_peak_position_comparisons():
     contain text assignments of each peak in the unknown spectrum."""
 
     #First, generate a testing dataset.
-    hdf5_calfilename = 'peakidentify_calibration_file.hdf5'
+    dataprep.new_hdf5('peakidentify_calibration_test')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
+                              '../tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
+                              label='Hydrogen')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
+                              '../tests/test_files/Methane_Baseline_Calibration.xlsx',
+                              label='Methane')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/CO2_100wt%.csv',label='CO2')
+
+    dataprep.new_hdf5('peakidentify_experiment_test')
+    dataprep.add_experiment('peakidentify_experiment_test.hdf5', '../tests/test_files/FA_3.6wt%_300C_25s.csv')
+    hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
     temp = 300
     time = 25
@@ -279,13 +307,26 @@ def test_peak_position_comparisons():
 
     exphdf5.close()
     calhdf5.close()
+    os.remove('peakidentify_calibration_test.hdf5')
+    os.remove('peakidentify_experiment_test.hdf5')
 
 def test_percentage_of_peaks_found():
     """This function tests the operation of the
     percentage_of_peaks_found function in peakidentify.py"""
 
     #First, generate a testing dataset.
-    hdf5_calfilename = 'peakidentify_calibration_file.hdf5'
+    dataprep.new_hdf5('peakidentify_calibration_test')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
+                              '../tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
+                              label='Hydrogen')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
+                              '../tests/test_files/Methane_Baseline_Calibration.xlsx',
+                              label='Methane')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/CO2_100wt%.csv',label='CO2')
+
+    dataprep.new_hdf5('peakidentify_experiment_test')
+    dataprep.add_experiment('peakidentify_experiment_test.hdf5', '../tests/test_files/FA_3.6wt%_300C_25s.csv')
+    hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
     temp = 300
     time = 25
@@ -384,12 +425,25 @@ def test_percentage_of_peaks_found():
 
     exphdf5.close()
     calhdf5.close()
+    os.remove('peakidentify_calibration_test.hdf5')
+    os.remove('peakidentify_experiment_test.hdf5')
 
 def test_plotting_peak_assignments():
     """This function tests the operation of the peak_assignment
     function in peakidentify.py"""
     #First, generate a testing dataset.
-    hdf5_calfilename = 'peakidentify_calibration_file.hdf5'
+    dataprep.new_hdf5('peakidentify_calibration_test')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
+                              '../tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
+                              label='Hydrogen')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
+                              '../tests/test_files/Methane_Baseline_Calibration.xlsx',
+                              label='Methane')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/CO2_100wt%.csv',label='CO2')
+
+    dataprep.new_hdf5('peakidentify_experiment_test')
+    dataprep.add_experiment('peakidentify_experiment_test.hdf5', '../tests/test_files/FA_3.6wt%_300C_25s.csv')
+    hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
     temp = 300
     time = 25
@@ -530,6 +584,8 @@ def test_plotting_peak_assignments():
 
     exphdf5.close()
     calhdf5.close()
+    os.remove('peakidentify_calibration_test.hdf5')
+    os.remove('peakidentify_experiment_test.hdf5')
 
 def test_add_label():
     """
