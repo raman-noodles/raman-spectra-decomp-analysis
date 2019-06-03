@@ -51,5 +51,3 @@ for filename in os.listdir(directory):
         exp_file.close()
         continue
 return
-
-
