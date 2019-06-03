@@ -618,6 +618,7 @@ def test_add_label():
               "and it was handled well with a TypeError.")
     hdf5.close()
     del hdf5
+    os.remove('peakidentify_add_label_test.hdf5')
     return
 
 def test_peak_1d_score():
