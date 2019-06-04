@@ -66,7 +66,6 @@ def peak_assignment(unknownhdf5_filename, temp, time, knownhdf5_filename,
     # extract spectra data
     unknown_x = list(unhdf5['{}C/{}s/wavenumber'.format(temp, time)])
     unknown_y = list(unhdf5['{}C/{}s/counts'.format(temp, time)])
-    residuals = np.asarray(list(unhdf5['{}C/{}s/residuals'.format(temp, time)]))
     unknown_x = np.asarray(unknown_x)
     unknown_y = np.asarray(unknown_y)
     #Lets identify the peaks in the unknown spectrum.
@@ -137,16 +136,16 @@ def peak_assignment(unknownhdf5_filename, temp, time, knownhdf5_filename,
     for j, peak in enumerate(list(unhdf5['{}C/{}s'.format(temp, time)])[:-3]):
         add_label(unknownhdf5_filename, temp, time, peak, peak_labels[j])
     if plot:
-        fig, ax1, ax2 = plotting_peak_assignments(unknown_x,
-                                                  unknown_y,
-                                                  unknown_peaks,
-                                                  unknown_peak_assignments,
-                                                  unknownhdf5_filename,
-                                                  knownhdf5_filename,
-                                                  temp,
-                                                  time,
-                                                  peak_labels,
-                                                  exportlabelinput)
+        plotting_peak_assignments(unknown_x,
+                                  unknown_y,
+                                  unknown_peaks,
+                                  unknown_peak_assignments,
+                                  unknownhdf5_filename,
+                                  knownhdf5_filename,
+                                  temp,
+                                  time,
+                                  peak_labels,
+                                  exportlabelinput)
 
     percentages = percentage_of_peaks_found(known_peaks[len(known_compound_list)-1],
                                             assignment_matrix,
@@ -154,7 +153,7 @@ def peak_assignment(unknownhdf5_filename, temp, time, knownhdf5_filename,
     print(percentages)
     knhdf5.close()
     unhdf5.close()
-    return unknown_x, unknown_y, unknown_peaks, unknown_peak_assignments, temp, time, percentages
+    return unknown_x, unknown_y, unknown_peaks, unknown_peak_assignments, percentages
 
 def compare_unknown_to_known(unknown_peaks, known_peaks, precision):
     """This function takes in peak positions for the spectrum to be
@@ -386,7 +385,6 @@ def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
     # extract spectra data
     x_data = list(unhdf5['{}C/{}s/wavenumber'.format(temp, time)])
     y_data = list(unhdf5['{}C/{}s/counts'.format(temp, time)])
-    fig = plt.figure(figsize=(10, 4), dpi=300)
 #     plt.plot(unknown_x, unknown_y, color='black', label='Unknown Spectrum')
     if exportlabelinput:
         print('export labelling only')
@@ -398,7 +396,7 @@ def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
     # plot spectra and peak labels
     fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True,
                                    gridspec_kw={'height_ratios': [3, 1]},
-                                   figsize=(15, 6))
+                                   figsize=(15, 6), dpi=300)
     # plot data
     ax1.plot(x_data, y_data, color='blue')
     ax2.plot(x_data, residuals, color='teal')
@@ -427,15 +425,11 @@ def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
                                                    unknownhdf5_filename),
                   fontsize=18, pad=350)
     plt.show()
-
-#     plt.legend(loc=0, framealpha=1)
     knhdf5.close()
     unhdf5.close()
-    return fig, ax1, ax2
 
 def add_label(hdf5_filename, temp, time, peak, label):
-    """
-    Function that adds a label to a peak dataset in the hdf5 file
+    """Function that adds a label to a peak dataset in the hdf5 file
     """
     #Handling errors in inputs.
     if not isinstance(hdf5_filename, str):
