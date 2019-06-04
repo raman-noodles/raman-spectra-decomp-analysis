@@ -38,16 +38,18 @@ def data_import(hdf5_filename, directory):
     Returns:
         None
     """
-dataprep.new_hdf5(hdf5_filename) 
-for filename in os.listdir(directory):
-    if filename.startswith('FA_') and filename.endswith('.csv'):
-        locationandfile = directory + filename
-        dataprep.add_experiment(hdf5_filename, locationandfile)
-        print('Data from {} fit with compound pseudo-Voigt model. Results saved to {}.'.format(filename, hdf5_filename)) #printing out to user the status of the import (because it can take a long time if importing a lot of data, about 1 minute/data set for test files
-        exp_file.close()
-        continue
-    else:
-        print('Data from {} fit with compound pseudo-Voigt model. Results saved to {}.'.format(filename, hdf5_filename))
-        exp_file.close()
-        continue
-return
+    dataprep.new_hdf5(hdf5_filename) 
+    for filename in os.listdir(directory):
+        if filename.startswith('FA_') and filename.endswith('.csv'):
+            locationandfile = directory + filename
+            dataprep.add_experiment(hdf5_filename, locationandfile)
+            print('Data from {} fit with compound pseudo-Voigt model. Results saved to {}.'.format(filename, hdf5_filename))
+            # printing out to user the status of the import (because it can take a long time if importing a lot of data,
+            # about minute/data set for test files
+            exp_file.close()
+            continue
+        else:
+            print('Data from {} fit with compound pseudo-Voigt model. Results saved to {}.'.format(filename, hdf5_filename))
+            exp_file.close()
+            continue
+    return
