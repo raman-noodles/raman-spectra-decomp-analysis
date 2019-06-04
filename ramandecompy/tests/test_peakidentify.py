@@ -19,12 +19,13 @@ def test_peak_assignment():
                              '../tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
                              label='Hydrogen')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/Methane_Baseline_Calibration.xlsx',
-                             label='Methane')
+                             '../tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
+                             label='CarbonMonoxide')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
                              '../tests/test_files/CO2_100wt%.csv',
                              label='CO2')
-
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/water.xlsx',label='H2O')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/sapphire.xlsx',label='sapphire')
     dataprep.new_hdf5('peakidentify_experiment_test')
     dataprep.add_experiment('peakidentify_experiment_test.hdf5',
                             '../tests/test_files/FA_3.6wt%_300C_25s.csv')
@@ -91,12 +92,13 @@ def test_compare_unknown_to_known():
                              '../tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
                              label='Hydrogen')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/Methane_Baseline_Calibration.xlsx',
-                             label='Methane')
+                             '../tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
+                             label='CarbonMonoxide')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
                              '../tests/test_files/CO2_100wt%.csv',
                              label='CO2')
-
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/water.xlsx',label='H2O')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/sapphire.xlsx',label='sapphire')
     dataprep.new_hdf5('peakidentify_experiment_test')
     dataprep.add_experiment('peakidentify_experiment_test.hdf5',
                             '../tests/test_files/FA_3.6wt%_300C_25s.csv')
@@ -186,11 +188,13 @@ def test_peak_position_comparisons():
                              '../tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
                              label='Hydrogen')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/Methane_Baseline_Calibration.xlsx',
-                             label='Methane')
+                             '../tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
+                             label='CarbonMonoxide')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
                              '../tests/test_files/CO2_100wt%.csv',
                              label='CO2')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/water.xlsx',label='H2O')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/sapphire.xlsx',label='sapphire')
     dataprep.new_hdf5('peakidentify_experiment_test')
     dataprep.add_experiment('peakidentify_experiment_test.hdf5',
                             '../tests/test_files/FA_3.6wt%_300C_25s.csv')
@@ -329,12 +333,13 @@ def test_percentage_of_peaks_found():
                              '../tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
                              label='Hydrogen')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/Methane_Baseline_Calibration.xlsx',
-                             label='Methane')
+                             '../tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
+                             label='CarbonMonoxide')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
                              '../tests/test_files/CO2_100wt%.csv',
                              label='CO2')
-
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/water.xlsx',label='H2O')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/sapphire.xlsx',label='sapphire')
     dataprep.new_hdf5('peakidentify_experiment_test')
     dataprep.add_experiment('peakidentify_experiment_test.hdf5',
                             '../tests/test_files/FA_3.6wt%_300C_25s.csv')
@@ -385,9 +390,8 @@ def test_percentage_of_peaks_found():
     #Test for input error handling.
 
     try:
-        peakidentify.percentage_of_peaks_found([[0], [1], [2], [3]],
-                                               association_matrix,
-                                               hdf5_calfilename)
+        peakidentify.percentage_of_peaks_found([[0], [1], [2], [3], [4], [5]],
+                                                association_matrix, hdf5_calfilename)
     except TypeError:
         print("""The function correctly handled the error when a list of ints
         was input instead of the known_peaks list""")
@@ -423,14 +427,14 @@ def test_percentage_of_peaks_found():
     for _, peak in enumerate(list(calhdf5[key])[:-3]):
         co2_peaks.append(list(calhdf5['{}/{}'.format(key, peak)])[0][2])
     print(co2_peaks)
-    co2_dict_0 = peakidentify.percentage_of_peaks_found([co2_peaks, [0], [0]],
-                                                        [[0, 0], [0], [0]],
+    co2_dict_0 = peakidentify.percentage_of_peaks_found([co2_peaks, [0], [0], [0], [0]],
+                                                        [[0, 0], [0], [0], [0], [0]],
                                                         hdf5_calfilename)
     assert co2_dict_0[key] == 0, """The function is not correctly
     calculating percentages when no peaks are found"""
 
-    co2_dict_1 = peakidentify.percentage_of_peaks_found([co2_peaks, [1], [1]],
-                                                        [[1, 1], [1], [1]],
+    co2_dict_1 = peakidentify.percentage_of_peaks_found([co2_peaks, [1], [1], [1], [1]],
+                                                        [[1, 1], [1], [1], [1], [1]],
                                                         hdf5_calfilename)
     assert co2_dict_1[key] == 100, """The function is not correctly
     calculating percentages when all peaks are found"""
@@ -449,12 +453,13 @@ def test_plotting_peak_assignments():
                              '../tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
                              label='Hydrogen')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/Methane_Baseline_Calibration.xlsx',
-                             label='Methane')
+                             '../tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
+                             label='CarbonMonoxide')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
                              '../tests/test_files/CO2_100wt%.csv',
                              label='CO2')
-
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/water.xlsx',label='H2O')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/sapphire.xlsx',label='sapphire')
     dataprep.new_hdf5('peakidentify_experiment_test')
     dataprep.add_experiment('peakidentify_experiment_test.hdf5',
                             '../tests/test_files/FA_3.6wt%_300C_25s.csv')
