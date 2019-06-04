@@ -6,3 +6,4 @@ peakutils
 h5py
 pandas
 xlrd
+lineid_plot

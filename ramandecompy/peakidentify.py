@@ -4,116 +4,158 @@ to be analyzed. From that identification, it then classifies the peaks in the un
 spectra based on the fed-in known spectra.
  """
 import math
+import h5py
 import numpy as np
 import matplotlib.pyplot as plt
-from ramandecompy import spectrafit
-from ramandecompy import peakidentify
-from ramandecompy import dataprep
+import lineid_plot
 
-# Will probably need to create an additional function 
 
-def peak_assignment(unknownhdf5_filename, unknownkey, knownhdf5_filename,
-                    known_compound_list, precision=.08, plot=True):
-    """This function is a wrapper function from which all classification of peaks occurs."""
+# Will probably need to create an additional function
+
+def peak_assignment(unknownhdf5_filename, temp, time, knownhdf5_filename,
+                    precision=50, exportlabelinput=True, plot=True):
+    """This function is a wrapper function from which all classification
+    of peaks occurs."""
 
     #Handling errors in inputs.
-
-    if not isinstance(known_compound_list, list):
-        raise TypeError("Passed value of `known_compound_list` is not a list! Instead, it is: "
-                        + str(type(known_compound_list)))
-    # handling input errors
     if not isinstance(knownhdf5_filename, str):
-        raise TypeError('Passed value of `knownhdf5_filename` is not a string! Instead, it is: '
-                        + str(type(knownhdf5_filename)))
+        raise TypeError("""Passed value of `knownhdf5_filename` is not a string!
+        Instead, it is: """ + str(type(knownhdf5_filename)))
     if not knownhdf5_filename.split('/')[-1].split('.')[-1] == 'hdf5':
-        raise TypeError('`knownhdf5_filename` is not type = .hdf5! Instead, it is: '
-                        + knownhdf5_filename.split('/')[-1].split('.')[-1])
-    if not isinstance(unknownkey, str):
-        raise TypeError('Passed value of `unknownkey` is not a string! Instead, it is: '
-                        + str(type(unknownkey)))
-    #Now we need to check the elements within the known_compound_list to make sure they are correct.
-    for i, _ in enumerate(known_compound_list):
-        if not isinstance(known_compound_list[i], str):
-            raise TypeError("""Passed value within `known_compound_list` is not a string!
-            Instead, it is: """ + str(type(known_compound_list[i])))
+        raise TypeError("""`knownhdf5_filename` is not type = .hdf5!
+        Instead, it is: """ + knownhdf5_filename.split('/')[-1].split('.')[-1])
+    if not isinstance(unknownhdf5_filename, str):
+        raise TypeError("""Passed value of `unknownhdf5_filename` is not a string!
+        Instead, it is: """ + str(type(unknownhdf5_filename)))
+    if not unknownhdf5_filename.split('/')[-1].split('.')[-1] == 'hdf5':
+        raise TypeError("""`unknownhdf5_filename` is not type = .hdf5!
+        Instead, it is: """ + unknownhdf5_filename.split('/')[-1].split('.')[-1])
+    if not isinstance(temp, int):
+        raise TypeError("""Passed value of `temp` is not a int!
+        Instead, it is: """ + str(type(temp)))
+    if not isinstance(time, int):
+        raise TypeError("""Passed value of `time` is not a int!
+        Instead, it is: """ + str(type(time)))
 
     if not isinstance(precision, (float, int)):
         raise TypeError("""Passed value of `precision` is not a float or int!
         Instead, it is: """ + str(type(precision)))
-
+    if not isinstance(exportlabelinput, bool):
+        raise TypeError("""Passed value of `exportlabelinput` is not a Boolean!
+        Instead, it is: """ + str(type(exportlabelinput)))
     if not isinstance(plot, bool):
         raise TypeError("""Passed value of `plot` is not a Boolean!
         Instead, it is: """ + str(type(plot)))
     # open .hdf5
-    unhdf5 = h5py.File(unknownhdf5_filename, 'r')
-    knhdf5 = h5py.File(knownhdf5_filename, 'r')
-    
+    unhdf5 = h5py.File(unknownhdf5_filename, 'r+')
+    knhdf5 = h5py.File(knownhdf5_filename, 'r+')
+
+    #Extract keys from files
+    known_compound_list = list(knhdf5.keys())
+
+    if not isinstance(known_compound_list, list):
+        raise TypeError("""Passed value of `known_compound_list` is not a list!
+        Instead, it is: """ + str(type(known_compound_list)))
+    #Now we need to check the elements within the known_compound_list
+    #to make sure they are correct.
+    for i, _ in enumerate(known_compound_list):
+        if not isinstance(known_compound_list[i], str):
+            raise TypeError("""Passed value within `known_compound_list` is not
+            a string! Instead, it is: """ + str(type(known_compound_list[i])))
+
     # extract spectra data
-    known_x = list(knhdf5['{}/wavenumber'.format(known_compound_list[0])])
-    known_y = list(knhdf5['{}/counts'.format(known_compound_list[0])])
-    unknown_x = list(unhdf5['{}/wavenumber'.format(unknownkey)])
-    unknown_y = list(unhdf5['{}/counts'.format(unknownkey)])
-    known_x = np.asarray(known_x)
-    known_y = np.asarray(known_y)
+    unknown_x = list(unhdf5['{}C/{}s/wavenumber'.format(temp, time)])
+    unknown_y = list(unhdf5['{}C/{}s/counts'.format(temp, time)])
     unknown_x = np.asarray(unknown_x)
     unknown_y = np.asarray(unknown_y)
     #Lets identify the peaks in the unknown spectrum.
     unknown_peaks = []
-    for i,_ in enumerate(list(unhdf5[unknownkey])[:-2]):
-        if i < 9:
-            unknown_peaks.append(list(unhdf5['{}/Peak_0{}'.format(unknownkey, i+1)])[2])
+    for i, peak in enumerate(list(unhdf5['{}C/{}s'.format(temp, time)])[:-3]):
+        try:
+            if i < 9:
+                unknown_peaks.append(list(unhdf5['{}C/{}s/Peak_0{}*'.format(temp,
+                                                                            time,
+                                                                            i+1)])[0][2])
+            else:
+                unknown_peaks.append(list(unhdf5['{}C/{}s/Peak_{}*'.format(temp,
+                                                                           time,
+                                                                           i+1)])[0][2])
+        except Exception as e:
+            #Normal peakassignment
+            print("""Function did not receive adjusted peak.
+            The function continued to look for an normal peak.""")
+            if i < 9:
+                print(peak)
+                unknown_peaks.append(list(unhdf5['{}C/{}s/Peak_0{}'.format(temp,
+                                                                           time,
+                                                                           i+1)])[0][2])
+            else:
+                unknown_peaks.append(list(unhdf5['{}C/{}s/Peak_{}'.format(temp,
+                                                                          time,
+                                                                          i+1)])[0][2])
+            print('Peak_{}*'.format(i+1))
         else:
-            unknown_peaks.append(list(unhdf5['{}/Peak_{}'.format(unknownkey, i+1)])[2])
+            pass
+
 
     #OK, next identify all of the peaks present in the known compound set.
     #For efficiency, we'll also compare them against the unknown in the same for loop.
     known_peaks = []
     known_peaks_list = []
     num_peaks_list = []
-    known_compound_list = list(knhdf5.keys())
     assignment_matrix = []
     split__index_list = []
     for i, _ in enumerate(known_compound_list):
         print("The peaks that we found for "
-          + str(known_compound_list[i]) + " are: ")
-        num_peaks_list.append(len(list(knhdf5[known_compound_list[i]])[:-2]))
+              + str(known_compound_list[i]) + " are: ")
+        num_peaks_list.append(len(list(knhdf5[known_compound_list[i]])[:-3]))
         split__index_list.append(sum(num_peaks_list))
-        for j,peak in enumerate(list(knhdf5[known_compound_list[i]])[:-2]):
-            print(list(knhdf5['{}/{}'.format(known_compound_list[i], peak)])[2])
+        for j, peak in enumerate(list(knhdf5[known_compound_list[i]])[:-3]):
+            print(list(knhdf5['{}/{}'.format(known_compound_list[i], peak)])[0][2])
             # Need to separate known peaks to make a list of two separate lists
             # to perform custom list split using list comprehension + zip() and split_index_list
-            known_peaks_list.append(list(knhdf5['{}/{}'.format(known_compound_list[i], peak)])[2])
-            result = [known_peaks_list[i : j] for i, j in zip([0] + split__index_list, split__index_list + [None])] 
+            known_peaks_list.append(list(knhdf5['{}/{}'.format(known_compound_list[i],
+                                                               peak)])[0][2])
+            result = [known_peaks_list[i : j] for i, j in zip([0] + split__index_list,
+                                                              split__index_list +
+                                                              [None])]
         known_peaks.append(result)
         assignment_matrix.append(compare_unknown_to_known(
-            unknown_peaks, known_peaks[i][i], precision,
-            unknownhdf5_filename, unknownkey))
+            unknown_peaks, known_peaks[i][i], precision))
     #Ok, so that generates a full association matrix that contains everything
     #we need to assign peaks.
     #Now, let's go through and actually assign text to peaks.
     unknown_peak_assignments = peak_position_comparisons(unknown_peaks,
-                                                        known_peaks,
-                                                        known_compound_list,
-                                                        assignment_matrix,
-                                                        unknownhdf5_filename,
-                                                        unknownkey)
+                                                         known_peaks,
+                                                         assignment_matrix,
+                                                         knownhdf5_filename)
     print(unknown_peak_assignments)
-
+    peak_labels = []
+    for i, _ in enumerate(unknown_peak_assignments):
+        peak_labels.append(str(unknown_peak_assignments[i]))
+    for j, peak in enumerate(list(unhdf5['{}C/{}s'.format(temp, time)])[:-3]):
+        add_label(unknownhdf5_filename, temp, time, peak, peak_labels[j])
     if plot:
-        plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
+        plotting_peak_assignments(unknown_x,
+                                  unknown_y,
+                                  unknown_peaks,
                                   unknown_peak_assignments,
-                                  known_compound_list,
                                   unknownhdf5_filename,
-                                  unknownkey)
+                                  knownhdf5_filename,
+                                  temp,
+                                  time,
+                                  peak_labels,
+                                  exportlabelinput)
 
     percentages = percentage_of_peaks_found(known_peaks[len(known_compound_list)-1],
                                             assignment_matrix,
-                                            known_compound_list,
-                                            hdf5_filename)
+                                            knownhdf5_filename)
     print(percentages)
+    knhdf5.close()
+    unhdf5.close()
+    return unknown_x, unknown_y, unknown_peaks, unknown_peak_assignments, percentages
 
-    
-def compare_unknown_to_known(unknown_peaks, known_peaks, precision, hdf5_filename, key):
+def compare_unknown_to_known(unknown_peaks, known_peaks, precision):
     """This function takes in peak positions for the spectrum to be
     analyzed and a single known compound and determines if the peaks
     found in the known compound are present in the unknown spectrum."""
@@ -126,20 +168,11 @@ def compare_unknown_to_known(unknown_peaks, known_peaks, precision, hdf5_filenam
     if not isinstance(known_peaks, list):
         raise TypeError("""Passed value of `known_peaks` is not a list!
         Instead, it is: """ + str(type(known_peaks)))
+# Need to check values within known_peaks
 
     if not isinstance(precision, (float, int)):
         raise TypeError("""Passed value of `precision` is not a float or int!
         Instead, it is: """ + str(type(precision)))
-    # handling input errors
-    if not isinstance(hdf5_filename, str):
-        raise TypeError('Passed value of `hdf5_filename` is not a string! Instead, it is: '
-                        + str(type(hdf5_filename)))
-    if not hdf5_filename.split('/')[-1].split('.')[-1] == 'hdf5':
-        raise TypeError('`hdf5_filename` is not type = .hdf5! Instead, it is: '
-                        + hdf5_filename.split('/')[-1].split('.')[-1])
-    if not isinstance(key, str):
-        raise TypeError('Passed value of `key` is not a string! Instead, it is: '
-                        + str(type(key)))
 
     assignment_matrix = np.zeros(len(unknown_peaks))
     peaks_found = 0
@@ -147,7 +180,7 @@ def compare_unknown_to_known(unknown_peaks, known_peaks, precision, hdf5_filenam
         for j, _ in enumerate(known_peaks):
             # instead of If, call peak_1D_score
             if math.isclose(unknown_peaks[i], known_peaks[j],
-                            rel_tol=precision):
+                            abs_tol=precision, rel_tol=1e-9):
                 # Instead of using a 1, just input the score
                 # from the score calculator.
                 # Bigger is better.
@@ -162,14 +195,12 @@ def compare_unknown_to_known(unknown_peaks, known_peaks, precision, hdf5_filenam
         else:
             pass
     print(assignment_matrix)
+
     return assignment_matrix
 
-
 def peak_position_comparisons(unknown_peaks, known_compound_peaks,
-                              known_compound_list,
                               association_matrix,
-                              hdf5_filename,
-                              key):
+                              knownhdf5_filename):
     """This function takes in an association matrix and turns the numbers
     given by said matrix into a text label."""
 
@@ -177,43 +208,46 @@ def peak_position_comparisons(unknown_peaks, known_compound_peaks,
     if not isinstance(unknown_peaks, list):
         raise TypeError("""Passed value of `unknown_peaks` is not a list!
         Instead, it is: """ + str(type(unknown_peaks)))
-
     if not isinstance(known_compound_peaks, list):
         raise TypeError("""Passed value of `known_compound_peaks` is not a list!
         Instead, it is: """ + str(type(known_compound_peaks)))
+    if not isinstance(knownhdf5_filename, str):
+        raise TypeError("""Passed value of `knownhdf5_filename` is not a string!
+        Instead, it is: """+ str(type(knownhdf5_filename)))
+    if not knownhdf5_filename.split('/')[-1].split('.')[-1] == 'hdf5':
+        raise TypeError("""`knownhdf5_filename` is not type = .hdf5!
+        Instead, it is: """+ knownhdf5_filename.split('/')[-1].split('.')[-1])
+    if not isinstance(association_matrix, list):
+        raise TypeError("""Passed value of `association_matrix` is not a float
+        or int! Instead, it is: """ + str(type(association_matrix)))
+
+    # open .hdf5
+    knhdf5 = h5py.File(knownhdf5_filename, 'r+')
+
+    #Extract keys from files
+    known_compound_list = list(knhdf5.keys())
 
     if not isinstance(known_compound_list, list):
         raise TypeError("""Passed value of `known_compound_list` is not a list!
-        Instead, it is: """ + str(type(known_compound_list)))
-    # handling input errors
-    if not isinstance(hdf5_filename, str):
-        raise TypeError('Passed value of `hdf5_filename` is not a string! Instead, it is: '
-                        + str(type(hdf5_filename)))
-    if not hdf5_filename.split('/')[-1].split('.')[-1] == 'hdf5':
-        raise TypeError('`hdf5_filename` is not type = .hdf5! Instead, it is: '
-                        + hdf5_filename.split('/')[-1].split('.')[-1])
-    if not isinstance(key, str):
-        raise TypeError('Passed value of `key` is not a string! Instead, it is: '
-                        + str(type(key)))
-    
-    #Now we need to check the elements within the known_compound_list to make sure they are correct.
+        Instead, it is: """+ str(type(known_compound_list)))
+    # Now we need to check the elements within the known_compound_list
+    # to make sure they are correct.
     for i, _ in enumerate(known_compound_list):
         if not isinstance(known_compound_list[i], str):
-            raise TypeError("""Passed value within `known_compound_list` is not a dictionary!
-            Instead, it is: """ + str(type(known_compound_list[i])))
-
-    if not isinstance(association_matrix, list):
-        raise TypeError("""Passed value of `association_matrix` is not a float or int!
-        Instead, it is: """ + str(type(association_matrix)))
+            raise TypeError("""Passed value within `known_compound_list` is
+            not a string! Instead, it is: """ + str(type(known_compound_list[i])))
 
     unknown_peak_assignment = []
     #Step through the unknown peaks to make an assignment for each unknown peak.
 
     for i, _ in enumerate(unknown_peaks):
-        #We might be able to make a small performance improvement if we were to somehow
-        #not search the peaks we already had searched, but that seems to not be trivial.
+        # We might be able to make a small performance
+        # improvement if we were to somehow
+        # not search the peaks we already had searched
+        # but that seems to not be trivial.
         position_assignment = []
-        #We'll need an outer loop that walks through all the different compound positions
+        # We'll need an outer loop that walks through
+        # all the different compound positions
         for j, _ in enumerate(known_compound_peaks):
             if association_matrix[j][i] == 1:
                 position_assignment.append(known_compound_list[j])
@@ -224,11 +258,11 @@ def peak_position_comparisons(unknown_peaks, known_compound_peaks,
         else:
             pass
         unknown_peak_assignment.append(position_assignment)
-
+    knhdf5.close()
     return unknown_peak_assignment
 
 
-def percentage_of_peaks_found(known_peaks, association_matrix, list_of_known_compounds, hdf5_filename):
+def percentage_of_peaks_found(known_peaks, association_matrix, knownhdf5_filename):
     """This function takes in a list of classified peaks, and returns a percentage of
     how many of the material's peaks are found in the unknown spectrum.
     This can be used as a metric of confidence."""
@@ -237,41 +271,49 @@ def percentage_of_peaks_found(known_peaks, association_matrix, list_of_known_com
     if not isinstance(known_peaks, list):
         raise TypeError("""Passed value of `known_peaks` is not a list!
         Instead, it is: """ + str(type(known_peaks)))
-
-    if not isinstance(list_of_known_compounds, list):
-        raise TypeError("""Passed value of `list_of_known_compounds` is not a list!
-        Instead, it is: """ + str(type(list_of_known_compounds)))
-    # handling input errors
-    if not isinstance(hdf5_filename, str):
-        raise TypeError('Passed value of `hdf5_filename` is not a string! Instead, it is: '
-                        + str(type(hdf5_filename)))
-    if not hdf5_filename.split('/')[-1].split('.')[-1] == 'hdf5':
-        raise TypeError('`hdf5_filename` is not type = .hdf5! Instead, it is: '
-                        + hdf5_filename.split('/')[-1].split('.')[-1])
-
-    # Now we need to check the elements within the
-    # list_of_known_compounds to make sure they are correct.
-    for i, _ in enumerate(list_of_known_compounds):
-        if not isinstance(list_of_known_compounds[i], str):
-            raise TypeError("""Passed value within `list_of_known_compounds` is not a dictionary!
-            Instead, it is: """ + str(type(list_of_known_compounds[i])))
-
     if not isinstance(association_matrix, list):
         raise TypeError("""Passed value of `association_matrix` is not a float or int!
         Instead, it is: """ + str(type(association_matrix)))
+    if not isinstance(knownhdf5_filename, str):
+        raise TypeError("""Passed value of `knownhdf5_filename` is not a string!
+        Instead, it is: """+ str(type(knownhdf5_filename)))
+    if not knownhdf5_filename.split('/')[-1].split('.')[-1] == 'hdf5':
+        raise TypeError("""`knownhdf5_filename` is not type = .hdf5!
+        Instead, it is: """ + knownhdf5_filename.split('/')[-1].split('.')[-1])
 
+    # open .hdf5
+    knhdf5 = h5py.File(knownhdf5_filename, 'r+')
+
+    # Extract keys from files
+    known_compound_list = list(knhdf5.keys())
+
+    if not isinstance(known_compound_list, list):
+        raise TypeError("""Passed value of `known_compound_list` is not a list!
+        Instead, it is: """+ str(type(known_compound_list)))
+    # Now we need to check the elements within the known_compound_list
+    # to make sure they are correct.
+    for i, _ in enumerate(known_compound_list):
+        if not isinstance(known_compound_list[i], str):
+            raise TypeError("""Passed value within `known_compound_list`
+            is not a string!
+            Instead, it is: """ + str(type(known_compound_list[i])))
     percentage_dict = {}
-    for j, _ in enumerate(list_of_known_compounds):
+    for j, _ in enumerate(known_compound_list):
+#         print(association_matrix)
+#         print(known_peaks)
         count_number = sum(association_matrix[j])
-        percentage_dict[list_of_known_compounds[j]] = float(count_number / (len(known_peaks[j]))) * 100
-
+        percentage_dict[known_compound_list[j]] = float(count_number /
+                                                        (len(known_peaks[j]))) * 100
+    knhdf5.close()
     return percentage_dict
 
 
-def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks, unknown_peak_assignments,
-                              known_compound_list, hdf5_filename, key):
-    """This function plots a set of unknown peaks, and plots the assigned classification given by
-    the functions within peakassignment"""
+def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
+                              unknown_peak_assignments, unknownhdf5_filename,
+                              knownhdf5_filename,
+                              temp, time, peak_labels, exportlabelinput=True):
+    """This function plots a set of unknown peaks, and plots the assigned
+    classification given by the functions within peakassignment"""
 
     #Handling errors in inputs.
     if not isinstance(unknown_peaks, list):
@@ -286,87 +328,162 @@ def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks, unknown_peak_
         raise TypeError(""" Passed value of `unknown_y` is not a list or ndarray!
         Instead, it is: """ + str(type(unknown_y)))
     # handling input errors
-    if not isinstance(hdf5_filename, str):
-        raise TypeError('Passed value of `hdf5_filename` is not a string! Instead, it is: '
-                        + str(type(hdf5_filename)))
-    if not hdf5_filename.split('/')[-1].split('.')[-1] == 'hdf5':
-        raise TypeError('`hdf5_filename` is not type = .hdf5! Instead, it is: '
-                        + hdf5_filename.split('/')[-1].split('.')[-1])
-    if not isinstance(key, str):
-        raise TypeError('Passed value of `key` is not a string! Instead, it is: '
-                        + str(type(key)))
-
+    if not isinstance(unknownhdf5_filename, str):
+        raise TypeError("""Passed value of `unknownhdf5_filename` is not a string!
+        Instead, it is: """ + str(type(unknownhdf5_filename)))
+    if not unknownhdf5_filename.split('/')[-1].split('.')[-1] == 'hdf5':
+        raise TypeError("""`unknownhdf5_filename` is not type = .hdf5!
+        Instead, it is: """ + unknownhdf5_filename.split('/')[-1].split('.')[-1])
+    if not isinstance(knownhdf5_filename, str):
+        raise TypeError("""Passed value of `knownhdf5_filename` is not a string!
+        Instead, it is: """ + str(type(knownhdf5_filename)))
+    if not knownhdf5_filename.split('/')[-1].split('.')[-1] == 'hdf5':
+        raise TypeError("""`knownhdf5_filename` is not type = .hdf5!
+        Instead, it is: """ + knownhdf5_filename.split('/')[-1].split('.')[-1])
+    if not isinstance(temp, int):
+        raise TypeError("""Passed value of `temp` is not a int!
+        Instead, it is: """ + str(type(temp)))
+    if not isinstance(time, int):
+        raise TypeError("""Passed value of `time` is not a int!
+        Instead, it is: """ + str(type(time)))
+    if not isinstance(peak_labels, list):
+        raise TypeError("""Passed value of `peak_labels` is not a list!
+        Instead, it is: """ + str(type(peak_labels)))
+    # Now we need to check the elements within the known_compound_list
+    # to make sure they are correct.
+    for i, _ in enumerate(peak_labels):
+        if not isinstance(peak_labels[i], str):
+            raise TypeError("""Passed value within `peak_labels` is not a string!
+            Instead, it is: """ + str(type(peak_labels[i])))
     #Now we need to check the elements within the unknown_peak_assignment
     #to make sure they are correct.
     for i, _ in enumerate(unknown_peak_assignments):
         if not isinstance(unknown_peak_assignments[i], list):
-            raise TypeError("""Passed value within `unknown_peak_assignment` is not a list!
+            raise TypeError("""Passed value within `unknown_peak_assignment`
+            is not a list!
             Instead, it is: """ + str(type(unknown_peak_assignments[i])))
             if not isinstance(unknown_peak_assignments[i][i], str):
-                raise TypeError("""Passed value within `unknown_peak_assignment` is not a string!
+                raise TypeError("""Passed value within `unknown_peak_assignment`
+                is not a string! 
                 Instead, it is: """ + str(type(unknown_peak_assignments[i][i])))
     # open .hdf5
-    hdf5 = h5py.File(hdf5_filename, 'r')
-    # extract spectra data
-    x_data = list(hdf5['{}/wavenumber'.format(key)])
-    y_data = list(hdf5['{}/counts'.format(key)])
-    colors = ['r', 'g', 'c', 'm', 'y']
-    fig = plt.figure(figsize=(10, 4), dpi=300)
-#     plt.plot(unknown_x, unknown_y, color='black', label='Unknown Spectrum')
-#     peak_labels = []
+    knhdf5 = h5py.File(knownhdf5_filename, 'r')
+    unhdf5 = h5py.File(unknownhdf5_filename, 'r')
+    residuals = np.asarray(list(unhdf5['{}C/{}s/residuals'.format(temp, time)]))
+    #Extract keys from files
+    known_compound_list = list(knhdf5.keys())
 
-#     for i, _ in enumerate(unknown_peak_assignments):
-#         for j, _ in enumerate(known_compound_list):           
-#             if unknown_peak_assignments[i] == [known_compound_list[j]]:
-#                 plt.axvline(x=unknown_peaks[i], color=colors[j],
-#                             label=unknown_peak_assignments[i],
-#                             linestyle='--')
-#             elif unknown_peak_assignments[i] == [known_compound_list[j-1],known_compound_list[j]]:
-#                 plt.axvline(x=unknown_peaks[i], color=colors[j-1],
-#                             label=unknown_peak_assignments[i],
-#                             linestyle='--')
-#             else: 
-#                 pass
-#         if unknown_peak_assignments[i] == ['Unassigned']:
-#             plt.axvline(x=unknown_peaks[i], color='b',
-#                         label=unknown_peak_assignments[i],
-#                         linestyle='--')
-#         else:
-#             pass
-#     # extract fitted peak center values
-#     peak_centers = []
-#     peak_labels = []
-#     for _,peak in enumerate(list(hdf5[key])[:-2]):
-#         peak_centers.append(list(hdf5['{}/{}'.format(key, peak)])[2])
-#         peak_labels.append(peak)
-    # plot spectra and peak labels
-    
-    
-###############################3
-    peak_labels=[]
-    pk = lineid_plot.initial_plot_kwargs()
-    pk['color'] = "red"
-    for i, _ in enumerate(unknown_peak_assignments):
-        peak_labels.append(str(unknown_peak_assignments[i][0]))
-    print(unknown_peaks)
+    if not isinstance(known_compound_list, list):
+        raise TypeError("""Passed value of `known_compound_list` is not a list!
+        Instead, it is: """ + str(type(known_compound_list)))
+    # Now we need to check the elements within the known_compound_list
+    # to make sure they are correct.
+    for i, _ in enumerate(known_compound_list):
+        if not isinstance(known_compound_list[i], str):
+            raise TypeError("""Passed value within `known_compound_list` is
+            not a string! Instead, it is: """ + str(type(known_compound_list[i])))
+    # extract spectra data
+    x_data = list(unhdf5['{}C/{}s/wavenumber'.format(temp, time)])
+    y_data = list(unhdf5['{}C/{}s/counts'.format(temp, time)])
+#     plt.plot(unknown_x, unknown_y, color='black', label='Unknown Spectrum')
+    if exportlabelinput:
+        print('export labelling only')
+    else:
+        peak_labels = []
+        for i, _ in enumerate(unknown_peak_assignments):
+            peak_labels.append(str(unknown_peak_assignments[i]))
     print(peak_labels)
-    fig, ax = lineid_plot.plot_line_ids(x_data, y_data, unknown_peaks, peak_labels,
-                                        box_axes_space=0.12, plot_kwargs={'linewidth':1}, max_iter=50)
-    
-    fig.set_size_inches(15,5)
+    # plot spectra and peak labels
+    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True,
+                                   gridspec_kw={'height_ratios': [3, 1]},
+                                   figsize=(15, 6), dpi=300)
+    # plot data
+    ax1.plot(x_data, y_data, color='blue')
+    ax2.plot(x_data, residuals, color='teal')
+    lineid_plot.plot_line_ids(x_data, y_data, unknown_peaks,
+                              peak_labels, box_axes_space=0.30,
+                              plot_kwargs={'linewidth':1},
+                              max_iter=75, ax=ax1)
+#     fig.set_size_inches(15,5)
     # lock the scale so that additional plots do not warp the labels
-    ax.set_autoscale_on(True)
+    ax1.set_autoscale_on(False)
     # Titles and labels
-    ax.set_title('{} spectra from {}'.format(key, hdf5_filename), fontsize=16, pad=80)
-    ax.set_xlabel('wavenumber ($cm^{-1}$)', fontsize=14)
-    ax.set_xlim(min(x_data), max(x_data))
-#     ax.set_ylim(min(y_data), max(y_data))
-    ax.set_ylabel('counts', fontsize=14)
+    ax2.set_xlabel('Wavenumber ($cm^{-1}$)', fontsize=14)
+    ax1.set_xlim(min(x_data), max(x_data))
+    ax1.set_ylabel('Counts', fontsize=14, labelpad=20)
+    ax2.set_ylabel('Residuals', fontsize=14, labelpad=12)
+    # scale residuals plot symmetrically about zero
+    ylim = max(abs(min(residuals)), abs(max(residuals)))
+    ax2.set_ylim(-ylim, ylim)
+    # add grid lines to residual plot
+    ax2.grid(which='major', axis='y', linestyle='-')
+    # force tick labels for top plot
+    ax1.tick_params(axis='both', which='both', labelsize=10, labelbottom=True)
+    # add title
+    ax1.set_title('{}C/{}s spectra from {}'.format(temp,
+                                                   time,
+                                                   unknownhdf5_filename),
+                  fontsize=18, pad=350)
     plt.show()
-    
-#     plt.legend(loc=0, framealpha=1)
+    knhdf5.close()
+    unhdf5.close()
+
+def add_label(hdf5_filename, temp, time, peak, label):
+    """Function that adds a label to a peak dataset in the hdf5 file
+    """
+    #Handling errors in inputs.
+    if not isinstance(hdf5_filename, str):
+        raise TypeError("""Passed value of `hdf5_filename` is not a string!
+        Instead, it is: """ + str(type(hdf5_filename)))
+    if not hdf5_filename.split('/')[-1].split('.')[-1] == 'hdf5':
+        raise TypeError("""`hdf5_filename` is not type = .hdf5!
+        Instead, it is: """ + hdf5_filename.split('/')[-1].split('.')[-1])
+    if not isinstance(temp, int):
+        raise TypeError("""Passed value of `temp` is not a int!
+        Instead, it is: """ + str(type(temp)))
+    if not isinstance(time, int):
+        raise TypeError("""Passed value of `time` is not a int!
+        Instead, it is: """ + str(type(time)))
+    if not isinstance(peak, str):
+        raise TypeError("""Passed value of `peak` is not a string!
+        Instead, it is: """ + str(type(peak)))
+    if not isinstance(label, str):
+        raise TypeError("""Passed value of `label` is not a string!
+        Instead, it is: """ + str(type(label)))
+    # open hdf5 file as read/write
+    hdf5 = h5py.File(hdf5_filename, 'r+')
+    # extract existing data from peak dataset
+    peak_data = list(hdf5['{}C/{}s/{}'.format(temp, time, peak)])[0]
+#     print(peak_data)
+    # make a new tuple that contains the orginal data as well as the label
+    label_tuple = (label,)
+    data = tuple(peak_data) +label_tuple
+    # delete the old dataset so the new one can be saved
+    del hdf5['{}C/{}s/{}'.format(temp, time, peak)]
+    # define a custom datatype that allows for a string as the the last tuple element
+    my_datatype = np.dtype([('fraction', np.float),
+                            ('center', np.float),
+                            ('sigma', np.float),
+                            ('amplitude', np.float),
+                            ('fwhm', np.float),
+                            ('height', np.float),
+                            ('area under the curve', np.float),
+                            ('label', h5py.special_dtype(vlen=str))])
+    # recreate the old dataset in the hdf5 file
+    dataset = hdf5.create_dataset('{}C/{}s/{}'.format(temp, time, peak),
+                                  (1,), dtype=my_datatype)
+    # apply custom dtype to data tuple
+#     print(dataset)
+    print(data)
+#     print(my_datatype)
+    data_array = np.array(data, dtype=my_datatype)
+    # write new values to the blank dataset
+    dataset[...] = data_array
+#     print(dataset)
     hdf5.close()
-def peak_1d_score(row_i, row_j, scoremax):
+    return
+
+def peak_1d_score(row_i, row_j, scoremax, precision):
     """
     Returns scores with respect to the repricoal of the
     calculated Euclidean distance between peaks
@@ -376,7 +493,8 @@ def peak_1d_score(row_i, row_j, scoremax):
     Parameters:
         row_i (list like):  input list
         row_j (list like): input list
-        scoremax (float): Euclidean reciprocal score divided by max score; default is 1
+        scoremax (float): Euclidean reciprocal score divided by max score;
+        default is 1
 
     Returns:
         scores (list): Euclidean reciprocal scores
@@ -402,10 +520,10 @@ def peak_1d_score(row_i, row_j, scoremax):
     for i, _ in enumerate(row_i):
         for j, _ in enumerate(row_j):
             # Calculating distances between peaks
-            distance = np.where((row_i[i] - row_j[j] > 50), np.nan,
+            distance = np.where((row_i[i] - row_j[j] > precision), np.nan,
                                 math.sqrt(sum([math.pow(row_i[i] - row_j[j], 2)])))
             # Score for peaks less than 50 units apart
-            if 1 / (distance + 1) > .02:
+            if 1 / (distance + 1) > (1/precision):
                 # Dividing over the given max score
                 scores.append(((1 / (distance + 1)) / scoremax))
                 # Appends a tuple of the compared peaks
@@ -415,7 +533,7 @@ def peak_1d_score(row_i, row_j, scoremax):
     return scores, peaks
 
 
-def score_max(row_i, row_j, k):
+def score_max(row_i, row_j, k, precision):
     """
     Returns list of scores sorted with respect to the peaks
     related to its output max score
@@ -443,20 +561,20 @@ def score_max(row_i, row_j, k):
     if k < 0:
         raise ValueError("""Passed value of `k` is not within bounds!""")
     try:
-        scoremax = sorted(set(peak_1d_score(row_i, row_j, 1)[0][:]))[-k]
-        maxscores, maxpeaks = peak_1d_score(row_i, row_j, scoremax)
+        scoremax = sorted(set(peak_1d_score(row_i, row_j, 1, precision)[0][:]))[-k]
+        maxscores, maxpeaks = peak_1d_score(row_i, row_j, scoremax, precision)
 
     except Exception as e:
         print("""Function did not receive a scoremax variable. The variable
         scoremax has been reset back to 1. This is equivalent to 
         your unnormalized score.""")
 
-        maxscores, maxpeaks = peak_1d_score(row_i, row_j, scoremax=1)
+        maxscores, maxpeaks = peak_1d_score(row_i, row_j, 1, precision)
 
     return maxscores, maxpeaks
 
 
-def score_sort(row_i, row_j, k):
+def score_sort(row_i, row_j, k, precision):
     """
     Returns list of scores sorted
 
@@ -482,7 +600,7 @@ def score_sort(row_i, row_j, k):
         raise ValueError("""Passed value of `k` is not within bounds!""")
 
     sortedscores = []
-    sortedscores.append(score_max(row_i, row_j, k))
+    sortedscores.append(score_max(row_i, row_j, k, precision))
     sortedscores.sort()
 
     return sortedscores
