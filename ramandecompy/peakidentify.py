@@ -8,11 +8,12 @@ import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 import lineid_plot
+import pandas as pd
 
 
 # Will probably need to create an additional function
 
-def peak_assignment(unknownhdf5_filename, temp, time, knownhdf5_filename,
+def peak_assignment(unknownhdf5_filename, key, knownhdf5_filename,
                     precision=50, exportlabelinput=True, plot=True):
     """This function is a wrapper function from which all classification
     of peaks occurs."""
@@ -30,13 +31,9 @@ def peak_assignment(unknownhdf5_filename, temp, time, knownhdf5_filename,
     if not unknownhdf5_filename.split('/')[-1].split('.')[-1] == 'hdf5':
         raise TypeError("""`unknownhdf5_filename` is not type = .hdf5!
         Instead, it is: """ + unknownhdf5_filename.split('/')[-1].split('.')[-1])
-    if not isinstance(temp, int):
-        raise TypeError("""Passed value of `temp` is not a int!
-        Instead, it is: """ + str(type(temp)))
-    if not isinstance(time, int):
-        raise TypeError("""Passed value of `time` is not a int!
-        Instead, it is: """ + str(type(time)))
-
+    if not isinstance(key, str):
+        raise TypeError("""Passed value of `key` is not a int!
+        Instead, it is: """ + str(type(key)))
     if not isinstance(precision, (float, int)):
         raise TypeError("""Passed value of `precision` is not a float or int!
         Instead, it is: """ + str(type(precision)))
@@ -64,36 +61,31 @@ def peak_assignment(unknownhdf5_filename, temp, time, knownhdf5_filename,
             a string! Instead, it is: """ + str(type(known_compound_list[i])))
 
     # extract spectra data
-    unknown_x = list(unhdf5['{}C/{}s/wavenumber'.format(temp, time)])
-    unknown_y = list(unhdf5['{}C/{}s/counts'.format(temp, time)])
-    residuals = np.asarray(list(unhdf5['{}C/{}s/residuals'.format(temp, time)]))
+    unknown_x = list(unhdf5['{}/wavenumber'.format(key)])
+    unknown_y = list(unhdf5['{}/counts'.format(key)])
     unknown_x = np.asarray(unknown_x)
     unknown_y = np.asarray(unknown_y)
     #Lets identify the peaks in the unknown spectrum.
     unknown_peaks = []
-    for i, peak in enumerate(list(unhdf5['{}C/{}s'.format(temp, time)])[:-3]):
+    for i, peak in enumerate(list(unhdf5['{}'.format(key)])[:-3]):
         try:
             if i < 9:
-                unknown_peaks.append(list(unhdf5['{}C/{}s/Peak_0{}*'.format(temp,
-                                                                            time,
-                                                                            i+1)])[0][2])
+                unknown_peaks.append(list(unhdf5['{}/Peak_0{}*'.format(key,
+                                                                       i+1)])[0][2])
             else:
-                unknown_peaks.append(list(unhdf5['{}C/{}s/Peak_{}*'.format(temp,
-                                                                           time,
-                                                                           i+1)])[0][2])
+                unknown_peaks.append(list(unhdf5['{}/Peak_{}*'.format(key,
+                                                                      i+1)])[0][2])
         except Exception as e:
             #Normal peakassignment
             print("""Function did not receive adjusted peak.
             The function continued to look for an normal peak.""")
             if i < 9:
                 print(peak)
-                unknown_peaks.append(list(unhdf5['{}C/{}s/Peak_0{}'.format(temp,
-                                                                           time,
-                                                                           i+1)])[0][2])
+                unknown_peaks.append(list(unhdf5['{}/Peak_0{}'.format(key,
+                                                                      i+1)])[0][2])
             else:
-                unknown_peaks.append(list(unhdf5['{}C/{}s/Peak_{}'.format(temp,
-                                                                          time,
-                                                                          i+1)])[0][2])
+                unknown_peaks.append(list(unhdf5['{}/Peak_{}'.format(key,
+                                                                     i+1)])[0][2])
             print('Peak_{}*'.format(i+1))
         else:
             pass
@@ -134,19 +126,25 @@ def peak_assignment(unknownhdf5_filename, temp, time, knownhdf5_filename,
     peak_labels = []
     for i, _ in enumerate(unknown_peak_assignments):
         peak_labels.append(str(unknown_peak_assignments[i]))
-    for j, peak in enumerate(list(unhdf5['{}C/{}s'.format(temp, time)])[:-3]):
-        add_label(unknownhdf5_filename, temp, time, peak, peak_labels[j])
+    frames = []
+    for j, peak in enumerate(list(unhdf5['{}'.format(key)])[:-3]):
+        frames.append(pd.DataFrame(add_label(unknownhdf5_filename,
+                                             key, peak, peak_labels[j])))
+         
+    df = pd.concat(frames,axis=1, join='outer', join_axes=None, ignore_index=False,
+              keys=None, levels=None, names=None, verify_integrity=False,
+              copy=True,sort=True)
+    df =df.T
     if plot:
-        fig, ax1, ax2 = plotting_peak_assignments(unknown_x,
-                                                  unknown_y,
-                                                  unknown_peaks,
-                                                  unknown_peak_assignments,
-                                                  unknownhdf5_filename,
-                                                  knownhdf5_filename,
-                                                  temp,
-                                                  time,
-                                                  peak_labels,
-                                                  exportlabelinput)
+        plotting_peak_assignments(unknown_x,
+                                  unknown_y,
+                                  unknown_peaks,
+                                  unknown_peak_assignments,
+                                  unknownhdf5_filename,
+                                  knownhdf5_filename,
+                                  key,
+                                  peak_labels,
+                                  exportlabelinput)
 
     percentages = percentage_of_peaks_found(known_peaks[len(known_compound_list)-1],
                                             assignment_matrix,
@@ -154,7 +152,7 @@ def peak_assignment(unknownhdf5_filename, temp, time, knownhdf5_filename,
     print(percentages)
     knhdf5.close()
     unhdf5.close()
-    return unknown_x, unknown_y, unknown_peaks, unknown_peak_assignments, temp, time, percentages
+    return df
 
 def compare_unknown_to_known(unknown_peaks, known_peaks, precision):
     """This function takes in peak positions for the spectrum to be
@@ -311,8 +309,8 @@ def percentage_of_peaks_found(known_peaks, association_matrix, knownhdf5_filenam
 
 def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
                               unknown_peak_assignments, unknownhdf5_filename,
-                              knownhdf5_filename,
-                              temp, time, peak_labels, exportlabelinput=True):
+                              knownhdf5_filename, key, peak_labels,
+                              exportlabelinput=True):
     """This function plots a set of unknown peaks, and plots the assigned
     classification given by the functions within peakassignment"""
 
@@ -341,12 +339,9 @@ def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
     if not knownhdf5_filename.split('/')[-1].split('.')[-1] == 'hdf5':
         raise TypeError("""`knownhdf5_filename` is not type = .hdf5!
         Instead, it is: """ + knownhdf5_filename.split('/')[-1].split('.')[-1])
-    if not isinstance(temp, int):
-        raise TypeError("""Passed value of `temp` is not a int!
-        Instead, it is: """ + str(type(temp)))
-    if not isinstance(time, int):
-        raise TypeError("""Passed value of `time` is not a int!
-        Instead, it is: """ + str(type(time)))
+    if not isinstance(key, str):
+        raise TypeError("""Passed value of `key` is not a int!
+        Instead, it is: """ + str(type(key)))
     if not isinstance(peak_labels, list):
         raise TypeError("""Passed value of `peak_labels` is not a list!
         Instead, it is: """ + str(type(peak_labels)))
@@ -370,7 +365,7 @@ def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
     # open .hdf5
     knhdf5 = h5py.File(knownhdf5_filename, 'r')
     unhdf5 = h5py.File(unknownhdf5_filename, 'r')
-    residuals = np.asarray(list(unhdf5['{}C/{}s/residuals'.format(temp, time)]))
+    residuals = np.asarray(list(unhdf5['{}/residuals'.format(key)]))
     #Extract keys from files
     known_compound_list = list(knhdf5.keys())
 
@@ -384,9 +379,8 @@ def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
             raise TypeError("""Passed value within `known_compound_list` is
             not a string! Instead, it is: """ + str(type(known_compound_list[i])))
     # extract spectra data
-    x_data = list(unhdf5['{}C/{}s/wavenumber'.format(temp, time)])
-    y_data = list(unhdf5['{}C/{}s/counts'.format(temp, time)])
-    fig = plt.figure(figsize=(10, 4), dpi=300)
+    x_data = list(unhdf5['{}/wavenumber'.format(key)])
+    y_data = list(unhdf5['{}/counts'.format(key)])
 #     plt.plot(unknown_x, unknown_y, color='black', label='Unknown Spectrum')
     if exportlabelinput:
         print('export labelling only')
@@ -398,7 +392,7 @@ def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
     # plot spectra and peak labels
     fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True,
                                    gridspec_kw={'height_ratios': [3, 1]},
-                                   figsize=(15, 6))
+                                   figsize=(15, 6), dpi=300)
     # plot data
     ax1.plot(x_data, y_data, color='blue')
     ax2.plot(x_data, residuals, color='teal')
@@ -422,20 +416,14 @@ def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
     # force tick labels for top plot
     ax1.tick_params(axis='both', which='both', labelsize=10, labelbottom=True)
     # add title
-    ax1.set_title('{}C/{}s spectra from {}'.format(temp,
-                                                   time,
-                                                   unknownhdf5_filename),
+    ax1.set_title('{} spectra from {}'.format(key, unknownhdf5_filename),
                   fontsize=18, pad=350)
     plt.show()
-
-#     plt.legend(loc=0, framealpha=1)
     knhdf5.close()
     unhdf5.close()
-    return fig, ax1, ax2
 
-def add_label(hdf5_filename, temp, time, peak, label):
-    """
-    Function that adds a label to a peak dataset in the hdf5 file
+def add_label(hdf5_filename, key, peak, label):
+    """Function that adds a label to a peak dataset in the hdf5 file
     """
     #Handling errors in inputs.
     if not isinstance(hdf5_filename, str):
@@ -444,12 +432,12 @@ def add_label(hdf5_filename, temp, time, peak, label):
     if not hdf5_filename.split('/')[-1].split('.')[-1] == 'hdf5':
         raise TypeError("""`hdf5_filename` is not type = .hdf5!
         Instead, it is: """ + hdf5_filename.split('/')[-1].split('.')[-1])
-    if not isinstance(temp, int):
-        raise TypeError("""Passed value of `temp` is not a int!
-        Instead, it is: """ + str(type(temp)))
-    if not isinstance(time, int):
-        raise TypeError("""Passed value of `time` is not a int!
-        Instead, it is: """ + str(type(time)))
+    if not isinstance(key, str):
+        raise TypeError("""Passed value of `key` is not a int!
+        Instead, it is: """ + str(type(key)))
+    if not isinstance(key, str):
+        raise TypeError("""Passed value of `key` is not a int!
+        Instead, it is: """ + str(type(key)))
     if not isinstance(peak, str):
         raise TypeError("""Passed value of `peak` is not a string!
         Instead, it is: """ + str(type(peak)))
@@ -459,13 +447,13 @@ def add_label(hdf5_filename, temp, time, peak, label):
     # open hdf5 file as read/write
     hdf5 = h5py.File(hdf5_filename, 'r+')
     # extract existing data from peak dataset
-    peak_data = list(hdf5['{}C/{}s/{}'.format(temp, time, peak)])[0]
+    peak_data = list(hdf5['{}/{}'.format(key, peak)])[0]
 #     print(peak_data)
     # make a new tuple that contains the orginal data as well as the label
     label_tuple = (label,)
     data = tuple(peak_data) +label_tuple
     # delete the old dataset so the new one can be saved
-    del hdf5['{}C/{}s/{}'.format(temp, time, peak)]
+    del hdf5['{}/{}'.format(key, peak)]
     # define a custom datatype that allows for a string as the the last tuple element
     my_datatype = np.dtype([('fraction', np.float),
                             ('center', np.float),
@@ -476,7 +464,7 @@ def add_label(hdf5_filename, temp, time, peak, label):
                             ('area under the curve', np.float),
                             ('label', h5py.special_dtype(vlen=str))])
     # recreate the old dataset in the hdf5 file
-    dataset = hdf5.create_dataset('{}C/{}s/{}'.format(temp, time, peak),
+    dataset = hdf5.create_dataset('{}/{}'.format(key, peak),
                                   (1,), dtype=my_datatype)
     # apply custom dtype to data tuple
 #     print(dataset)
@@ -487,7 +475,7 @@ def add_label(hdf5_filename, temp, time, peak, label):
     dataset[...] = data_array
 #     print(dataset)
     hdf5.close()
-    return
+    return data
 
 def peak_1d_score(row_i, row_j, scoremax, precision):
     """
