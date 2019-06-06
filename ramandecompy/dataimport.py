@@ -18,7 +18,7 @@ from ramandecompy import dataprep
 
 
 def data_import(hdf5_filename, directory):
- """
+    """
     This function adds Raman experimental data to an existing hdf5 file. It uses the
     spectrafit.fit_data function to fit the data before saving the fit result and
     the raw data to the hdf5 file. The data_filename must be in a standardized format
@@ -38,11 +38,13 @@ def data_import(hdf5_filename, directory):
     Returns:
         None
     """
-    dataprep.new_hdf5(hdf5_filename) 
+    # open hdf5 file as read/write
+    dataprep.new_hdf5(hdf5_filename)
+    exp_file = h5py.File(hdf5_filename+'.hdf5', 'r+')
     for filename in os.listdir(directory):
         if filename.startswith('FA_') and filename.endswith('.csv'):
             locationandfile = directory + filename
-            dataprep.add_experiment(hdf5_filename, locationandfile)
+            dataprep.add_experiment(str(hdf5_filename)+'.hdf5', locationandfile)
             print('Data from {} fit with compound pseudo-Voigt model. Results saved to {}.'.format(filename, hdf5_filename))
             # printing out to user the status of the import (because it can take a long time if importing a lot of data,
             # about minute/data set for test files
