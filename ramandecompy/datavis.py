@@ -7,6 +7,8 @@ import h5py
 import lineid_plot
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.collections import PolyCollection
 
 
 def pseudo_voigt(x_data, amplitude, center, sigma, fraction):
@@ -129,3 +131,71 @@ def plot_fit(hdf5_filename, key, color='blue'):
     ax1.text(535, -100, 'Model', color='blue', fontsize=12)
     hdf5.close()
     return fig, ax1, ax2
+
+
+def polygon_under_graph(xlist, ylist):
+    """
+    Construct the vertex list which defines the polygon filling the space under
+    the (xlist, ylist) line graph.  Assumes the xs are in ascending order.
+    """
+    return [(xlist[0], 0.), *zip(xlist, ylist), (xlist[-1], 0.)]
+
+
+def plot_temp(hdf5_filename, temp):
+    """
+    docstring
+    """
+    # open hdf5_file
+    hdf5 = h5py.File(hdf5_filename, 'r')
+    # intialize 3D plot
+    fig = plt.figure(figsize=(20,6))
+    ax = fig.add_subplot(111, projection='3d')
+    # plot raw spectra data from hdf5 file
+    for _, time in enumerate(list(hdf5['{}C'.format(temp)].keys())):
+        x_data = list(hdf5['{}C/{}/wavenumber'.format(temp, time)])
+        y_data = list(hdf5['{}C/{}/counts'.format(temp, time)]) 
+        ax.plot(x_data, y_data, zs=int(time[:-1]), zdir='y', c='blue', linewidth=0.75, alpha=0.7)
+    # assign orientation and labels
+    ax.view_init(30, -100)
+    ax.set_xlabel('Wavenumber', fontsize=12, labelpad=20)
+    ax.set_ylabel('Residence Time', fontsize=12, labelpad=10)
+    ax.set_zlabel('Counts', fontsize=12, labelpad=10)
+    ax.set_title('Spectra @ {}C'.format(temp), fontsize=18)
+    hdf5.close()
+    return fig, ax
+
+
+def plot_3D_component(ax, hdf5_filename, temp, peak_number):
+    """
+    docstring
+    """
+    # open hdf5_file
+    hdf5 = h5py.File(hdf5_filename, 'r')
+    # plot pseudo-voigt profiles
+    for _, time in enumerate(list(hdf5['{}C'.format(temp)].keys())):
+        key = '{}C/{}'.format(temp, time)
+        # extract wavenumber data
+        x_data = list(hdf5[key+'/wavenumber'])
+        peak_list = list(hdf5[key].keys())
+        peak_name = peak_list[peak_number-1]
+        # extract pseudo voigt parameters
+        peak_params = list(hdf5['{}/{}'.format(key, peak_name)][0])
+        fraction, sigma, center, amplitude = peak_params[0:4]
+        # calculate pseudo voigt distribution from peak_params
+        y_data = pseudo_voigt(x_data, amplitude, center, sigma, fraction)
+        # assign verticies for polygon to represent area under curve
+        verts = []
+        verts.append(polygon_under_graph(x_data, y_data))
+        # plot polygons
+        poly = PolyCollection(verts, facecolors='r', alpha=.6)
+        ax.add_collection3d(poly, zs=int(time[:-1]), zdir='y')
+    # apply title
+    if peak_number < 10:
+        ax.set_title('Pseudo-Voigt profile for Peak_0{} @ {}C'.format(peak_number, temp),
+                     fontsize=18, pad=35)
+    else:
+        ax.set_title('Pseudo-Voigt profile for Peak_{} @ {}C'.format(peak_number, temp),
+                     fontsize=18, pad=35)    
+    # close hdf5 file
+    hdf5.close()
+    return
