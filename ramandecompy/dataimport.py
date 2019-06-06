@@ -28,12 +28,12 @@ def data_import(hdf5_filename, directory):
 
     Args:
         hdf5_filename (str): the filename and location of an existing hdf5 file to add the
-                             experiment data too.
-        directory (str): the folder location of raw Raman spectroscopy data in
-                             either the form of an .xlsx or a .csv with the wavenumber data
-                             in the 1st column and the counts data in the 2nd column. These
-                             files should contain only the wavenumber and counts data
-                             (no column labels).
+                             experiment data too. Variable must be in a string format.
+
+
+
+        directory (str): the folder location of raw Raman spectroscopy data in a 
+                             string format.
 
     Returns:
         None
