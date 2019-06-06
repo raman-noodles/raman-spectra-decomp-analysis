@@ -8,6 +8,7 @@ import h5py
 import numpy as np
 import matplotlib.pyplot as plt
 import lineid_plot
+import pandas as pd
 
 
 # Will probably need to create an additional function
@@ -133,8 +134,15 @@ def peak_assignment(unknownhdf5_filename, temp, time, knownhdf5_filename,
     peak_labels = []
     for i, _ in enumerate(unknown_peak_assignments):
         peak_labels.append(str(unknown_peak_assignments[i]))
+    frames = []
     for j, peak in enumerate(list(unhdf5['{}C/{}s'.format(temp, time)])[:-3]):
-        add_label(unknownhdf5_filename, temp, time, peak, peak_labels[j])
+        frames.append(pd.DataFrame(add_label(unknownhdf5_filename, temp,
+                                             time, peak, peak_labels[j])))
+         
+    df = pd.concat(frames,axis=1, join='outer', join_axes=None, ignore_index=False,
+              keys=None, levels=None, names=None, verify_integrity=False,
+              copy=True,sort=True)
+    df =df.T
     if plot:
         plotting_peak_assignments(unknown_x,
                                   unknown_y,
@@ -153,7 +161,7 @@ def peak_assignment(unknownhdf5_filename, temp, time, knownhdf5_filename,
     print(percentages)
     knhdf5.close()
     unhdf5.close()
-    return unknown_x, unknown_y, unknown_peaks, unknown_peak_assignments, percentages
+    return unknown_x, unknown_y, unknown_peaks, unknown_peak_assignments, percentages, df
 
 def compare_unknown_to_known(unknown_peaks, known_peaks, precision):
     """This function takes in peak positions for the spectrum to be
@@ -481,7 +489,7 @@ def add_label(hdf5_filename, temp, time, peak, label):
     dataset[...] = data_array
 #     print(dataset)
     hdf5.close()
-    return
+    return data
 
 def peak_1d_score(row_i, row_j, scoremax, precision):
     """
