@@ -70,22 +70,22 @@ def peak_assignment(unknownhdf5_filename, key, knownhdf5_filename,
     for i, peak in enumerate(list(unhdf5['{}'.format(key)])[:-3]):
         try:
             if i < 9:
-                unknown_peaks.append(list(unhdf5['{}/Peak_0{}*'.format(key,
-                                                                       i+1)])[0][2])
-            else:
-                unknown_peaks.append(list(unhdf5['{}/Peak_{}*'.format(key,
-                                                                      i+1)])[0][2])
-        except Exception as e:
-            #Normal peakassignment
-            print("""Function did not receive adjusted peak.
-            The function continued to look for an normal peak.""")
-            if i < 9:
-                print(peak)
                 unknown_peaks.append(list(unhdf5['{}/Peak_0{}'.format(key,
                                                                       i+1)])[0][2])
             else:
                 unknown_peaks.append(list(unhdf5['{}/Peak_{}'.format(key,
                                                                      i+1)])[0][2])
+        except Exception as e:
+            #Normal peakassignment
+            print("""Function did not receive normal peak.
+            The function continued to look for an adjusted peak.""")
+            if i < 9:
+                print(peak)
+                unknown_peaks.append(list(unhdf5['{}/Peak_0{}*'.format(key,
+                                                                       i+1)])[0][2])
+            else:
+                unknown_peaks.append(list(unhdf5['{}/Peak_{}*'.format(key,
+                                                                      i+1)])[0][2])
             print('Peak_{}*'.format(i+1))
         else:
             pass
