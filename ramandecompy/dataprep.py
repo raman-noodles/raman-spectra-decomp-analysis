@@ -114,7 +114,7 @@ def add_calibration(hdf5_filename, data_filename, label=None):
         label = (data_filename.split('/')[-1]).split('.')[0]
         cal_file['{}/wavenumber'.format(label)] = data['wavenumber']
         cal_file['{}/counts'.format(label)] = data['counts']
-        cal_file['{}/residuals'.format(lable)] = residuals
+        cal_file['{}/residuals'.format(label)] = residuals
         for i, result in enumerate(fit_result):
             # create custom datatype
             my_datatype = np.dtype([('fraction', np.float),
