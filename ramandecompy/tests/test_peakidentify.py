@@ -31,12 +31,11 @@ def test_peak_assignment():
                             '../tests/test_files/FA_3.6wt%_300C_25s.csv')
     hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
-    temp = 300
-    time = 25
+    key = '300C/25s'
     calhdf5 = h5py.File(hdf5_calfilename, 'r+')
     exphdf5 = h5py.File(hdf5_expfilename, 'r+')
-    unknown_x = list(exphdf5['{}C/{}s/wavenumber'.format(temp, time)])
-    unknown_y = list(exphdf5['{}C/{}s/counts'.format(temp, time)])
+    unknown_x = list(exphdf5['{}/wavenumber'.format(key)])
+    unknown_y = list(exphdf5['{}/counts'.format(key)])
     unknown_x = np.asarray(unknown_x)
     unknown_y = np.asarray(unknown_y)
     precision = 50
@@ -44,7 +43,7 @@ def test_peak_assignment():
 
     try:
         peakidentify.peak_assignment(hdf5_expfilename,
-                                     temp, time, hdf5_calfilename,
+                                     key, hdf5_calfilename,
                                      precision, False, False)
 
     except TypeError:
@@ -53,7 +52,7 @@ def test_peak_assignment():
 
     try:
         peakidentify.peak_assignment(hdf5_expfilename,
-                                     temp, time, hdf5_calfilename,
+                                     key, hdf5_calfilename,
                                      'precision', False, False)
 
     except TypeError:
@@ -62,7 +61,7 @@ def test_peak_assignment():
 
     try:
         peakidentify.peak_assignment(hdf5_expfilename,
-                                     temp, time, hdf5_calfilename,
+                                     key, hdf5_calfilename,
                                      precision, 'False', False)
 
     except TypeError:
@@ -71,7 +70,7 @@ def test_peak_assignment():
 
     try:
         peakidentify.peak_assignment(hdf5_expfilename,
-                                     temp, time, hdf5_calfilename,
+                                     key, hdf5_calfilename,
                                      precision, False, 'False')
 
     except TypeError:
@@ -104,12 +103,11 @@ def test_compare_unknown_to_known():
                             '../tests/test_files/FA_3.6wt%_300C_25s.csv')
     hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
-    temp = 300
-    time = 25
+    key = '300C/25s'
     calhdf5 = h5py.File(hdf5_calfilename, 'r+')
     exphdf5 = h5py.File(hdf5_expfilename, 'r+')
-    unknown_x = list(exphdf5['{}C/{}s/wavenumber'.format(temp, time)])
-    unknown_y = list(exphdf5['{}C/{}s/counts'.format(temp, time)])
+    unknown_x = list(exphdf5['{}/wavenumber'.format(key)])
+    unknown_y = list(exphdf5['{}/counts'.format(key)])
     unknown_x = np.asarray(unknown_x)
     unknown_y = np.asarray(unknown_y)
     known_compound_list = list(calhdf5.keys())
@@ -117,15 +115,11 @@ def test_compare_unknown_to_known():
     known_peaks = []
     known_peaks_list = []
     unknown_peaks = []
-    for i, _ in enumerate(list(exphdf5['{}C/{}s'.format(temp, time)])[:-3]):
+    for i, _ in enumerate(list(exphdf5['{}'.format(key)])[:-3]):
         if i < 9:
-            unknown_peaks.append(list(exphdf5['{}C/{}s/Peak_0{}'.format(temp,
-                                                                        time,
-                                                                        i+1)])[0][2])
+            unknown_peaks.append(list(exphdf5['{}/Peak_0{}'.format(key, i+1)])[0][2])
         else:
-            unknown_peaks.append(list(exphdf5['{}C/{}s/Peak_{}'.format(temp,
-                                                                       time,
-                                                                       i+1)])[0][2])
+            unknown_peaks.append(list(exphdf5['{}/Peak_{}'.format(key, i+1)])[0][2])
     for i, _ in enumerate(known_compound_list):
         for _, peak in enumerate(list(calhdf5[known_compound_list[i]])[:-3]):
             known_peaks_list.append(list(calhdf5['{}/{}'.format(known_compound_list[i],
@@ -200,12 +194,11 @@ def test_peak_position_comparisons():
                             '../tests/test_files/FA_3.6wt%_300C_25s.csv')
     hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
-    temp = 300
-    time = 25
+    key = '300C/25s'
     calhdf5 = h5py.File(hdf5_calfilename, 'r+')
     exphdf5 = h5py.File(hdf5_expfilename, 'r+')
-    unknown_x = list(exphdf5['{}C/{}s/wavenumber'.format(temp, time)])
-    unknown_y = list(exphdf5['{}C/{}s/counts'.format(temp, time)])
+    unknown_x = list(exphdf5['{}/wavenumber'.format(key)])
+    unknown_y = list(exphdf5['{}/counts'.format(key)])
     unknown_x = np.asarray(unknown_x)
     unknown_y = np.asarray(unknown_y)
     known_compound_list = list(calhdf5.keys())
@@ -214,15 +207,11 @@ def test_peak_position_comparisons():
     known_peaks_list = []
     association_matrix = []
     unknown_peaks = []
-    for i, _ in enumerate(list(exphdf5['{}C/{}s'.format(temp, time)])[:-3]):
+    for i, _ in enumerate(list(exphdf5['{}'.format(key)])[:-3]):
         if i < 9:
-            unknown_peaks.append(list(exphdf5['{}C/{}s/Peak_0{}'.format(temp,
-                                                                        time,
-                                                                        i+1)])[0][2])
+            unknown_peaks.append(list(exphdf5['{}/Peak_0{}'.format(key, i+1)])[0][2])
         else:
-            unknown_peaks.append(list(exphdf5['{}C/{}s/Peak_{}'.format(temp,
-                                                                       time,
-                                                                       i+1)])[0][2])
+            unknown_peaks.append(list(exphdf5['{}/Peak_{}'.format(key, i+1)])[0][2])
     known_peaks = []
     known_peaks_list = []
     num_peaks_list = []
@@ -345,27 +334,22 @@ def test_percentage_of_peaks_found():
                             '../tests/test_files/FA_3.6wt%_300C_25s.csv')
     hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
-    temp = 300
-    time = 25
+    key = '300C/25s'
     calhdf5 = h5py.File(hdf5_calfilename, 'r+')
     exphdf5 = h5py.File(hdf5_expfilename, 'r+')
-    unknown_x = list(exphdf5['{}C/{}s/wavenumber'.format(temp, time)])
-    unknown_y = list(exphdf5['{}C/{}s/counts'.format(temp, time)])
+    unknown_x = list(exphdf5['{}/wavenumber'.format(key)])
+    unknown_y = list(exphdf5['{}/counts'.format(key)])
     unknown_x = np.asarray(unknown_x)
     unknown_y = np.asarray(unknown_y)
     known_compound_list = list(calhdf5.keys())
     precision = 50
 
     unknown_peaks = []
-    for i, _ in enumerate(list(exphdf5['{}C/{}s'.format(temp, time)])[:-3]):
+    for i, _ in enumerate(list(exphdf5['{}'.format(key)])[:-3]):
         if i < 9:
-            unknown_peaks.append(list(exphdf5['{}C/{}s/Peak_0{}'.format(temp,
-                                                                        time,
-                                                                        i+1)])[0][2])
+            unknown_peaks.append(list(exphdf5['{}/Peak_0{}'.format(key, i+1)])[0][2])
         else:
-            unknown_peaks.append(list(exphdf5['{}C/{}s/Peak_{}'.format(temp,
-                                                                       time,
-                                                                       i+1)])[0][2])
+            unknown_peaks.append(list(exphdf5['{}/Peak_{}'.format(key, i+1)])[0][2])
     known_peaks = []
     known_peaks_list = []
     num_peaks_list = []
@@ -428,13 +412,13 @@ def test_percentage_of_peaks_found():
         co2_peaks.append(list(calhdf5['{}/{}'.format(key, peak)])[0][2])
     print(co2_peaks)
     co2_dict_0 = peakidentify.percentage_of_peaks_found([co2_peaks, [0], [0], [0], [0]],
-                                                        [[0, 0], [0], [0], [0], [0]],
+                                                        [[0, 0], [0], [0],[0], [0]],
                                                         hdf5_calfilename)
     assert co2_dict_0[key] == 0, """The function is not correctly
     calculating percentages when no peaks are found"""
 
-    co2_dict_1 = peakidentify.percentage_of_peaks_found([co2_peaks, [1], [1], [1], [1]],
-                                                        [[1, 1], [1], [1], [1], [1]],
+    co2_dict_1 = peakidentify.percentage_of_peaks_found([co2_peaks, [1], [1],[1], [1]],
+                                                        [[1, 1], [1], [1],[1], [1]],
                                                         hdf5_calfilename)
     assert co2_dict_1[key] == 100, """The function is not correctly
     calculating percentages when all peaks are found"""
@@ -465,27 +449,22 @@ def test_plotting_peak_assignments():
                             '../tests/test_files/FA_3.6wt%_300C_25s.csv')
     hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
-    temp = 300
-    time = 25
+    key = '300C/25s'
     calhdf5 = h5py.File(hdf5_calfilename, 'r+')
     exphdf5 = h5py.File(hdf5_expfilename, 'r+')
-    unknown_x = list(exphdf5['{}C/{}s/wavenumber'.format(temp, time)])
-    unknown_y = list(exphdf5['{}C/{}s/counts'.format(temp, time)])
+    unknown_x = list(exphdf5['{}/wavenumber'.format(key)])
+    unknown_y = list(exphdf5['{}/counts'.format(key)])
     unknown_x = np.asarray(unknown_x)
     unknown_y = np.asarray(unknown_y)
     known_compound_list = list(calhdf5.keys())
     precision = 50
 
     unknown_peaks = []
-    for i, _ in enumerate(list(exphdf5['{}C/{}s'.format(temp, time)])[:-3]):
+    for i, _ in enumerate(list(exphdf5['{}'.format(key)])[:-3]):
         if i < 9:
-            unknown_peaks.append(list(exphdf5['{}C/{}s/Peak_0{}'.format(temp,
-                                                                        time,
-                                                                        i+1)])[0][2])
+            unknown_peaks.append(list(exphdf5['{}/Peak_0{}'.format(key, i+1)])[0][2])
         else:
-            unknown_peaks.append(list(exphdf5['{}C/{}s/Peak_{}'.format(temp,
-                                                                       time,
-                                                                       i+1)])[0][2])
+            unknown_peaks.append(list(exphdf5['{}/Peak_{}'.format(key, i+1)])[0][2])
     known_peaks = []
     known_peaks_list = []
     num_peaks_list = []
@@ -520,7 +499,7 @@ def test_plotting_peak_assignments():
                                                unknown_peak_assignments,
                                                hdf5_expfilename,
                                                hdf5_calfilename,
-                                               temp, time, peak_labels)
+                                               key, peak_labels)
     except TypeError:
         print("""The function correctly handled the error
         when an int was input instead of the unknown_x list""")
@@ -530,7 +509,7 @@ def test_plotting_peak_assignments():
                                                unknown_peak_assignments,
                                                hdf5_expfilename,
                                                hdf5_calfilename,
-                                               temp, time, peak_labels)
+                                               key, peak_labels)
     except TypeError:
         print("""The function correctly handled the error when an int
         was input instead of the unknown_y list""")
@@ -542,7 +521,7 @@ def test_plotting_peak_assignments():
                                                unknown_peak_assignments,
                                                hdf5_expfilename,
                                                hdf5_calfilename,
-                                               temp, time, peak_labels)
+                                               key, peak_labels)
     except TypeError:
         print("""The function correctly handled the error when a string
         was input instead of the unknown_peaks list""")
@@ -554,7 +533,7 @@ def test_plotting_peak_assignments():
                                                3,
                                                hdf5_expfilename,
                                                hdf5_calfilename,
-                                               temp, time, peak_labels)
+                                               key, peak_labels)
     except TypeError:
         print("""The function correctly handled the error when an int
         was input instead of the unknown_peak_assignments""")
@@ -566,7 +545,7 @@ def test_plotting_peak_assignments():
                                                ['WATER', 23, 'CO'],
                                                hdf5_expfilename,
                                                hdf5_calfilename,
-                                               temp, time, peak_labels)
+                                               key, peak_labels)
 
     except TypeError:
         print("""The function correctly handled the case when an int
@@ -579,7 +558,7 @@ def test_plotting_peak_assignments():
                                                ['H', 23, 'CO2'],
                                                hdf5_expfilename,
                                                hdf5_calfilename,
-                                               temp, time, peak_labels)
+                                               key, peak_labels)
 
     except TypeError:
         print("""The function correctly handled the case when an int
@@ -592,7 +571,7 @@ def test_plotting_peak_assignments():
                                                unknown_peak_assignments,
                                                3,
                                                hdf5_calfilename,
-                                               temp, time, peak_labels)
+                                               key, peak_labels)
 
     except TypeError:
         print("""The function correctly handled the case when an int
@@ -605,7 +584,7 @@ def test_plotting_peak_assignments():
                                                unknown_peak_assignments,
                                                hdf5_expfilename,
                                                3,
-                                               temp, time, peak_labels)
+                                               key, peak_labels)
 
     except TypeError:
         print("""The function correctly handled the case when an int
@@ -624,26 +603,20 @@ def test_add_label():
     dataprep.add_experiment('peakidentify_add_label_test.hdf5',
                             '../tests/test_files/FA_3.6wt%_300C_25s.csv')
     hdf5_filename = 'peakidentify_add_label_test.hdf5'
-    temp = 300
-    time = 25
+    key = '300C/25s'
     peak = 'Peak_01'
     label = '[Hydrogen]'
     # open hdf5 file as read/write
     hdf5 = h5py.File(hdf5_filename, 'r+')
     try:
-        peakidentify.add_label('hdf5_filename', temp, time, peak, label)
+        peakidentify.add_label('hdf5_filename', key, peak, label)
     except TypeError:
         print("An invalid hdf5_filename was passed to the function, "
               "and it was handled well with a TypeError.")
     try:
-        peakidentify.add_label(hdf5_filename, 'temp', time, peak, label)
+        peakidentify.add_label(hdf5_filename, 'key', peak, label)
     except TypeError:
         print("An invalid temp was passed to the function, "
-              "and it was handled well with a TypeError.")
-    try:
-        peakidentify.add_label(hdf5_filename, temp, 'time', peak, label)
-    except TypeError:
-        print("An invalid time was passed to the function, "
               "and it was handled well with a TypeError.")
     hdf5.close()
     del hdf5
