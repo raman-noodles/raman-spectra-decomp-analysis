@@ -149,7 +149,7 @@ def add_experiment(hdf5_filename, exp_filename):
     Args:
         hdf5_filename (str): the filename and location of an existing hdf5 file to add the
                              experiment data too.
-        data_filename (str): the filename and location of raw Raman spectroscopy data in
+        exp_filename (str): the filename and location of raw Raman spectroscopy data in
                              either the form of an .xlsx or a .csv with the wavenumber data
                              in the 1st column and the counts data in the 2nd column. These
                              files should contain only the wavenumber and counts data
