@@ -282,7 +282,7 @@ def test_peak_position_comparisons():
                                                          association_matrix_0,
                                                          hdf5_calfilename)[0]
 
-    assert zero_output[0] == 'CO2', """The function is not properly
+    assert zero_output[0] == 'Acetaldehyde', """The function is not properly
     handling unassigned peaks."""
 
     #Test the function to make sure that it has the right functionality
@@ -302,7 +302,7 @@ def test_peak_position_comparisons():
     print(test_peak_labels[0][0])
     print(test_peak_labels[1][0])
 
-    assert test_peak_labels[0][0] == 'CO2', """The funciton is
+    assert test_peak_labels[0][0] == 'Acetaldehyde', """The funciton is
     not correctly assigning peaks when association matrix = 1"""
     assert test_peak_labels[1][0] == 'Unassigned', """The function is
     not correctly handling a lack of peak assignments"""
@@ -374,8 +374,10 @@ def test_percentage_of_peaks_found():
     #Test for input error handling.
 
     try:
-        peakidentify.percentage_of_peaks_found([[0], [1], [2], [3], [4], [5]],
-                                                association_matrix, hdf5_calfilename)
+        peakidentify.percentage_of_peaks_found([[0], [1], [2], [3], [4],
+                                                [5],[6],[7],[8]]
+                                                association_matrix,
+                                                hdf5_calfilename)
     except TypeError:
         print("""The function correctly handled the error when a list of ints
         was input instead of the known_peaks list""")
@@ -411,14 +413,18 @@ def test_percentage_of_peaks_found():
     for _, peak in enumerate(list(calhdf5[key])[:-3]):
         co2_peaks.append(list(calhdf5['{}/{}'.format(key, peak)])[0][2])
     print(co2_peaks)
-    co2_dict_0 = peakidentify.percentage_of_peaks_found([co2_peaks, [0], [0], [0], [0]],
-                                                        [[0, 0], [0], [0],[0], [0]],
+    co2_dict_0 = peakidentify.percentage_of_peaks_found([co2_peaks, [0], [0], [0],
+                                                         [0],[0], [0], [0]],
+                                                        [[0, 0], [0], [0],[0],
+                                                         [0],[0], [0], [0]],
                                                         hdf5_calfilename)
     assert co2_dict_0[key] == 0, """The function is not correctly
     calculating percentages when no peaks are found"""
 
-    co2_dict_1 = peakidentify.percentage_of_peaks_found([co2_peaks, [1], [1],[1], [1]],
-                                                        [[1, 1], [1], [1],[1], [1]],
+    co2_dict_1 = peakidentify.percentage_of_peaks_found([co2_peaks, [1], [1],[1],
+                                                         [1],[1],[1], [1]],
+                                                        [[1, 1], [1], [1],[1],
+                                                         [1],[1],[1], [1]],
                                                         hdf5_calfilename)
     assert co2_dict_1[key] == 100, """The function is not correctly
     calculating percentages when all peaks are found"""
