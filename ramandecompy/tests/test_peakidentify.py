@@ -81,6 +81,7 @@ def test_peak_assignment():
     os.remove('peakidentify_calibration_test.hdf5')
     os.remove('peakidentify_experiment_test.hdf5')
 
+
 def test_compare_unknown_to_known():
     """This function tests the operation of the compare_unknown_to_known
     function in peakidentify.py"""
@@ -169,6 +170,7 @@ def test_compare_unknown_to_known():
     calhdf5.close()
     os.remove('peakidentify_calibration_test.hdf5')
     os.remove('peakidentify_experiment_test.hdf5')
+
 
 def test_peak_position_comparisons():
     """This function tests the operation of the peak_position_comparisons
@@ -406,7 +408,7 @@ def test_percentage_of_peaks_found():
         hdf5_calfilename), dict), """The function is not
         returning a dictionary."""
 
-#     #Test for function output.
+    #Test for function output.
     co2_peaks = []
     key = 'CO2'
     for _, peak in enumerate(list(calhdf5[key])[:-3]):
@@ -601,6 +603,7 @@ def test_plotting_peak_assignments():
     os.remove('peakidentify_calibration_test.hdf5')
     os.remove('peakidentify_experiment_test.hdf5')
 
+    
 def test_add_label():
     """
     Function that adds a label to a peak dataset in the hdf5 file
@@ -618,16 +621,17 @@ def test_add_label():
         peakidentify.add_label('hdf5_filename', key, peak, label)
     except TypeError:
         print("An invalid hdf5_filename was passed to the function, "
-              "and it was handled well with a TypeError.")
+              +"and it was handled well with a TypeError.")
     try:
         peakidentify.add_label(hdf5_filename, 'key', peak, label)
     except TypeError:
         print("An invalid temp was passed to the function, "
-              "and it was handled well with a TypeError.")
+              +"and it was handled well with a TypeError.")
     hdf5.close()
     del hdf5
     os.remove('peakidentify_add_label_test.hdf5')
 
+    
 def test_peak_1d_score():
     """Evaluates the functionality of the peak_1D_score function"""
     # Initialize the test arguments
