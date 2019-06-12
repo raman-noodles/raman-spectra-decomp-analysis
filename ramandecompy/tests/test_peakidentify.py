@@ -9,26 +9,25 @@ from ramandecompy import peakidentify
 from ramandecompy import dataprep
 
 
-
 def test_peak_assignment():
     """This function tests the operation of the peak_assignment
     function in peakidentify.py"""
     #First, generate a testing dataset.
     dataprep.new_hdf5('peakidentify_calibration_test')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
+                             'ramandecompy/tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
                              label='Hydrogen')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
+                             'ramandecompy/tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
                              label='CarbonMonoxide')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/CO2_100wt%.csv',
+                             'ramandecompy/tests/test_files/CO2_100wt%.csv',
                              label='CO2')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/water.xlsx',label='H2O')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/sapphire.xlsx',label='sapphire')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/water.xlsx',label='H2O')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/sapphire.xlsx',label='sapphire')
     dataprep.new_hdf5('peakidentify_experiment_test')
     dataprep.add_experiment('peakidentify_experiment_test.hdf5',
-                            '../tests/test_files/FA_3.6wt%_300C_25s.csv')
+                            'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
     hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
     key = '300C/25s'
@@ -88,19 +87,19 @@ def test_compare_unknown_to_known():
     #First, generate a testing dataset.
     dataprep.new_hdf5('peakidentify_calibration_test')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
+                             'ramandecompy/tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
                              label='Hydrogen')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
+                             'ramandecompy/tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
                              label='CarbonMonoxide')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/CO2_100wt%.csv',
+                             'ramandecompy/tests/test_files/CO2_100wt%.csv',
                              label='CO2')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/water.xlsx',label='H2O')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/sapphire.xlsx',label='sapphire')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/water.xlsx',label='H2O')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/sapphire.xlsx',label='sapphire')
     dataprep.new_hdf5('peakidentify_experiment_test')
     dataprep.add_experiment('peakidentify_experiment_test.hdf5',
-                            '../tests/test_files/FA_3.6wt%_300C_25s.csv')
+                            'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
     hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
     key = '300C/25s'
@@ -179,19 +178,19 @@ def test_peak_position_comparisons():
     #First, generate a testing dataset.
     dataprep.new_hdf5('peakidentify_calibration_test')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
+                             'ramandecompy/tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
                              label='Hydrogen')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
+                             'ramandecompy/tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
                              label='CarbonMonoxide')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/CO2_100wt%.csv',
+                             'ramandecompy/tests/test_files/CO2_100wt%.csv',
                              label='CO2')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/water.xlsx',label='H2O')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/sapphire.xlsx',label='sapphire')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/water.xlsx',label='H2O')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/sapphire.xlsx',label='sapphire')
     dataprep.new_hdf5('peakidentify_experiment_test')
     dataprep.add_experiment('peakidentify_experiment_test.hdf5',
-                            '../tests/test_files/FA_3.6wt%_300C_25s.csv')
+                            'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
     hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
     key = '300C/25s'
@@ -319,19 +318,19 @@ def test_percentage_of_peaks_found():
     #First, generate a testing dataset.
     dataprep.new_hdf5('peakidentify_calibration_test')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
+                             'ramandecompy/tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
                              label='Hydrogen')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
+                             'ramandecompy/tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
                              label='CarbonMonoxide')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/CO2_100wt%.csv',
+                             'ramandecompy/tests/test_files/CO2_100wt%.csv',
                              label='CO2')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/water.xlsx',label='H2O')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/sapphire.xlsx',label='sapphire')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/water.xlsx',label='H2O')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/sapphire.xlsx',label='sapphire')
     dataprep.new_hdf5('peakidentify_experiment_test')
     dataprep.add_experiment('peakidentify_experiment_test.hdf5',
-                            '../tests/test_files/FA_3.6wt%_300C_25s.csv')
+                            'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
     hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
     key = '300C/25s'
@@ -440,19 +439,19 @@ def test_plotting_peak_assignments():
     #First, generate a testing dataset.
     dataprep.new_hdf5('peakidentify_calibration_test')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
+                             'ramandecompy/tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
                              label='Hydrogen')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
+                             'ramandecompy/tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
                              label='CarbonMonoxide')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/CO2_100wt%.csv',
+                             'ramandecompy/tests/test_files/CO2_100wt%.csv',
                              label='CO2')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/water.xlsx',label='H2O')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/sapphire.xlsx',label='sapphire')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/water.xlsx',label='H2O')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/sapphire.xlsx',label='sapphire')
     dataprep.new_hdf5('peakidentify_experiment_test')
     dataprep.add_experiment('peakidentify_experiment_test.hdf5',
-                            '../tests/test_files/FA_3.6wt%_300C_25s.csv')
+                            'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
     hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
     key = '300C/25s'
@@ -607,7 +606,7 @@ def test_add_label():
     """
     dataprep.new_hdf5('peakidentify_add_label_test')
     dataprep.add_experiment('peakidentify_add_label_test.hdf5',
-                            '../tests/test_files/FA_3.6wt%_300C_25s.csv')
+                            'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
     hdf5_filename = 'peakidentify_add_label_test.hdf5'
     key = '300C/25s'
     peak = 'Peak_01'

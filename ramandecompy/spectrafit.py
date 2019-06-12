@@ -327,7 +327,7 @@ def build_custom_model(x_data, y_data, peaks, peaks_add, plot_fits):
         y_data (list like): The y-values of the spectra from which peaks will be detected.
         peaks (list): A list containing tuples of the x_data (wavenumber) and y_data (counts)
                       values of the peaks.
-        peaks_add (list): A list containing user specified peak locations to be added to the fit
+        peaks_add (list): A list of tuples containing user specified peak locations to be added to the fit
                       as well as interpolated values to provide an initial height guess.
         plot_fits (boolean): A simple True/False boolean input that determins if the plot_fit
                       function should be used to display the resulting fit for visual inspection.
@@ -346,6 +346,22 @@ def build_custom_model(x_data, y_data, peaks, peaks_add, plot_fits):
                             fit_result[i][6] = p[i]_area under the curve
 
     """
+    # handling errors in inputs
+    if not isinstance(x_data, (list, np.ndarray)):
+        raise TypeError('Passed value of `x_data` is not a list or numpy.ndarray! Instead, it is: '
+                        + str(type(x_data)))
+    if not isinstance(y_data, (list, np.ndarray)):
+        raise TypeError('Passed value of `y_data` is not a list or numpy.ndarray! Instead, it is: '
+                        + str(type(y_data)))
+    if not isinstance(peaks, list):
+        raise TypeError('Passed value of `peaks` is not a list! Instead, it is: '
+                        + str(type(peaks)))
+    if not isinstance(peaks_add, list):
+        raise TypeError('Passed value of `peaks_add` is not a list! Instead, it is: '
+                        + str(type(peaks_add)))
+    if not isinstance(plot_fits, bool):
+        raise TypeError('Passed value of `plot_fits` is not a boolean! Instead, it is: '
+                        + str(type(plot_fits)))
     # add new list of peaks to model
     # first starting with existing peaks
     old_peak_list = []
