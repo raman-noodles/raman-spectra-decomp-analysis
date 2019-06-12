@@ -9,26 +9,25 @@ from ramandecompy import peakidentify
 from ramandecompy import dataprep
 
 
-
 def test_peak_assignment():
     """This function tests the operation of the peak_assignment
     function in peakidentify.py"""
     #First, generate a testing dataset.
     dataprep.new_hdf5('peakidentify_calibration_test')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
+                             'ramandecompy/tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
                              label='Hydrogen')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
+                             'ramandecompy/tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
                              label='CarbonMonoxide')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/CO2_100wt%.csv',
+                             'ramandecompy/tests/test_files/CO2_100wt%.csv',
                              label='CO2')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/water.xlsx',label='H2O')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/sapphire.xlsx',label='sapphire')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/water.xlsx',label='H2O')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/sapphire.xlsx',label='sapphire')
     dataprep.new_hdf5('peakidentify_experiment_test')
     dataprep.add_experiment('peakidentify_experiment_test.hdf5',
-                            '../tests/test_files/FA_3.6wt%_300C_25s.csv')
+                            'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
     hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
     key = '300C/25s'
@@ -82,25 +81,26 @@ def test_peak_assignment():
     os.remove('peakidentify_calibration_test.hdf5')
     os.remove('peakidentify_experiment_test.hdf5')
 
+
 def test_compare_unknown_to_known():
     """This function tests the operation of the compare_unknown_to_known
     function in peakidentify.py"""
     #First, generate a testing dataset.
     dataprep.new_hdf5('peakidentify_calibration_test')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
+                             'ramandecompy/tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
                              label='Hydrogen')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
+                             'ramandecompy/tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
                              label='CarbonMonoxide')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/CO2_100wt%.csv',
+                             'ramandecompy/tests/test_files/CO2_100wt%.csv',
                              label='CO2')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/water.xlsx',label='H2O')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/sapphire.xlsx',label='sapphire')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/water.xlsx',label='H2O')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/sapphire.xlsx',label='sapphire')
     dataprep.new_hdf5('peakidentify_experiment_test')
     dataprep.add_experiment('peakidentify_experiment_test.hdf5',
-                            '../tests/test_files/FA_3.6wt%_300C_25s.csv')
+                            'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
     hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
     key = '300C/25s'
@@ -171,6 +171,7 @@ def test_compare_unknown_to_known():
     os.remove('peakidentify_calibration_test.hdf5')
     os.remove('peakidentify_experiment_test.hdf5')
 
+
 def test_peak_position_comparisons():
     """This function tests the operation of the peak_position_comparisons
     function in peakidentify. Said function returns a list of strings that
@@ -179,19 +180,19 @@ def test_peak_position_comparisons():
     #First, generate a testing dataset.
     dataprep.new_hdf5('peakidentify_calibration_test')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
+                             'ramandecompy/tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
                              label='Hydrogen')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
+                             'ramandecompy/tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
                              label='CarbonMonoxide')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/CO2_100wt%.csv',
+                             'ramandecompy/tests/test_files/CO2_100wt%.csv',
                              label='CO2')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/water.xlsx',label='H2O')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/sapphire.xlsx',label='sapphire')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/water.xlsx',label='H2O')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/sapphire.xlsx',label='sapphire')
     dataprep.new_hdf5('peakidentify_experiment_test')
     dataprep.add_experiment('peakidentify_experiment_test.hdf5',
-                            '../tests/test_files/FA_3.6wt%_300C_25s.csv')
+                            'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
     hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
     key = '300C/25s'
@@ -319,19 +320,19 @@ def test_percentage_of_peaks_found():
     #First, generate a testing dataset.
     dataprep.new_hdf5('peakidentify_calibration_test')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
+                             'ramandecompy/tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
                              label='Hydrogen')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
+                             'ramandecompy/tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
                              label='CarbonMonoxide')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/CO2_100wt%.csv',
+                             'ramandecompy/tests/test_files/CO2_100wt%.csv',
                              label='CO2')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/water.xlsx',label='H2O')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/sapphire.xlsx',label='sapphire')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/water.xlsx',label='H2O')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/sapphire.xlsx',label='sapphire')
     dataprep.new_hdf5('peakidentify_experiment_test')
     dataprep.add_experiment('peakidentify_experiment_test.hdf5',
-                            '../tests/test_files/FA_3.6wt%_300C_25s.csv')
+                            'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
     hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
     key = '300C/25s'
@@ -407,7 +408,7 @@ def test_percentage_of_peaks_found():
         hdf5_calfilename), dict), """The function is not
         returning a dictionary."""
 
-#     #Test for function output.
+    #Test for function output.
     co2_peaks = []
     key = 'CO2'
     for _, peak in enumerate(list(calhdf5[key])[:-3]):
@@ -434,25 +435,26 @@ def test_percentage_of_peaks_found():
     os.remove('peakidentify_calibration_test.hdf5')
     os.remove('peakidentify_experiment_test.hdf5')
 
+    
 def test_plotting_peak_assignments():
     """This function tests the operation of the peak_assignment
     function in peakidentify.py"""
     #First, generate a testing dataset.
     dataprep.new_hdf5('peakidentify_calibration_test')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
+                             'ramandecompy/tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
                              label='Hydrogen')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
+                             'ramandecompy/tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
                              label='CarbonMonoxide')
     dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             '../tests/test_files/CO2_100wt%.csv',
+                             'ramandecompy/tests/test_files/CO2_100wt%.csv',
                              label='CO2')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/water.xlsx',label='H2O')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','../tests/test_files/sapphire.xlsx',label='sapphire')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/water.xlsx',label='H2O')
+    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/sapphire.xlsx',label='sapphire')
     dataprep.new_hdf5('peakidentify_experiment_test')
     dataprep.add_experiment('peakidentify_experiment_test.hdf5',
-                            '../tests/test_files/FA_3.6wt%_300C_25s.csv')
+                            'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
     hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
     key = '300C/25s'
@@ -601,13 +603,14 @@ def test_plotting_peak_assignments():
     os.remove('peakidentify_calibration_test.hdf5')
     os.remove('peakidentify_experiment_test.hdf5')
 
+    
 def test_add_label():
     """
     Function that adds a label to a peak dataset in the hdf5 file
     """
     dataprep.new_hdf5('peakidentify_add_label_test')
     dataprep.add_experiment('peakidentify_add_label_test.hdf5',
-                            '../tests/test_files/FA_3.6wt%_300C_25s.csv')
+                            'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
     hdf5_filename = 'peakidentify_add_label_test.hdf5'
     key = '300C/25s'
     peak = 'Peak_01'
@@ -618,16 +621,17 @@ def test_add_label():
         peakidentify.add_label('hdf5_filename', key, peak, label)
     except TypeError:
         print("An invalid hdf5_filename was passed to the function, "
-              "and it was handled well with a TypeError.")
+              +"and it was handled well with a TypeError.")
     try:
         peakidentify.add_label(hdf5_filename, 'key', peak, label)
     except TypeError:
         print("An invalid temp was passed to the function, "
-              "and it was handled well with a TypeError.")
+              +"and it was handled well with a TypeError.")
     hdf5.close()
     del hdf5
     os.remove('peakidentify_add_label_test.hdf5')
 
+    
 def test_peak_1d_score():
     """Evaluates the functionality of the peak_1D_score function"""
     # Initialize the test arguments
