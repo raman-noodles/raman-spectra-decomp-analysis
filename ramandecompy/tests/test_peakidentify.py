@@ -433,6 +433,7 @@ def test_percentage_of_peaks_found():
     os.remove('peakidentify_calibration_test.hdf5')
     os.remove('peakidentify_experiment_test.hdf5')
 
+    
 def test_plotting_peak_assignments():
     """This function tests the operation of the peak_assignment
     function in peakidentify.py"""
