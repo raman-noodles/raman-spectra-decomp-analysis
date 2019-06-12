@@ -10,6 +10,7 @@ Developed by the Raman-Noodles team (2019 DIRECT Cohort, University of Washingto
 import matplotlib.pyplot as plt
 import numpy as np
 import lmfit
+import h5py
 from lmfit.models import PseudoVoigtModel
 from scipy.signal import find_peaks
 from sklearn.metrics import auc
@@ -442,6 +443,19 @@ def apply_old_model(x_data, y_data, peaks, plot_fits):
         residuals ():
 
     """
+    # handling errors in inputs
+    if not isinstance(x_data, (list, np.ndarray)):
+        raise TypeError('Passed value of `x_data` is not a list or numpy.ndarray! Instead, it is: '
+                        + str(type(x_data)))
+    if not isinstance(y_data, (list, np.ndarray)):
+        raise TypeError('Passed value of `y_data` is not a list or numpy.ndarray! Instead, it is: '
+                        + str(type(y_data)))
+    if not isinstance(peaks, list):
+        raise TypeError('Passed value of `peaks` is not a list! Instead, it is: '
+                        + str(type(peaks)))
+    if not isinstance(plot_fits, bool):
+        raise TypeError('Passed value of `plot_fits` is not a boolean! Instead, it is: '
+                        + str(type(plot_fits)))
     # add old peaks to the model
     old_peak_list = []
     for i, old_peak in enumerate(peaks):
@@ -463,14 +477,14 @@ def apply_old_model(x_data, y_data, peaks, plot_fits):
         else:
             mod = mod + old_peak_list[i]
     # run the fit
-    out = spectrafit.model_fit(x_data, y_data, mod, pars, report=False)
+    out = model_fit(x_data, y_data, mod, pars, report=False)
     # plot_fits option
     if plot_fits is True:
-        spectrafit.plot_fit(x_data, y_data, out, plot_components=True)
+        plot_fit(x_data, y_data, out, plot_components=True)
     else:
         pass
     # save fit data
-    fit_result, residuals = spectrafit.export_fit_data(x_data, y_data, out)
+    fit_result, residuals = export_fit_data(x_data, y_data, out)
     # add 'user_added' label as 8th term to user added peaks
     for i in range(len(peaks), len(fit_result)):
         fit_result[i].append('user_added')
@@ -497,11 +511,24 @@ def superimpose_next(hdf5_filename, existing_key, new_key, plot_fits):
     Returns:
         None
     """
-    add_list = None
-    drop_list = None
-    hdf5_file = 'spectrafit_dev3.hdf5'
-
-    hdf5 = h5py.File(hdf5_file, 'r+')
+    # handling input errors
+    if not isinstance(hdf5_filename, str):
+        raise TypeError('Passed value of `cal_filename` is not a string! Instead, it is: '
+                        + str(type(hdf5_filename)))
+    if not hdf5_filename.split('/')[-1].split('.')[-1] == 'hdf5':
+        raise TypeError('`cal_filename` is not type = .hdf5! Instead, it is: '
+                        + hdf5_filename.split('/')[-1].split('.')[-1])
+    if not isinstance(existing_key, str):
+        raise TypeError('Passed value of `existing_key` is not a string! Instead, it is: '
+                        + str(type(existing_key)))
+    if not isinstance(new_key, str):
+        raise TypeError('Passed value of `existing_key` is not a string! Instead, it is: '
+                        + str(type(new_key)))
+    if not isinstance(plot_fits, bool):
+        raise TypeError('Passed value of `plot_fits` is not a boolean! Instead, it is: '
+                        + str(type(plot_fits)))
+    # open hdf5 file
+    hdf5 = h5py.File(hdf5_filename, 'r+')
     # extract raw x-y data from new spectra to fit
     x_data = np.asarray(hdf5['{}/{}'.format(new_key, 'wavenumber')])
     y_data = np.asarray(hdf5['{}/{}'.format(new_key, 'counts')])
