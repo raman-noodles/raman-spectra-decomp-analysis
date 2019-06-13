@@ -167,7 +167,9 @@ def test_export_fit_data():
         
         
 def test_fit_data():
-    """docstring"""
+    """
+    docstring
+    """
     fit_result, residuals = spectrafit.fit_data(X_TEST, Y_TEST)
     assert isinstance(fit_result, list), 'output is not a list'
     for i,peak in enumerate(fit_result):
@@ -182,4 +184,43 @@ def test_fit_data():
         spectrafit.fit_data(4.2, Y_TEST)
     except TypeError:
         print('A float was passed to the function, and was handled well with a TypeError.')
-    
+
+
+def test_build_custom_model():
+    """
+    docstring
+    """
+    # first build a custom peak list that only contains the pseudo voight descriptors for the first 3 peaks
+    peaks =[(0.68764166, 4.52683284, 355.65041041, 8506.9345801, 9.05366569, 687.05133171, 8424.94459088),
+            (0.57765067, 4.40443189, 587.33331331, 21649.13312358, 8.80886378, 1878.91168914, 21593.07349362),
+            (0.65921506, 4.44539185, 816.00734735, 3733.9967507, 8.8907837, 310.71145822, 3726.8698975)]
+    # not the "speculated" center and height location of the 4th peak
+    peaks_add = [(1035, 256)]
+    fit_result, residuals = spectrafit.build_custom_model(X_TEST, Y_TEST, peaks, peaks_add, plot_fits=True)
+    assert len(fit_result) == 4, '4th peak was not successfully added to the model'
+    assert isinstance(fit_result, list), '`fit_result` is not a list'
+    for i, element in enumerate(fit_result):
+        assert isinstance(element, list), 'element with index {} in fit_result is not a list'.format(i)
+        if i <= 2:
+            assert len(element) == 7, 'index {} in fit_result should have length 7'.format(i)
+        else:
+            assert len(element) == 8, 'index {} in fit_result should have length 8'.format(i)
+            assert element[-1] == 'user_added', 'user_added tag not successfully appended' 
+    assert len(residuals) == len(X_TEST), 'size of `residuals` does not match input data'
+    assert isinstance(residuals[0], np.float64), 'the 1st element in `residuals` is not a np.float64'
+    try:
+        spectrafit.build_custom_model(4.2, Y_TEST, peaks, peaks_add, plot_fits=True)
+    except TypeError:
+            print('A float was passed to the function, and was handled well with a TypeError.')
+    try:
+        spectrafit.build_custom_model(X_TEST, 'Y_TEST', peaks, peaks_add, plot_fits=True)
+    except TypeError:
+            print('A string was passed to the function, and was handled well with a TypeError.')
+    try:
+        spectrafit.build_custom_model(X_TEST, Y_TEST, (1, 2, 3, 4, 5, 6), peaks_add, plot_fits=True)
+    except TypeError:
+            print('A tuple was passed to the function, and was handled well with a TypeError.')
+    try:
+        spectrafit.build_custom_model(X_TEST, Y_TEST, peaks, peaks_add, plot_fits=1)
+    except TypeError:
+            print('An int was passed to the function, and was handled well with a TypeError.')

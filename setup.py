@@ -7,4 +7,4 @@ setup(name='ramandecompy',
       author='Raman Noodles Group, University of Washington (2019)',
       license='MIT',
       packages=['ramandecompy'],
-      install_requires=['numpy', 'matplotlib', 'scipy', 'lmfit', 'peakutils', 'h5py', 'pandas', 'xlrd', 'lineid_plot'])
+      install_requires=['numpy', 'matplotlib', 'scipy', 'lmfit', 'peakutils', 'h5py', 'pandas', 'xlrd', 'lineid_plot', 'sklearn'])
