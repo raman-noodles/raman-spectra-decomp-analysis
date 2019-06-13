@@ -598,3 +598,23 @@ def score_sort(row_i, row_j, k, precision):
     sortedscores.sort()
 
     return sortedscores
+def process_score(unknown_peaks,known_peaks,k, precision, unknownname, knownname):
+    "documentation"
+    if k<len(known_peaks)+1:
+        compdf=pd.DataFrame(data=peakidentify.score_sort(unknown_peaks,known_peaks,k, precision)[0][0][:],
+                            columns=[str(unknownname)+'_vs_'+str(knownname)+'_peak_Scores normalized over the #'+
+                                     str(k) + ' highest score in the peak set'])
+        compdf=compdf.assign(Peaks=peakidentify.score_sort(unknown_peaks,known_peaks,1, precision)[0][1][:])
+    else:
+        compdf=pd.DataFrame(data=peakidentify.score_sort(unknown_peaks,known_peaks,k, precision)[0][0][:],
+                            columns=[str(unknownname)+'_vs_'+str(knownname)+'_peak_Scores Unnormalized'])
+        compdf=compdf.assign(Peaks=peakidentify.score_sort(unknown_peaks,known_peaks,1, precision)[0][1][:])
+    return compdf
+def score_table(unknown_peaks,known_peaks, precision,unknownname,knownname):
+    "documentation"
+    k_range = range(1,len(known_peaks)+2)
+    frames = [ process_score(unknown_peaks,known_peaks,k, precision,unknownname,knownname) for k in k_range ]
+    result = pd.concat(frames,axis=1, join='outer', join_axes=None, ignore_index=False,
+              keys=None, levels=None, names=None, verify_integrity=False,
+              copy=True,sort=True)
+    return result
