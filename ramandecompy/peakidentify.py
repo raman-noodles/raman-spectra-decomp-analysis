@@ -14,7 +14,7 @@ import pandas as pd
 # Will probably need to create an additional function
 
 def peak_assignment(unknownhdf5_filename, key, knownhdf5_filename,
-                    precision=50, exportlabelinput=True, plot=True):
+                    precision=10, exportlabelinput=True, plot=True):
     """This function is a wrapper function from which all classification
     of peaks occurs."""
 
