@@ -2,10 +2,12 @@
 This is the unit test module for spectrafit.py
 """
 
+import os
 import pickle
 import numpy as np
 import pandas as pd
 import lmfit
+from shutil import copyfile
 from ramandecompy import spectrafit
 
 
@@ -221,6 +223,79 @@ def test_build_custom_model():
     except TypeError:
             print('A tuple was passed to the function, and was handled well with a TypeError.')
     try:
+        spectrafit.build_custom_model(X_TEST, Y_TEST, peaks, 4.2, plot_fits=1)
+    except TypeError:
+            print('A float was passed to the function, and it was handled well with a TypeError.')
+    try:
         spectrafit.build_custom_model(X_TEST, Y_TEST, peaks, peaks_add, plot_fits=1)
     except TypeError:
             print('An int was passed to the function, and was handled well with a TypeError.')
+
+
+def test_apply_old_model():
+    """
+    docstring
+    """
+    # first build a custom peak list that only contains the pseudo voight descriptors for each peak with
+    # slightly lower initial amplitudes
+    peaks =[(0.68764166, 4.52683284, 355.65041041, 8000, 9.05366569, 687.05133171, 8424.94459088),
+            (0.57765067, 4.40443189, 587.33331331, 18000, 8.80886378, 1878.91168914, 21593.07349362),
+            (0.65921506, 4.44539185, 816.00734735, 3000, 8.8907837, 310.71145822, 3726.8698975),
+            (0.91026426, 4.39010113, 1035.65477477, 2500, 8.78020227, 256.57385316, 3386.98656078)]
+    fit_result, residuals = spectrafit.apply_old_model(X_TEST, Y_TEST, peaks, plot_fits=True)
+    assert len(fit_result) == 4, '4th peak was not successfully added to the model'
+    assert isinstance(fit_result, list), '`fit_result` is not a list'
+    for i, element in enumerate(fit_result):
+        assert isinstance(element, list), 'element with index {} in fit_result is not a list'.format(i)
+        assert len(element) == 7, 'index {} in fit_result should have length 7'.format(i)
+    assert len(residuals) == len(X_TEST), 'size of `residuals` does not match input data'
+    assert isinstance(residuals[0], np.float64), 'the 1st element in `residuals` is not a np.float64'
+    try:
+        spectrafit.apply_old_model(4.2, Y_TEST, peaks, plot_fits=True)
+    except TypeError:
+            print('A float was passed to the function, and was handled well with a TypeError.')
+    try:
+        spectrafit.apply_old_model(X_TEST, 'Y_TEST', peaks, plot_fits=True)
+    except TypeError:
+            print('A string was passed to the function, and was handled well with a TypeError.')
+    try:
+        spectrafit.apply_old_model(X_TEST, Y_TEST, (1, 2, 3, 4, 5, 6), plot_fits=True)
+    except TypeError:
+            print('A tuple was passed to the function, and was handled well with a TypeError.')
+    try:
+        spectrafit.apply_old_model(X_TEST, Y_TEST, peaks, plot_fits=1)
+    except TypeError:
+            print('An int was passed to the function, and was handled well with a TypeError.')
+
+
+def test_superimpose_next():
+    """
+    docstring
+    """
+    # initialize inputs
+    hdf5_filename = 'test_experiement_copy.hdf5'
+    existing_key = '300C/25s'
+    new_key = '300C/25s'
+    # create a copy of test_experiment.hdf5
+    copyfile('ramandecompy/tests/test_files/test_experiment.hdf5', hdf5_filename)
+    # run function
+    spectrafit.superimpose_next(hdf5_filename, existing_key, new_key, plot_fits=True)
+    try:
+        spectrafit.superimpose_next(4.2, existing_key, new_key, plot_fits=True)
+    except TypeError:
+        print('A float was passed to the function, and was handled well with a TypeError.')
+    try:
+        spectrafit.superimpose_next(hdf5_filename, [1, 2], new_key, plot_fits=True)
+    except TypeError:
+        print('A list was passed to the function, and was handled well with a TypeError.')
+    try:
+        spectrafit.superimpose_next(hdf5_filename, existing_key, 4, plot_fits=True)
+    except TypeError:
+        print('An int was passed to the function, and was handled well with a TypeError.')
+    try:
+        spectrafit.superimpose_next(hdf5_filename, existing_key, new_key, plot_fits='yes')
+    except TypeError:
+        print('A string was passed to the function, and was handled well with a TypeError.')
+    os.remove(hdf5_filename)
+
+
