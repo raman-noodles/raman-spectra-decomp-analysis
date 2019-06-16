@@ -128,8 +128,8 @@ def peak_assignment(unknownhdf5_filename, key, knownhdf5_filename,
         peak_labels.append(str(unknown_peak_assignments[i]))
     frames = []
     for j, peak in enumerate(list(unhdf5['{}'.format(key)])[:-3]):
-        frames.append(pd.DataFrame(add_label(unknownhdf5_filename,
-                                             key, peak, peak_labels[j])))
+        frames.append(add_label(unknownhdf5_filename,
+                                key, peak, peak_labels[j]))
          
     df = pd.concat(frames,axis=1, join='outer', join_axes=None, ignore_index=False,
               keys=None, levels=None, names=None, verify_integrity=False,
@@ -310,7 +310,7 @@ def percentage_of_peaks_found(known_peaks, association_matrix, knownhdf5_filenam
 def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
                               unknown_peak_assignments, unknownhdf5_filename,
                               knownhdf5_filename, key, peak_labels,
-                              exportlabelinput=True):
+                              exportlabelinput=True, plot = True):
     """This function plots a set of unknown peaks, and plots the assigned
     classification given by the functions within peakassignment"""
 
@@ -382,43 +382,44 @@ def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
     x_data = list(unhdf5['{}/wavenumber'.format(key)])
     y_data = list(unhdf5['{}/counts'.format(key)])
 #     plt.plot(unknown_x, unknown_y, color='black', label='Unknown Spectrum')
-    if exportlabelinput:
-        print('export labelling only')
-    else:
-        peak_labels = []
-        for i, _ in enumerate(unknown_peak_assignments):
-            peak_labels.append(str(unknown_peak_assignments[i]))
-    print(peak_labels)
-    # plot spectra and peak labels
-    fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True,
-                                   gridspec_kw={'height_ratios': [3, 1]},
-                                   figsize=(15, 6), dpi=300)
-    # plot data
-    ax1.plot(x_data, y_data, color='blue')
-    ax2.plot(x_data, residuals, color='teal')
-    lineid_plot.plot_line_ids(x_data, y_data, unknown_peaks,
-                              peak_labels, box_axes_space=0.30,
-                              plot_kwargs={'linewidth':1},
-                              max_iter=75, ax=ax1)
-#     fig.set_size_inches(15,5)
-    # lock the scale so that additional plots do not warp the labels
-    ax1.set_autoscale_on(False)
-    # Titles and labels
-    ax2.set_xlabel('Wavenumber ($cm^{-1}$)', fontsize=14)
-    ax1.set_xlim(min(x_data), max(x_data))
-    ax1.set_ylabel('Counts', fontsize=14, labelpad=20)
-    ax2.set_ylabel('Residuals', fontsize=14, labelpad=12)
-    # scale residuals plot symmetrically about zero
-    ylim = max(abs(min(residuals)), abs(max(residuals)))
-    ax2.set_ylim(-ylim, ylim)
-    # add grid lines to residual plot
-    ax2.grid(which='major', axis='y', linestyle='-')
-    # force tick labels for top plot
-    ax1.tick_params(axis='both', which='both', labelsize=10, labelbottom=True)
-    # add title
-    ax1.set_title('{} spectra from {}'.format(key, unknownhdf5_filename),
-                  fontsize=18, pad=350)
-    plt.show()
+    if plot:
+        if exportlabelinput:
+            print('export labelling only')
+        else:
+            peak_labels = []
+            for i, _ in enumerate(unknown_peak_assignments):
+                peak_labels.append(str(unknown_peak_assignments[i]))
+        print(peak_labels)
+        # plot spectra and peak labels
+        fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True,
+                                       gridspec_kw={'height_ratios': [3, 1]},
+                                       figsize=(15, 6), dpi=300)
+        # plot data
+        ax1.plot(x_data, y_data, color='blue')
+        ax2.plot(x_data, residuals, color='teal')
+        lineid_plot.plot_line_ids(x_data, y_data, unknown_peaks,
+                                  peak_labels, box_axes_space=0.30,
+                                  plot_kwargs={'linewidth':1},
+                                  max_iter=75, ax=ax1)
+    #     fig.set_size_inches(15,5)
+        # lock the scale so that additional plots do not warp the labels
+        ax1.set_autoscale_on(False)
+        # Titles and labels
+        ax2.set_xlabel('Wavenumber ($cm^{-1}$)', fontsize=14)
+        ax1.set_xlim(min(x_data), max(x_data))
+        ax1.set_ylabel('Counts', fontsize=14, labelpad=20)
+        ax2.set_ylabel('Residuals', fontsize=14, labelpad=12)
+        # scale residuals plot symmetrically about zero
+        ylim = max(abs(min(residuals)), abs(max(residuals)))
+        ax2.set_ylim(-ylim, ylim)
+        # add grid lines to residual plot
+        ax2.grid(which='major', axis='y', linestyle='-')
+        # force tick labels for top plot
+        ax1.tick_params(axis='both', which='both', labelsize=10, labelbottom=True)
+        # add title
+        ax1.set_title('{} spectra from {}'.format(key, unknownhdf5_filename),
+                      fontsize=18, pad=350)
+        plt.show()
     knhdf5.close()
     unhdf5.close()
 
@@ -447,7 +448,7 @@ def add_label(hdf5_filename, key, peak, label):
     # open hdf5 file as read/write
     hdf5 = h5py.File(hdf5_filename, 'r+')
     # extract existing data from peak dataset
-    peak_data = list(hdf5['{}/{}'.format(key, peak)])[0]
+    peak_data = list(hdf5['{}/{}'.format(key, peak)][0])[:7]
 #     print(peak_data)
     # make a new tuple that contains the orginal data as well as the label
     label_tuple = (label,)
@@ -475,7 +476,8 @@ def add_label(hdf5_filename, key, peak, label):
     dataset[...] = data_array
 #     print(dataset)
     hdf5.close()
-    return data
+    df = pd.DataFrame(data)
+    return df
 
 def peak_1d_score(row_i, row_j, scoremax, precision):
     """
@@ -601,14 +603,14 @@ def score_sort(row_i, row_j, k, precision):
 def process_score(unknown_peaks,known_peaks,k, precision, unknownname, knownname):
     "documentation"
     if k<len(known_peaks)+1:
-        compdf=pd.DataFrame(data=peakidentify.score_sort(unknown_peaks,known_peaks,k, precision)[0][0][:],
+        compdf=pd.DataFrame(data=score_sort(unknown_peaks,known_peaks,k, precision)[0][0][:],
                             columns=[str(unknownname)+'_vs_'+str(knownname)+'_peak_Scores normalized over the #'+
                                      str(k) + ' highest score in the peak set'])
-        compdf=compdf.assign(Peaks=peakidentify.score_sort(unknown_peaks,known_peaks,1, precision)[0][1][:])
+        compdf=compdf.assign(Peaks=score_sort(unknown_peaks,known_peaks,1, precision)[0][1][:])
     else:
-        compdf=pd.DataFrame(data=peakidentify.score_sort(unknown_peaks,known_peaks,k, precision)[0][0][:],
+        compdf=pd.DataFrame(data=score_sort(unknown_peaks,known_peaks,k, precision)[0][0][:],
                             columns=[str(unknownname)+'_vs_'+str(knownname)+'_peak_Scores Unnormalized'])
-        compdf=compdf.assign(Peaks=peakidentify.score_sort(unknown_peaks,known_peaks,1, precision)[0][1][:])
+        compdf=compdf.assign(Peaks=score_sort(unknown_peaks,known_peaks,1, precision)[0][1][:])
     return compdf
 def score_table(unknown_peaks,known_peaks, precision,unknownname,knownname):
     "documentation"

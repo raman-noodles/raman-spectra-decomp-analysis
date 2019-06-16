@@ -1,3 +1,6 @@
+"""
+Module used to unit test the functionality and outputs of the peakidentify.py module
+"""
 """This function takes in compounds from a dictionary from shoyu, and, using spectrafit,
 identifies peaks found in both the fed-in known spectra, as well as the unknown spectra
 to be analyzed. From that identification, it then classifies the peaks in the unknown
@@ -17,7 +20,7 @@ from ramandecompy import datavis
 from ramandecompy import dataimport
 
 
-def keyfinder(hdf5_filename):
+def test_keyfinder(hdf5_filename):
     seconds = []
     hdf5 = h5py.File(hdf5_filename, 'r')
     for _, layer_1 in enumerate(list(hdf5.keys())):
@@ -45,7 +48,7 @@ def keyfinder(hdf5_filename):
     #         print('{}'.format(layer_1))
     hdf5.close()
     return seconds
-def generate_spectra_dataset(hdf5_filename, target_compound, spectra_count):
+def test_generate_spectra_dataset(hdf5_filename, target_compound, spectra_count):
     """
     docstring
     """
@@ -95,7 +98,7 @@ def generate_spectra_dataset(hdf5_filename, target_compound, spectra_count):
         label.append(j % 2)
     hdf5.close()
     return x_data, y_data, label
-def combine_experiment(hdf5_filename, key, x_data, y_data, labels, num):
+def test_combine_experiment(hdf5_filename, key, x_data, y_data, labels, num):
     """
     This function adds Raman experimental data to an existing hdf5 file. It uses the
     spectrafit.fit_data function to fit the data before saving the fit result and
@@ -188,7 +191,7 @@ def combine_experiment(hdf5_filename, key, x_data, y_data, labels, num):
     exp_file.close()
     df = pd.DataFrame(data)
     return df
-def interp_and_norm(hdf5_filename, compound):
+def test_interp_and_norm(hdf5_filename, compound):
     """
     docstring
     """
@@ -209,7 +212,7 @@ def interp_and_norm(hdf5_filename, compound):
     hdf5.close()
     return tuple_list
 
-def apply_scaling(tuple_list, j, i ,target_index):
+def test_apply_scaling(tuple_list, j, i ,target_index):
     """
     docstring
     """
@@ -234,7 +237,7 @@ def apply_scaling(tuple_list, j, i ,target_index):
     # repack tuple_list
     scaled_tuple_list = list(zip(x_data, y_data_scaled))
     return scaled_tuple_list
-def interpolated_spectra(hdf5_interpfilename, hdf5_calfilename, spectra_count):
+def test_interpolated_spectra(hdf5_interpfilename, hdf5_calfilename, spectra_count):
     hdf5 = h5py.File(hdf5_calfilename, 'r+')
     # get list of compounds from hdf5 file
     y_data_list = []

@@ -7,29 +7,23 @@ import h5py
 import numpy as np
 from ramandecompy import peakidentify
 from ramandecompy import dataprep
-
-
+hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
+hdf5_expfilename = 'ramandecompy/tests/test_files/peakidentify_experiment_test.hdf5'
+key = '300C/25s'
+calhdf5 = h5py.File(hdf5_calfilename, 'r+')
+exphdf5 = h5py.File(hdf5_expfilename, 'r+') 
+hdf5_filename = 'ramandecompy/tests/test_files/peakidentify_add_label_test.hdf5'
+key = '300C/25s'
+peak = 'Peak_01'
+label = '[Hydrogen]'
+# open hdf5 file as read/write
+hdf5 = h5py.File(hdf5_filename, 'r+')
 def test_peak_assignment():
     """This function tests the operation of the peak_assignment
     function in peakidentify.py"""
     #First, generate a testing dataset.
-    dataprep.new_hdf5('peakidentify_calibration_test')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             'ramandecompy/tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
-                             label='Hydrogen')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             'ramandecompy/tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
-                             label='CarbonMonoxide')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             'ramandecompy/tests/test_files/CO2_100wt%.csv',
-                             label='CO2')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/water.xlsx',label='H2O')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/sapphire.xlsx',label='sapphire')
-    dataprep.new_hdf5('peakidentify_experiment_test')
-    dataprep.add_experiment('peakidentify_experiment_test.hdf5',
-                            'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
-    hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
-    hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
+    hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
+    hdf5_expfilename = 'ramandecompy/tests/test_files/peakidentify_experiment_test.hdf5'
     key = '300C/25s'
     calhdf5 = h5py.File(hdf5_calfilename, 'r+')
     exphdf5 = h5py.File(hdf5_expfilename, 'r+')
@@ -37,13 +31,16 @@ def test_peak_assignment():
     unknown_y = list(exphdf5['{}/counts'.format(key)])
     unknown_x = np.asarray(unknown_x)
     unknown_y = np.asarray(unknown_y)
-    precision = 50
+    precision = 10
+    peakidentify.peak_assignment(hdf5_expfilename,
+                                 key, hdf5_calfilename,
+                                 precision, False, plot = False)
     #Various try statements to make sure that bad inputs are handled correctly.
 
     try:
         peakidentify.peak_assignment(hdf5_expfilename,
                                      key, hdf5_calfilename,
-                                     precision, False, False)
+                                     precision, False, plot = False)
 
     except TypeError:
         print("An invalid known_compound_list was passed to the function, "
@@ -52,7 +49,7 @@ def test_peak_assignment():
     try:
         peakidentify.peak_assignment(hdf5_expfilename,
                                      key, hdf5_calfilename,
-                                     'precision', False, False)
+                                     'precision', False, plot = False)
 
     except TypeError:
         print("An invalid precision value was passed to the function, and "
@@ -61,7 +58,7 @@ def test_peak_assignment():
     try:
         peakidentify.peak_assignment(hdf5_expfilename,
                                      key, hdf5_calfilename,
-                                     precision, 'False', False)
+                                     precision, 'False', plot = False)
 
     except TypeError:
         print("An invalid export label value was passed to the function, and it "
@@ -76,33 +73,13 @@ def test_peak_assignment():
         print("An invalid plot value was passed to the function, and it "
               "was handled well with a TypeError.")
 
-    exphdf5.close()
-    calhdf5.close()
-    os.remove('peakidentify_calibration_test.hdf5')
-    os.remove('peakidentify_experiment_test.hdf5')
-
 
 def test_compare_unknown_to_known():
     """This function tests the operation of the compare_unknown_to_known
     function in peakidentify.py"""
     #First, generate a testing dataset.
-    dataprep.new_hdf5('peakidentify_calibration_test')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             'ramandecompy/tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
-                             label='Hydrogen')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             'ramandecompy/tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
-                             label='CarbonMonoxide')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             'ramandecompy/tests/test_files/CO2_100wt%.csv',
-                             label='CO2')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/water.xlsx',label='H2O')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/sapphire.xlsx',label='sapphire')
-    dataprep.new_hdf5('peakidentify_experiment_test')
-    dataprep.add_experiment('peakidentify_experiment_test.hdf5',
-                            'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
-    hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
-    hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
+    hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
+    hdf5_expfilename = 'ramandecompy/tests/test_files/peakidentify_experiment_test.hdf5'
     key = '300C/25s'
     calhdf5 = h5py.File(hdf5_calfilename, 'r+')
     exphdf5 = h5py.File(hdf5_expfilename, 'r+')
@@ -111,7 +88,7 @@ def test_compare_unknown_to_known():
     unknown_x = np.asarray(unknown_x)
     unknown_y = np.asarray(unknown_y)
     known_compound_list = list(calhdf5.keys())
-    precision = 50
+    precision = 10
     known_peaks = []
     known_peaks_list = []
     unknown_peaks = []
@@ -126,6 +103,7 @@ def test_compare_unknown_to_known():
                                                                 peak)])[0][2])
         known_peaks.append(known_peaks_list[i])
 
+    peakidentify.compare_unknown_to_known(unknown_peaks, known_peaks, precision)
     try:
         peakidentify.compare_unknown_to_known(1, known_peaks, precision)
     except TypeError:
@@ -166,35 +144,14 @@ def test_compare_unknown_to_known():
     assert dif_comp == 0, ("Peak Assignment Error. Passed values should "
                            "have no matching assignments.")
 
-    exphdf5.close()
-    calhdf5.close()
-    os.remove('peakidentify_calibration_test.hdf5')
-    os.remove('peakidentify_experiment_test.hdf5')
-
-
 def test_peak_position_comparisons():
     """This function tests the operation of the peak_position_comparisons
     function in peakidentify. Said function returns a list of strings that
     contain text assignments of each peak in the unknown spectrum."""
 
     #First, generate a testing dataset.
-    dataprep.new_hdf5('peakidentify_calibration_test')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             'ramandecompy/tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
-                             label='Hydrogen')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             'ramandecompy/tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
-                             label='CarbonMonoxide')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             'ramandecompy/tests/test_files/CO2_100wt%.csv',
-                             label='CO2')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/water.xlsx',label='H2O')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/sapphire.xlsx',label='sapphire')
-    dataprep.new_hdf5('peakidentify_experiment_test')
-    dataprep.add_experiment('peakidentify_experiment_test.hdf5',
-                            'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
-    hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
-    hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
+    hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
+    hdf5_expfilename = 'ramandecompy/tests/test_files/peakidentify_experiment_test.hdf5'
     key = '300C/25s'
     calhdf5 = h5py.File(hdf5_calfilename, 'r+')
     exphdf5 = h5py.File(hdf5_expfilename, 'r+')
@@ -203,7 +160,7 @@ def test_peak_position_comparisons():
     unknown_x = np.asarray(unknown_x)
     unknown_y = np.asarray(unknown_y)
     known_compound_list = list(calhdf5.keys())
-    precision = 50
+    precision = 10
     known_peaks = []
     known_peaks_list = []
     association_matrix = []
@@ -233,7 +190,9 @@ def test_peak_position_comparisons():
         known_peaks.append(result)
         association_matrix.append(peakidentify.compare_unknown_to_known(
             unknown_peaks, known_peaks[i][i], precision))
-
+    peakidentify.peak_position_comparisons(unknown_peaks, known_peaks,
+                                           association_matrix,
+                                           hdf5_calfilename)
     #Then, test error handling of bad inputs for the function.
     try:
         peakidentify.peak_position_comparisons(1, known_peaks,
@@ -308,33 +267,13 @@ def test_peak_position_comparisons():
     assert test_peak_labels[1][0] == 'Unassigned', """The function is
     not correctly handling a lack of peak assignments"""
 
-    exphdf5.close()
-    calhdf5.close()
-    os.remove('peakidentify_calibration_test.hdf5')
-    os.remove('peakidentify_experiment_test.hdf5')
-
 def test_percentage_of_peaks_found():
     """This function tests the operation of the
     percentage_of_peaks_found function in peakidentify.py"""
 
     #First, generate a testing dataset.
-    dataprep.new_hdf5('peakidentify_calibration_test')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             'ramandecompy/tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
-                             label='Hydrogen')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             'ramandecompy/tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
-                             label='CarbonMonoxide')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             'ramandecompy/tests/test_files/CO2_100wt%.csv',
-                             label='CO2')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/water.xlsx',label='H2O')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/sapphire.xlsx',label='sapphire')
-    dataprep.new_hdf5('peakidentify_experiment_test')
-    dataprep.add_experiment('peakidentify_experiment_test.hdf5',
-                            'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
-    hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
-    hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
+    hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
+    hdf5_expfilename = 'ramandecompy/tests/test_files/peakidentify_experiment_test.hdf5'
     key = '300C/25s'
     calhdf5 = h5py.File(hdf5_calfilename, 'r+')
     exphdf5 = h5py.File(hdf5_expfilename, 'r+')
@@ -343,7 +282,7 @@ def test_percentage_of_peaks_found():
     unknown_x = np.asarray(unknown_x)
     unknown_y = np.asarray(unknown_y)
     known_compound_list = list(calhdf5.keys())
-    precision = 50
+    precision = 10
 
     unknown_peaks = []
     for i, _ in enumerate(list(exphdf5['{}'.format(key)])[:-3]):
@@ -373,7 +312,8 @@ def test_percentage_of_peaks_found():
             unknown_peaks, known_peaks[i][i], precision))
 
     #Test for input error handling.
-
+    peakidentify.percentage_of_peaks_found(known_peaks, association_matrix,
+                                           hdf5_calfilename)
     try:
         peakidentify.percentage_of_peaks_found([[0], [1], [2], [3], [4],
                                                 [5],[6],[7],[8]],
@@ -393,7 +333,6 @@ def test_percentage_of_peaks_found():
 
     try:
         peakidentify.percentage_of_peaks_found(known_peaks, 1,
-                                               known_compound_list,
                                                hdf5_calfilename)
 
     except TypeError:
@@ -409,54 +348,38 @@ def test_percentage_of_peaks_found():
         returning a dictionary."""
 
     #Test for function output.
-    co2_peaks = []
-    key = 'CO2'
+    hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
+    acet_peaks = []
+    key = 'Acetaldehyde'
     for _, peak in enumerate(list(calhdf5[key])[:-3]):
-        co2_peaks.append(list(calhdf5['{}/{}'.format(key, peak)])[0][2])
-    print(co2_peaks)
-    co2_dict_0 = peakidentify.percentage_of_peaks_found([co2_peaks, [0], [0], [0],
-                                                         [0],[0], [0], [0]],
-                                                        [[0, 0], [0], [0],[0],
-                                                         [0],[0], [0], [0]],
-                                                        hdf5_calfilename)
-    assert co2_dict_0[key] == 0, """The function is not correctly
+        acet_peaks.append(list(calhdf5['{}/{}'.format(key, peak)])[0][2])
+    print(acet_peaks)
+    acet_dict_0 = peakidentify.percentage_of_peaks_found([acet_peaks, [0], [0], [0],
+                                                          [0], [0], [0],
+                                                          [0], [0], [0]],
+                                                         [[0, 0, 0, 0, 0, 0, 0, 0],
+                                                         [0], [0], [0],
+                                                         [0], [0], [0],
+                                                          [0], [0], [0]],
+                                                         hdf5_calfilename)
+    assert acet_dict_0[key] == 0, """The function is not correctly
     calculating percentages when no peaks are found"""
 
-    co2_dict_1 = peakidentify.percentage_of_peaks_found([co2_peaks, [1], [1],[1],
-                                                         [1],[1],[1], [1]],
-                                                        [[1, 1], [1], [1],[1],
-                                                         [1],[1],[1], [1]],
-                                                        hdf5_calfilename)
-    assert co2_dict_1[key] == 100, """The function is not correctly
+    acet_dict_1 = peakidentify.percentage_of_peaks_found([acet_peaks, [1], [1], [1],
+                                                         [1], [1], [1], [1], [1], [1]],
+                                                        [[1, 1, 1, 1, 1, 1, 1, 1],
+                                                         [1], [1], [1],
+                                                         [1], [1], [1], [1], [1], [1]],
+                                                         hdf5_calfilename)
+    assert acet_dict_1[key] == 100, """The function is not correctly
     calculating percentages when all peaks are found"""
-
-    exphdf5.close()
-    calhdf5.close()
-    os.remove('peakidentify_calibration_test.hdf5')
-    os.remove('peakidentify_experiment_test.hdf5')
-
     
 def test_plotting_peak_assignments():
     """This function tests the operation of the peak_assignment
     function in peakidentify.py"""
     #First, generate a testing dataset.
-    dataprep.new_hdf5('peakidentify_calibration_test')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             'ramandecompy/tests/test_files/Hydrogen_Baseline_Calibration.xlsx',
-                             label='Hydrogen')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             'ramandecompy/tests/test_files/CarbonMonoxide_Baseline_Calibration.xlsx',
-                             label='CarbonMonoxide')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5',
-                             'ramandecompy/tests/test_files/CO2_100wt%.csv',
-                             label='CO2')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/water.xlsx',label='H2O')
-    dataprep.add_calibration('peakidentify_calibration_test.hdf5','ramandecompy/tests/test_files/sapphire.xlsx',label='sapphire')
-    dataprep.new_hdf5('peakidentify_experiment_test')
-    dataprep.add_experiment('peakidentify_experiment_test.hdf5',
-                            'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
-    hdf5_calfilename = 'peakidentify_calibration_test.hdf5'
-    hdf5_expfilename = 'peakidentify_experiment_test.hdf5'
+    hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
+    hdf5_expfilename = 'ramandecompy/tests/test_files/peakidentify_experiment_test.hdf5'
     key = '300C/25s'
     calhdf5 = h5py.File(hdf5_calfilename, 'r+')
     exphdf5 = h5py.File(hdf5_expfilename, 'r+')
@@ -465,7 +388,7 @@ def test_plotting_peak_assignments():
     unknown_x = np.asarray(unknown_x)
     unknown_y = np.asarray(unknown_y)
     known_compound_list = list(calhdf5.keys())
-    precision = 50
+    precision = 10
 
     unknown_peaks = []
     for i, _ in enumerate(list(exphdf5['{}'.format(key)])[:-3]):
@@ -502,12 +425,19 @@ def test_plotting_peak_assignments():
     for i, _ in enumerate(unknown_peak_assignments):
         peak_labels.append(str(unknown_peak_assignments[i]))
     #Test for input error handling.
+    peakidentify.plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
+                                           unknown_peak_assignments,
+                                           hdf5_expfilename,
+                                           hdf5_calfilename,
+                                           key, peak_labels,
+                                           plot = False)
     try:
         peakidentify.plotting_peak_assignments(1, unknown_y, unknown_peaks,
                                                unknown_peak_assignments,
                                                hdf5_expfilename,
                                                hdf5_calfilename,
-                                               key, peak_labels)
+                                               key, peak_labels,
+                                               plot = False)
     except TypeError:
         print("""The function correctly handled the error
         when an int was input instead of the unknown_x list""")
@@ -517,7 +447,8 @@ def test_plotting_peak_assignments():
                                                unknown_peak_assignments,
                                                hdf5_expfilename,
                                                hdf5_calfilename,
-                                               key, peak_labels)
+                                               key, peak_labels,
+                                               plot = False)
     except TypeError:
         print("""The function correctly handled the error when an int
         was input instead of the unknown_y list""")
@@ -529,7 +460,8 @@ def test_plotting_peak_assignments():
                                                unknown_peak_assignments,
                                                hdf5_expfilename,
                                                hdf5_calfilename,
-                                               key, peak_labels)
+                                               key, peak_labels,
+                                               plot = False)
     except TypeError:
         print("""The function correctly handled the error when a string
         was input instead of the unknown_peaks list""")
@@ -541,7 +473,8 @@ def test_plotting_peak_assignments():
                                                3,
                                                hdf5_expfilename,
                                                hdf5_calfilename,
-                                               key, peak_labels)
+                                               key, peak_labels,
+                                               plot = False)
     except TypeError:
         print("""The function correctly handled the error when an int
         was input instead of the unknown_peak_assignments""")
@@ -553,7 +486,8 @@ def test_plotting_peak_assignments():
                                                ['WATER', 23, 'CO'],
                                                hdf5_expfilename,
                                                hdf5_calfilename,
-                                               key, peak_labels)
+                                               key, peak_labels,
+                                               plot = False)
 
     except TypeError:
         print("""The function correctly handled the case when an int
@@ -566,7 +500,8 @@ def test_plotting_peak_assignments():
                                                ['H', 23, 'CO2'],
                                                hdf5_expfilename,
                                                hdf5_calfilename,
-                                               key, peak_labels)
+                                               key, peak_labels,
+                                               plot = False)
 
     except TypeError:
         print("""The function correctly handled the case when an int
@@ -579,7 +514,8 @@ def test_plotting_peak_assignments():
                                                unknown_peak_assignments,
                                                3,
                                                hdf5_calfilename,
-                                               key, peak_labels)
+                                               key, peak_labels,
+                                               plot = False)
 
     except TypeError:
         print("""The function correctly handled the case when an int
@@ -592,46 +528,42 @@ def test_plotting_peak_assignments():
                                                unknown_peak_assignments,
                                                hdf5_expfilename,
                                                3,
-                                               key, peak_labels)
+                                               key, peak_labels,
+                                               plot = False)
 
     except TypeError:
         print("""The function correctly handled the case when an int
         was passed in the hdf5_calfilename""")
-
-    exphdf5.close()
-    calhdf5.close()
-    os.remove('peakidentify_calibration_test.hdf5')
-    os.remove('peakidentify_experiment_test.hdf5')
-
     
 def test_add_label():
     """
     Function that adds a label to a peak dataset in the hdf5 file
     """
-    dataprep.new_hdf5('peakidentify_add_label_test')
-    dataprep.add_experiment('peakidentify_add_label_test.hdf5',
-                            'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
-    hdf5_filename = 'peakidentify_add_label_test.hdf5'
     key = '300C/25s'
     peak = 'Peak_01'
     label = '[Hydrogen]'
-    # open hdf5 file as read/write
-    hdf5 = h5py.File(hdf5_filename, 'r+')
+    peakidentify.add_label(hdf5_filename, key, peak, label)
     try:
         peakidentify.add_label('hdf5_filename', key, peak, label)
     except TypeError:
         print("An invalid hdf5_filename was passed to the function, "
               +"and it was handled well with a TypeError.")
     try:
-        peakidentify.add_label(hdf5_filename, 'key', peak, label)
+        peakidentify.add_label(hdf5_filename, 3, peak, label)
     except TypeError:
-        print("An invalid temp was passed to the function, "
+        print("An invalid key was passed to the function, "
               +"and it was handled well with a TypeError.")
-    hdf5.close()
-    del hdf5
-    os.remove('peakidentify_add_label_test.hdf5')
+    try:
+        peakidentify.add_label(hdf5_filename, key, 3, label)
+    except TypeError:
+        print("An invalid peak was passed to the function, "
+              +"and it was handled well with a TypeError.")
+    try:
+        peakidentify.add_label(hdf5_filename, key, peak, 3)
+    except TypeError:
+        print("An invalid label was passed to the function, "
+              +"and it was handled well with a TypeError.")
 
-    
 def test_peak_1d_score():
     """Evaluates the functionality of the peak_1D_score function"""
     # Initialize the test arguments
@@ -640,7 +572,7 @@ def test_peak_1d_score():
     rowcat = row_i + row_j
     arraya = np.array([[0, 1], [2, 1], [0, 3]])
     arraycat = np.concatenate((arraya[0], arraya[2]))
-    precision = 50
+    precision = 10
 
     # Run Bad Function for lists
     try:
@@ -678,7 +610,7 @@ def test_score_max():
     row_j = [2, 1]
     rowcat = row_i + row_j
     arraya = np.array([[0, 1], [2, 1], [0, 3]])
-    precision = 50
+    precision = 10
 
     arraycat = np.concatenate((arraya[0], arraya[1]))
 
@@ -725,7 +657,7 @@ def test_score_sort():
     rowcat = row_i + row_j
     arraya = np.array([[0, 1], [2, 1], [0, 3]])
     k = 2
-    precision = 50
+    precision = 10
     arraycat = np.concatenate((arraya[0], arraya[1]))
     # Run Previous Function to get max score normalization
     maxscores = peakidentify.score_max(row_i, row_j, k, precision)
@@ -770,3 +702,26 @@ def test_score_sort():
         is sorted from smallest to largest"""
         assert arrsortedscores[0][0][i] <= arrsortedscores[0][0][i+1], """Output
         values is sorted from smallest to largest"""
+def test_process_score(unknown_peaks,known_peaks,k, precision, unknownname, knownname):
+    "documentation"
+#     if k<len(known_peaks)+1:
+#         compdf=pd.DataFrame(data=score_sort(unknown_peaks,known_peaks,k, precision)[0][0][:],
+#                             columns=[str(unknownname)+'_vs_'+str(knownname)+'_peak_Scores normalized over the #'+
+#                                      str(k) + ' highest score in the peak set'])
+#         compdf=compdf.assign(Peaks=score_sort(unknown_peaks,known_peaks,1, precision)[0][1][:])
+#     else:
+#         compdf=pd.DataFrame(data=score_sort(unknown_peaks,known_peaks,k, precision)[0][0][:],
+#                             columns=[str(unknownname)+'_vs_'+str(knownname)+'_peak_Scores Unnormalized'])
+#         compdf=compdf.assign(Peaks=score_sort(unknown_peaks,known_peaks,1, precision)[0][1][:])
+    return
+def test_score_table(unknown_peaks,known_peaks, precision,unknownname,knownname):
+    "documentation"
+#     k_range = range(1,len(known_peaks)+2)
+#     frames = [ process_score(unknown_peaks,known_peaks,k, precision,unknownname,knownname) for k in k_range ]
+#     result = pd.concat(frames,axis=1, join='outer', join_axes=None, ignore_index=False,
+#               keys=None, levels=None, names=None, verify_integrity=False,
+#               copy=True,sort=True)
+    return                           
+exphdf5.close()
+calhdf5.close()
+hdf5.close()
