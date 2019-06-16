@@ -186,6 +186,8 @@ def combine_experiment(hdf5_filename, key, x_data, y_data, labels, num):
     print("""Data from fit with compound pseudo-Voigt model.
           Results saved to {}.""".format(hdf5_filename))
     exp_file.close()
+    df = pd.DataFrame(data)
+    return df
 def interp_and_norm(hdf5_filename, compound):
     """
     docstring
@@ -232,3 +234,19 @@ def apply_scaling(tuple_list, j, i ,target_index):
     # repack tuple_list
     scaled_tuple_list = list(zip(x_data, y_data_scaled))
     return scaled_tuple_list
+def interpolated_spectra(hdf5_interpfilename, hdf5_calfilename, spectra_count):
+    hdf5 = h5py.File(hdf5_calfilename, 'r+')
+    # get list of compounds from hdf5 file
+    y_data_list = []
+    x_data_list = []
+    
+    compound_list = list(hdf5.keys())
+    print(compound_list)
+    for _, target_compound in enumerate(compound_list):
+        x_data, y_data, labels = machine_learning.generate_spectra_dataset(hdf5_calfilename, target_compound, spectra_count)
+        y_data_list.append(y_data)
+        x_data_list.append(x_data)
+        for i, label in enumerate(labels):
+            interpdf = machine_learning.combine_experiment(hdf5_interpfilename, 'interp_'+target_compound, x_data, y_data, label, i) 
+            
+    return interpdf
