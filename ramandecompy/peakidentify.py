@@ -476,7 +476,7 @@ def add_label(hdf5_filename, key, peak, label):
     dataset[...] = data_array
 #     print(dataset)
     hdf5.close()
-    df = pd.DataFrame(data)
+    df = pd.DataFrame(data = data)
     return df
 
 def peak_1d_score(row_i, row_j, scoremax, precision):
