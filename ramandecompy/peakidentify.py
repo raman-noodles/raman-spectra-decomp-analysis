@@ -434,10 +434,7 @@ def add_label(hdf5_filename, key, peak, label):
         raise TypeError("""`hdf5_filename` is not type = .hdf5!
         Instead, it is: """ + hdf5_filename.split('/')[-1].split('.')[-1])
     if not isinstance(key, str):
-        raise TypeError("""Passed value of `key` is not a int!
-        Instead, it is: """ + str(type(key)))
-    if not isinstance(key, str):
-        raise TypeError("""Passed value of `key` is not a int!
+        raise TypeError("""Passed value of `key` is not a str!
         Instead, it is: """ + str(type(key)))
     if not isinstance(peak, str):
         raise TypeError("""Passed value of `peak` is not a string!
@@ -600,6 +597,7 @@ def score_sort(row_i, row_j, k, precision):
     sortedscores.sort()
 
     return sortedscores
+
 def process_score(unknown_peaks,known_peaks,k, precision, unknownname, knownname):
     "documentation"
     if k<len(known_peaks)+1:
@@ -612,6 +610,7 @@ def process_score(unknown_peaks,known_peaks,k, precision, unknownname, knownname
                             columns=[str(unknownname)+'_vs_'+str(knownname)+'_peak_Scores Unnormalized'])
         compdf=compdf.assign(Peaks=score_sort(unknown_peaks,known_peaks,1, precision)[0][1][:])
     return compdf
+
 def score_table(unknown_peaks,known_peaks, precision,unknownname,knownname):
     "documentation"
     k_range = range(1,len(known_peaks)+2)
