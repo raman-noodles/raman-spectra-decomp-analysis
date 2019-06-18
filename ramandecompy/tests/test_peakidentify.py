@@ -72,6 +72,8 @@ def test_peak_assignment():
     except TypeError:
         print("An invalid plot value was passed to the function, and it "
               "was handled well with a TypeError.")
+    
+    # make assertions
 
 
 def test_compare_unknown_to_known():
@@ -266,6 +268,7 @@ def test_peak_position_comparisons():
     not correctly assigning peaks when association matrix = 1"""
     assert test_peak_labels[1][0] == 'Unassigned', """The function is
     not correctly handling a lack of peak assignments"""
+    
 
 def test_percentage_of_peaks_found():
     """This function tests the operation of the
@@ -373,6 +376,8 @@ def test_percentage_of_peaks_found():
                                                          hdf5_calfilename)
     assert acet_dict_1[key] == 100, """The function is not correctly
     calculating percentages when all peaks are found"""
+    
+    # make assertions
     
 def test_plotting_peak_assignments():
     """This function tests the operation of the peak_assignment
@@ -534,6 +539,7 @@ def test_plotting_peak_assignments():
     except TypeError:
         print("""The function correctly handled the case when an int
         was passed in the hdf5_calfilename""")
+    # make assertions
     
 def test_add_label():
     """
@@ -563,6 +569,8 @@ def test_add_label():
     except TypeError:
         print("An invalid label was passed to the function, "
               +"and it was handled well with a TypeError.")
+    # make assertions
+    
 
 def test_peak_1d_score():
     """Evaluates the functionality of the peak_1D_score function"""
@@ -702,8 +710,87 @@ def test_score_sort():
         is sorted from smallest to largest"""
         assert arrsortedscores[0][0][i] <= arrsortedscores[0][0][i+1], """Output
         values is sorted from smallest to largest"""
+        
 def test_process_score(unknown_peaks,known_peaks,k, precision, unknownname, knownname):
     "documentation"
+    hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
+    hdf5_expfilename = 'ramandecompy/tests/test_files/peakidentify_experiment_test.hdf5'
+    key = '300C/25s'
+    calhdf5 = h5py.File(hdf5_calfilename, 'r+')
+    exphdf5 = h5py.File(hdf5_expfilename, 'r+')
+    unknown_x = list(exphdf5['{}/wavenumber'.format(key)])
+    unknown_y = list(exphdf5['{}/counts'.format(key)])
+    unknown_x = np.asarray(unknown_x)
+    unknown_y = np.asarray(unknown_y)
+    known_compound_list = list(calhdf5.keys())
+    precision = 10
+
+    unknown_peaks = []
+    for i, _ in enumerate(list(exphdf5['{}'.format(key)])[:-3]):
+        if i < 9:
+            unknown_peaks.append(list(exphdf5['{}/Peak_0{}'.format(key, i+1)])[0][2])
+        else:
+            unknown_peaks.append(list(exphdf5['{}/Peak_{}'.format(key, i+1)])[0][2])
+    H2O_peaks = []
+    for _,peak in enumerate(list(calhdf5[key5])[:-3]):
+        H2O_peaks.append(list(calhdf5['{}/{}'.format(key5, peak)])[0][2])
+    precision = 10
+    unknown_name = 'Formic3.6wt%'
+    knownname = 'H2O'
+    # run good examples
+    process_score(unknown_peaks,known_peaks,k, precision,unknownname,knownname)
+    #run bad inputs
+    try:
+
+        process_score('unknown_peaks',known_peaks,k, precision,unknownname,knownname)
+
+    except TypeError:
+
+        print("An invalid maxscores from score_max was passed to the function, "
+              "and was handled correctly.")
+    try:
+
+        process_score(unknown_peaks,'known_peaks',k, precision,unknownname,knownname)
+
+    except TypeError:
+
+        print("An invalid maxscores from score_max was passed to the function, "
+              "and was handled correctly.")
+    try:
+
+        process_score(unknown_peaks,known_peaks,'k', precision,unknownname,knownname)
+
+    except TypeError:
+
+        print("An invalid maxscores from score_max was passed to the function, "
+              "and was handled correctly.")
+        
+    try:
+
+        process_score(unknown_peaks,known_peaks,k, 'precision',unknownname,knownname)
+
+    except TypeError:
+
+        print("An invalid maxscores from score_max was passed to the function, "
+              "and was handled correctly.")
+    try:
+
+        process_score(unknown_peaks,known_peaks,k, precision,3,knownname)
+
+    except TypeError:
+
+        print("An invalid maxscores from score_max was passed to the function, "
+              "and was handled correctly.")
+    try:
+
+        process_score(unknown_peaks,known_peaks,k, precision,unknownname,3)
+
+    except TypeError:
+
+        print("An invalid maxscores from score_max was passed to the function, "
+              "and was handled correctly.")
+    # make assertions
+    
 #     if k<len(known_peaks)+1:
 #         compdf=pd.DataFrame(data=score_sort(unknown_peaks,known_peaks,k, precision)[0][0][:],
 #                             columns=[str(unknownname)+'_vs_'+str(knownname)+'_peak_Scores normalized over the #'+
@@ -716,12 +803,89 @@ def test_process_score(unknown_peaks,known_peaks,k, precision, unknownname, know
     return
 def test_score_table(unknown_peaks,known_peaks, precision,unknownname,knownname):
     "documentation"
+    hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
+    hdf5_expfilename = 'ramandecompy/tests/test_files/peakidentify_experiment_test.hdf5'
+    key = '300C/25s'
+    calhdf5 = h5py.File(hdf5_calfilename, 'r+')
+    exphdf5 = h5py.File(hdf5_expfilename, 'r+')
+    unknown_x = list(exphdf5['{}/wavenumber'.format(key)])
+    unknown_y = list(exphdf5['{}/counts'.format(key)])
+    unknown_x = np.asarray(unknown_x)
+    unknown_y = np.asarray(unknown_y)
+    known_compound_list = list(calhdf5.keys())
+    precision = 10
+
+    unknown_peaks = []
+    for i, _ in enumerate(list(exphdf5['{}'.format(key)])[:-3]):
+        if i < 9:
+            unknown_peaks.append(list(exphdf5['{}/Peak_0{}'.format(key, i+1)])[0][2])
+        else:
+            unknown_peaks.append(list(exphdf5['{}/Peak_{}'.format(key, i+1)])[0][2])
+    H2O_peaks = []
+    for _,peak in enumerate(list(calhdf5[key5])[:-3]):
+        H2O_peaks.append(list(calhdf5['{}/{}'.format(key5, peak)])[0][2])
+    precision = 10
+    unknown_name = 'Formic3.6wt%'
+    knownname = 'H2O'
+    # run good examples
+    score_table(unknown_peaks,known_peaks,k, precision,unknownname,knownname)
+    #run bad inputs
+    try:
+
+        score_table('unknown_peaks',H2O_peaks,k, precision,unknownname,knownname)
+
+    except TypeError:
+
+        print("An invalid maxscores from score_max was passed to the function, "
+              "and was handled correctly.")
+    try:
+
+        score_table(unknown_peaks,'H2O_peaks',k, precision,unknownname,knownname)
+
+    except TypeError:
+
+        print("An invalid maxscores from score_max was passed to the function, "
+              "and was handled correctly.")
+    try:
+
+        score_table(unknown_peaks,H2O_peaks,'k', precision,unknownname,knownname)
+
+    except TypeError:
+
+        print("An invalid maxscores from score_max was passed to the function, "
+              "and was handled correctly.")
+        
+    try:
+
+        score_table(unknown_peaks,H2O_peaks,k, 'precision',unknownname,knownname)
+
+    except TypeError:
+
+        print("An invalid maxscores from score_max was passed to the function, "
+              "and was handled correctly.")
+    try:
+
+        score_table(unknown_peaks,H2O_peaks,k, precision,3,knownname)
+
+    except TypeError:
+
+        print("An invalid maxscores from score_max was passed to the function, "
+              "and was handled correctly.")
+    try:
+
+        score_table(unknown_peaks,H2O_peaks,k, precision,unknownname,3)
+
+    except TypeError:
+
+        print("An invalid maxscores from score_max was passed to the function, "
+              "and was handled correctly.")
+    # make assertions
+    
 #     k_range = range(1,len(known_peaks)+2)
 #     frames = [ process_score(unknown_peaks,known_peaks,k, precision,unknownname,knownname) for k in k_range ]
 #     result = pd.concat(frames,axis=1, join='outer', join_axes=None, ignore_index=False,
 #               keys=None, levels=None, names=None, verify_integrity=False,
-#               copy=True,sort=True)
-    return                           
+#               copy=True,sort=True)                         
 exphdf5.close()
 calhdf5.close()
 hdf5.close()
