@@ -126,9 +126,9 @@ def plot_fit(hdf5_filename, key, color='blue'):
     # add title
     plt.title('{} spectra from {}'.format(key, hdf5_filename.split('/')[-1]), fontsize=18, pad=350)
     # add custom legend
-    ax1.text(405, -100, 'Data', color='Red', fontsize=12)
-    ax1.text(375, -100, '(       ,         )', color='black', fontsize=14)
-    ax1.text(535, -100, 'Model', color='blue', fontsize=12)
+    ax1.text(0.2, 0.4, 'Data', color='Red', fontsize=12, transform=plt.gcf().transFigure)
+    ax1.text(0.19, 0.4, '(       ,         )', color='black', fontsize=14, transform=plt.gcf().transFigure)
+    ax1.text(0.23, 0.4, 'Model', color='blue', fontsize=12, transform=plt.gcf().transFigure)
     hdf5.close()
     return fig, ax1, ax2
 
