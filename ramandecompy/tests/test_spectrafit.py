@@ -197,7 +197,13 @@ def test_fit_data():
 
 def test_build_custom_model():
     """
-    docstring
+    Test function for the `build_custom_model` function from spectrafit. It tests that the
+    function runs correctly by inputting the descriptors for the first three peaks in the
+    hydrogen calibration spectra and adds the 4th peak to the model (purposfully excluded).
+    It tests that the output contains the correct number of peaks and is the correct type.
+    It ensures that the number of residuals is equivilent to the number of input datapoints
+    and that they are all returned as floats. It also insures that the function properly
+    handles bad arguments.
     """
     # build a custom peak list that only contains the pseudo voight
     # descriptors for the first 3 peaks
@@ -248,7 +254,11 @@ def test_build_custom_model():
 
 def test_apply_old_model():
     """
-    docstring
+    Test function for the `apply_old_model` function from spectrafit. The function applies
+    a set of existing pseudo-Voigt descriptors to the model. It tests that the output
+    contains the correct number of peaks and is the correct type. It ensures that the number
+    of residuals is equivilent to the number of input datapoints and that they are all
+    returned as floats. It also insures that the function properly handles bad arguments.
     """
     # first build a custom peak list that only contains the pseudo voight descriptors
     # for each peak with slightly lower initial amplitudes
@@ -261,7 +271,7 @@ def test_apply_old_model():
              (0.91026426, 4.39010113, 1035.65477477, 2500,
               8.78020227, 256.57385316, 3386.98656078)]
     fit_result, residuals = spectrafit.apply_old_model(X_TEST, Y_TEST, peaks, plot_fits=True)
-    assert len(fit_result) == 4, '4th peak was not successfully added to the model'
+    assert len(fit_result) == 4, 'an incorrect number of peaks were added to the model'
     assert isinstance(fit_result, list), '`fit_result` is not a list'
     for i, element in enumerate(fit_result):
         assert isinstance(element, list), """
@@ -290,7 +300,9 @@ def test_apply_old_model():
 
 def test_superimpose_next():
     """
-    docstring
+    This is a test function for the `superimpose_next` function from spectrafit. It tests
+    to make sure that the function runs without any errors and insures that the function
+    properly handles bad arguments.
     """
     # initialize inputs
     hdf5_filename = 'test_experiement_copy.hdf5'
@@ -321,7 +333,9 @@ def test_superimpose_next():
 
 def test_superimpose_set():
     """
-    docstring
+    This is a test function for the `superimpose_set` function from spectrafit. It tests
+    to make sure that the function runs without any errors and insures that the function
+    properly handles bad arguments.
     """
     # initialize inputs
     hdf5_filename = 'test_experiement_copy.hdf5'
