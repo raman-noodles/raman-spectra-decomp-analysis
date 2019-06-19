@@ -1,4 +1,4 @@
-"""This function takes in compounds from a dictionary from shoyu, and, using spectrafit,
+"""This function takes in compounds from a hdf5 file, and, using spectrafit,
 identifies peaks found in both the fed-in known spectra, as well as the unknown spectra
 to be analyzed. From that identification, it then classifies the peaks in the unknown
 spectra based on the fed-in known spectra.
@@ -131,7 +131,7 @@ def peak_assignment(unknownhdf5_filename, key, knownhdf5_filename,
         frames.append(add_label(unknownhdf5_filename,
                                 key, peak, peak_labels[j]))
          
-    df = pd.concat(frames,axis=1, join='outer', join_axes=None, ignore_index=False,
+    df = pd.concat(frames,axis=1, join='outer', join_axes=None, ignore_index=True,
               keys=None, levels=None, names=None, verify_integrity=False,
               copy=True,sort=True)
     df =df.T
@@ -599,7 +599,19 @@ def score_sort(row_i, row_j, k, precision):
     return sortedscores
 
 def process_score(unknown_peaks,known_peaks,k, precision, unknownname, knownname):
-    "documentation"
+    """
+    Returns DataFrame with peaks and scores normalized over different peak highest scores
+
+    Parameters:
+        unknown_peaks (list like): list of unknown peaks from experimental file
+        known_peaks (list like): list of unknown peaks from experimental file
+        precision (int): precision tolerance of peak identification
+        unknownname (string): name of unknown peak from calibration file
+        knownname (string): name of known peak from calibration file
+
+    Returns:
+        compdf (DataFrame): DataFrame with peaks and scores normalized over different peak highest scores
+    """
     if k<len(known_peaks)+1:
         compdf=pd.DataFrame(data=score_sort(unknown_peaks,known_peaks,k, precision)[0][0][:],
                             columns=[str(unknownname)+'_vs_'+str(knownname)+'_peak_Scores normalized over the #'+
@@ -612,7 +624,19 @@ def process_score(unknown_peaks,known_peaks,k, precision, unknownname, knownname
     return compdf
 
 def score_table(unknown_peaks,known_peaks, precision,unknownname,knownname):
-    "documentation"
+    """
+    Returns table of scores from process score dataFrame
+
+    Parameters:
+        unknown_peaks (list like): list of unknown peaks from experimental file
+        known_peaks (list like): list of unknown peaks from experimental file
+        precision (int): precision tolerance of peak identification
+        unknownname (string): name of unknown peak from calibration file
+        knownname (string): name of known peak from calibration file
+
+    Returns:
+        result (DataFrame): sorted score table
+    """
     k_range = range(1,len(known_peaks)+2)
     frames = [ process_score(unknown_peaks,known_peaks,k, precision,unknownname,knownname) for k in k_range ]
     result = pd.concat(frames,axis=1, join='outer', join_axes=None, ignore_index=False,
