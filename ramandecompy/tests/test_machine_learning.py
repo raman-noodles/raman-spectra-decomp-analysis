@@ -1,11 +1,7 @@
 """
-Module used to unit test the functionality and outputs of the peakidentify.py module
+Module used to unit test the functionality and outputs of the machine_learning.py module
 """
-"""This function takes in compounds from a dictionary from shoyu, and, using spectrafit,
-identifies peaks found in both the fed-in known spectra, as well as the unknown spectra
-to be analyzed. From that identification, it then classifies the peaks in the unknown
-spectra based on the fed-in known spectra.
- """
+
 import math
 import h5py
 import numpy as np
@@ -21,33 +17,24 @@ from ramandecompy import dataimport
 
 
 def test_keyfinder(hdf5_filename):
-    seconds = []
-    hdf5 = h5py.File(hdf5_filename, 'r')
-    for _, layer_1 in enumerate(list(hdf5.keys())):
-        if isinstance(hdf5[layer_1], h5py.Group):
-    #         print('\033[1m{}\033[0m'.format(layer_1))
-            for _, layer_2 in enumerate(list(hdf5[layer_1].keys())):
-                if isinstance(hdf5['{}/{}'.format(layer_1, layer_2)], h5py.Group):
-    #                 print('|    \033[1m{}\033[0m'.format(layer_2))
-                    seconds.append('{}/{}'.format(layer_1, layer_2))
-                    for _, layer_3 in enumerate(list(hdf5['{}/{}'.format(layer_1,
-                                                                         layer_2)])):
-                        if isinstance(hdf5['{}/{}/{}'.format(layer_1, layer_2,
-                                                             layer_3)],
-                                      h5py.Group):
-    #                         print('|    |    \033[1m{}\033[0m/...'.format(layer_3))
-                            pass
-                        else:
-                            pass
-    #                         print('|    |    {}'.format(layer_3))
-                else:
-    #                 print('|    {}'.format(layer_2))
-                    seconds.append('{}/{}'.format(layer_1, layer_2))
-        else:
-            pass
-    #         print('{}'.format(layer_1))
-    hdf5.close()
-    return seconds
+    """
+    docstring
+    """
+    hdf5_filename = 'ramandecompy/tests/test_files/test_experiment.hdf5'
+    key_list = machine_learning.keyfinder(hdf5_filename)
+    assert isinstance(key_list, list), 'expected output is not a list'
+    assert isinstance(key_list[0], str), 'first element of list should be a string'
+    assert len(key_list) == 5, 'number of keys in hdf5 file is incorrect'
+    try:
+        machine_learning.keyfinder(4.2)
+    except TypeError:
+        print('A float was passed to the function and was handled well with a TypeError')
+    try:
+        machine_learning.keyfinder('hdf5_filename.txt')
+    except TypeError:
+        print('A .txt was passed to the function and was handled well with a TypeError')
+
+
 def test_generate_spectra_dataset(hdf5_filename, target_compound, spectra_count):
     """
     docstring

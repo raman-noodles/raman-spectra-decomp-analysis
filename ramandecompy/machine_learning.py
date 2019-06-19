@@ -1,7 +1,5 @@
-"""This function takes in compounds from a dictionary from shoyu, and, using spectrafit,
-identifies peaks found in both the fed-in known spectra, as well as the unknown spectra
-to be analyzed. From that identification, it then classifies the peaks in the unknown
-spectra based on the fed-in known spectra.
+"""
+This module ustilizes a calibration hdf5 file to generate a set 
  """
 import math
 import h5py
@@ -18,33 +16,44 @@ from ramandecompy import dataimport
 
 
 def keyfinder(hdf5_filename):
-    seconds = []
+    """
+    Function that returns a list of all dataset containing keys in a standard experimental hdf5 file.
+    
+    Args:
+        hdf5_filename (str): The name and location of the relevant hdf5 datafile.
+    
+    Returns:
+        key_list (list): A list of all keys within the first three layers that contain datasets.
+    """
+    # handling input errors
+    if not isinstance(hdf5_filename, str):
+        raise TypeError('Passed value of `hdf5_filename` is not a string! Instead, it is: '
+                        + str(type(hdf5_filename)))
+    if not hdf5_filename.split('/')[-1].split('.')[-1] == 'hdf5':
+        raise TypeError('`hdf5_filename` is not type = .hdf5! Instead, it is: '
+                        + hdf5_filename.split('/')[-1].split('.')[-1])
+    # create an empty list
+    key_list = []
+    # open relevant hdf5 file
     hdf5 = h5py.File(hdf5_filename, 'r')
     for _, layer_1 in enumerate(list(hdf5.keys())):
         if isinstance(hdf5[layer_1], h5py.Group):
-    #         print('\033[1m{}\033[0m'.format(layer_1))
             for _, layer_2 in enumerate(list(hdf5[layer_1].keys())):
                 if isinstance(hdf5['{}/{}'.format(layer_1, layer_2)], h5py.Group):
-    #                 print('|    \033[1m{}\033[0m'.format(layer_2))
-                    seconds.append('{}/{}'.format(layer_1, layer_2))
-                    for _, layer_3 in enumerate(list(hdf5['{}/{}'.format(layer_1,
-                                                                         layer_2)])):
-                        if isinstance(hdf5['{}/{}/{}'.format(layer_1, layer_2,
-                                                             layer_3)],
-                                      h5py.Group):
-    #                         print('|    |    \033[1m{}\033[0m/...'.format(layer_3))
+                    key_list.append('{}/{}'.format(layer_1, layer_2))
+                    for _, layer_3 in enumerate(list(hdf5['{}/{}'.format(layer_1, layer_2)])):
+                        if isinstance(hdf5['{}/{}/{}'.format(layer_1, layer_2, layer_3)], h5py.Group):
                             pass
                         else:
                             pass
-    #                         print('|    |    {}'.format(layer_3))
                 else:
-    #                 print('|    {}'.format(layer_2))
-                    seconds.append('{}/{}'.format(layer_1, layer_2))
+                    key_list.append('{}/{}'.format(layer_1, layer_2))
         else:
             pass
-    #         print('{}'.format(layer_1))
     hdf5.close()
-    return seconds
+    return key_list
+
+
 def generate_spectra_dataset(hdf5_filename, target_compound, spectra_count):
     """
     docstring
@@ -95,6 +104,8 @@ def generate_spectra_dataset(hdf5_filename, target_compound, spectra_count):
         label.append(j % 2)
     hdf5.close()
     return x_data, y_data, label
+
+
 def combine_experiment(hdf5_filename, key, x_data, y_data, labels, num):
     """
     This function adds Raman experimental data to an existing hdf5 file. It uses the
@@ -188,6 +199,8 @@ def combine_experiment(hdf5_filename, key, x_data, y_data, labels, num):
     exp_file.close()
     df = pd.DataFrame(data)
     return df
+
+
 def interp_and_norm(hdf5_filename, compound):
     """
     docstring
@@ -208,6 +221,7 @@ def interp_and_norm(hdf5_filename, compound):
     # close hdf5 file
     hdf5.close()
     return tuple_list
+
 
 def apply_scaling(tuple_list, j, i ,target_index):
     """
@@ -234,6 +248,8 @@ def apply_scaling(tuple_list, j, i ,target_index):
     # repack tuple_list
     scaled_tuple_list = list(zip(x_data, y_data_scaled))
     return scaled_tuple_list
+
+
 def interpolated_spectra(hdf5_interpfilename, hdf5_calfilename, spectra_count):
     hdf5 = h5py.File(hdf5_calfilename, 'r+')
     # get list of compounds from hdf5 file
@@ -247,6 +263,5 @@ def interpolated_spectra(hdf5_interpfilename, hdf5_calfilename, spectra_count):
         y_data_list.append(y_data)
         x_data_list.append(x_data)
         for i, label in enumerate(labels):
-            interpdf = machine_learning.combine_experiment(hdf5_interpfilename, 'interp_'+target_compound, x_data, y_data, label, i) 
-            
+            interpdf = machine_learning.combine_experiment(hdf5_interpfilename, 'interp_'+target_compound, x_data, y_data, label, i)      
     return interpdf
