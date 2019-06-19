@@ -513,10 +513,10 @@ def superimpose_next(hdf5_filename, existing_key, new_key, plot_fits):
     """
     # handling input errors
     if not isinstance(hdf5_filename, str):
-        raise TypeError('Passed value of `cal_filename` is not a string! Instead, it is: '
+        raise TypeError('Passed value of `hdf5_filename` is not a string! Instead, it is: '
                         + str(type(hdf5_filename)))
     if not hdf5_filename.split('/')[-1].split('.')[-1] == 'hdf5':
-        raise TypeError('`cal_filename` is not type = .hdf5! Instead, it is: '
+        raise TypeError('`hdf5_filename` is not type = .hdf5! Instead, it is: '
                         + hdf5_filename.split('/')[-1].split('.')[-1])
     if not isinstance(existing_key, str):
         raise TypeError('Passed value of `existing_key` is not a string! Instead, it is: '

@@ -190,7 +190,7 @@ def add_experiment(hdf5_filename, exp_filename):
     # peak detection and data fitting
     fit_result, residuals = spectrafit.fit_data(data['wavenumber'].values, data['counts'].values)
     # extract experimental parameters from filename
-    specs = exp_filename.split('/')[-1].split('.')[:-1]
+    specs = exp_filename.split('/')[-1].split('.')[-2:-1]
     if len(specs) > 1:
         spec = ''
         for _, element in enumerate(specs):
