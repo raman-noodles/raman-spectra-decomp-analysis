@@ -94,7 +94,12 @@ def plot_fit(hdf5_filename, key, color='blue'):
     for _, peak in enumerate(list(hdf5[key])[:-3]):
         center = hdf5['{}/{}'.format(key, peak)][0][2]
         peak_centers.append(center)
-        peak_labels.append(peak)
+        if len(list(hdf5['{}/{}'.format(key, peak)])[0]) == 7:
+            peak_labels.append(peak)
+        elif len(list(hdf5['{}/{}'.format(key, peak)])[0]) == 8:
+            peak_labels.append(str(hdf5['{}/{}'.format(key, peak)][0][7]))
+        else:
+            print('invalid number of values in dataset')
     # plot spectra and peak labels
     fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, gridspec_kw={'height_ratios': [3, 1]},
                                figsize=(15,6))
