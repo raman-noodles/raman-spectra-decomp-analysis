@@ -104,7 +104,7 @@ def plot_fit(hdf5_filename, key, color='blue'):
     ax2.set_xlabel('Wavenumber ($cm^{-1}$)', fontsize=14)
     ax1.set_xlim(min(x_data), max(x_data))
     ax1.set_ylim(0-0.2*max(y_data), 1.1*max(y_data))
-    ax1.set_ylabel('Counts', fontsize=14, labelpad=20)
+    ax1.set_ylabel('Intensity (arb. units)', fontsize=14, labelpad=20)
     ax2.set_ylabel('Residuals', fontsize=14, labelpad=12)
     # plot data
     ax1.plot(x_data, y_data, color='red')

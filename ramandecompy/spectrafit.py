@@ -119,6 +119,7 @@ def set_params(peaks):
             pars = peak.make_params()
         else:
             pars.update(peak.make_params())
+        # constraints on profile desciptors
         pars[prefix+'center'].set(value[0], vary=False)
         pars[prefix+'height'].set(min=0.1*value[1])
         pars[prefix+'sigma'].set(10, min=1, max=100)
@@ -170,7 +171,7 @@ def model_fit(x_data, y_data, mod, pars, report=False):
     if not isinstance(report, bool):
         raise TypeError('Passed value of `report` is not a boolean! Instead, it is: '
                         + str(type(report)))
-    # fit model
+    # fit model - powell regression, out is solved model
     out = mod.fit(y_data, pars, method='powell', x=x_data)
     if report:
         print(out.fit_report())
@@ -280,7 +281,7 @@ def export_fit_data(x_data, y_data, out):
 
 def fit_data(x_data, y_data):
     """
-    This wrapper function takes as an input only the x_data and y_data for a Raman spectra
+    This wrapper function and uses the above builder functions takes as an input only the x_data and y_data for a Raman spectra
     and returns a list of the fit result values in the form of the output of the
     spectrafit.export_fit_data function.
 
