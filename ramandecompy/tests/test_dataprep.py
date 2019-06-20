@@ -113,7 +113,7 @@ def test_adjust_peaks():
     # peaks to add and drop form auto-fitting
     add_list = [1270, 1350, 1385]
     drop_list = ['Peak_01']
-    dataprep.adjust_peaks('exp_test.hdf5', '300C/25s', add_list, drop_list, plot_fits=True)
+    dataprep.adjust_peaks('exp_test.hdf5', '300C/25s', add_list, drop_list)
     try:
         dataprep.adjust_peaks(4.2, '300C/25s', add_list, drop_list, plot_fits=True)
     except TypeError:
