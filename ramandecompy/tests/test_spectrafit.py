@@ -175,7 +175,9 @@ def test_export_fit_data():
 
 def test_fit_data():
     """
-    docstring
+    This test function ensures that the spectrafit.fit_data function performs without
+    error. It checks that the output types and shapes are correct before testing to
+    ensure that input errors are handled well.
     """
     fit_result, residuals = spectrafit.fit_data(X_TEST, Y_TEST)
     assert isinstance(fit_result, list), 'output is not a list'
