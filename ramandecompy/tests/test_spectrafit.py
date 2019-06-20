@@ -121,7 +121,7 @@ def test_plot_fit():
     peaks = spectrafit.peak_detect(X_TEST, Y_TEST)[0]
     mod, pars = spectrafit.set_params(peaks)
     out = spectrafit.model_fit(X_TEST, Y_TEST, mod, pars)
-    spectrafit.plot_fit(X_TEST, Y_TEST, out, plot_components=True)
+    spectrafit.plot_fit(X_TEST, Y_TEST, out, plot_components=False)
     try:
         spectrafit.plot_fit(1.2, Y_TEST, out)
     except TypeError:
@@ -218,7 +218,7 @@ def test_build_custom_model():
     # not the "speculated" center and height location of the 4th peak
     peaks_add = [(1035, 256)]
     fit_result, residuals = spectrafit.build_custom_model(X_TEST, Y_TEST,
-                                                          peaks, peaks_add, plot_fits=True)
+                                                          peaks, peaks_add, plot_fits=False)
     assert len(fit_result) == 4, '4th peak was not successfully added to the model'
     assert isinstance(fit_result, list), '`fit_result` is not a list'
     for i, element in enumerate(fit_result):
@@ -272,7 +272,7 @@ def test_apply_old_model():
               8.8907837, 310.71145822, 3726.8698975),
              (0.91026426, 4.39010113, 1035.65477477, 2500,
               8.78020227, 256.57385316, 3386.98656078)]
-    fit_result, residuals = spectrafit.apply_old_model(X_TEST, Y_TEST, peaks, plot_fits=True)
+    fit_result, residuals = spectrafit.apply_old_model(X_TEST, Y_TEST, peaks, plot_fits=False)
     assert len(fit_result) == 4, 'an incorrect number of peaks were added to the model'
     assert isinstance(fit_result, list), '`fit_result` is not a list'
     for i, element in enumerate(fit_result):
@@ -313,7 +313,7 @@ def test_superimpose_next():
     # create a copy of test_experiment.hdf5
     copyfile('ramandecompy/tests/test_files/test_experiment.hdf5', hdf5_filename)
     # run function
-    spectrafit.superimpose_next(hdf5_filename, existing_key, new_key, plot_fits=True)
+    spectrafit.superimpose_next(hdf5_filename, existing_key, new_key, plot_fits=False)
     try:
         spectrafit.superimpose_next(4.2, existing_key, new_key, plot_fits=True)
     except TypeError:
@@ -345,7 +345,7 @@ def test_superimpose_set():
     # create a copy of test_experiment.hdf5
     copyfile('ramandecompy/tests/test_files/test_experiment.hdf5', hdf5_filename)
     # run function
-    spectrafit.superimpose_set(hdf5_filename, target_key, plot_fits=True)
+    spectrafit.superimpose_set(hdf5_filename, target_key, plot_fits=False)
     try:
         spectrafit.superimpose_set(4.2, target_key, plot_fits=True)
     except TypeError:
