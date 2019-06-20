@@ -126,7 +126,7 @@ def plot_fit(hdf5_filename, key, color='blue'):
                                   box_axes_space=0.12, plot_kwargs={'linewidth':0.75}, ax=ax1)
     elif peakidentify == True:
         lineid_plot.plot_line_ids(x_data, y_data, peak_centers, peak_labels,
-                                  box_axes_space=0.30, plot_kwargs={'linewidth':0.75}, ax=ax1)
+                                  box_axes_space=0.50, plot_kwargs={'linewidth':0.75}, ax=ax1)
     else:
         pass
     # set facecolor
