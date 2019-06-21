@@ -131,7 +131,7 @@ def peak_assignment(unknownhdf5_filename, key, knownhdf5_filename,
         frames.append(add_label(unknownhdf5_filename,
                                 key, peak, peak_labels[j]))
          
-    df = pd.concat(frames,axis=1, join='outer', join_axes=None, ignore_index=False,
+    df = pd.concat(frames,axis=1, join='outer', join_axes=None, ignore_index=True,
               keys=None, levels=None, names=None, verify_integrity=False,
               copy=True,sort=True)
     df =df.T
