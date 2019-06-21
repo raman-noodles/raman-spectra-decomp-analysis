@@ -18,7 +18,7 @@ from sklearn.metrics import auc
 
 def peak_detect(x_data, y_data, height=None, prominence=None, distance=None):
     """
-    Function that utilizes scipy to identify local maxima from input spectral data. Default
+    A function that utilizes scipy to identify local maxima from input spectral data. Default
     detection criteria are based upon normalized values for the y axis (counts) spectra data;
     however, the option remains to adjust the parameters to achieve the best fit, if the user
     so chooses. WARNING: This function may return unexpected results or unreliable results
@@ -86,7 +86,7 @@ def peak_detect(x_data, y_data, height=None, prominence=None, distance=None):
 
 def set_params(peaks):
     """
-    This module takes in the list of peaks from the peak detection modules, and then uses
+    This function takes in the list of peaks from the peak detection modules, and then uses
     that to initialize parameters for a set of Pseudo-Voigt models that are not yet fit.
     There is a single model for every peak.
 
