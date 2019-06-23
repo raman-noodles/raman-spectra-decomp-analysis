@@ -143,7 +143,7 @@ def peak_assignment(unknownhdf5_filename, key, knownhdf5_filename,
                                                          known_peaks,
                                                          assignment_matrix,
                                                          knownhdf5_filename)
-    print(unknown_peak_assignments)
+#     print(unknown_peak_assignments)
     peak_labels = []
     for i, _ in enumerate(unknown_peak_assignments):
         peak_labels.append(str(unknown_peak_assignments[i]))
@@ -232,7 +232,7 @@ def compare_unknown_to_known(unknown_peaks, known_peaks, precision):
 
     return assignment_matrix
 
-def peak_position_comparisons(unknown_peaks, known_compound_peaks,
+def peak_position_comparisons(unknown_peaks, known_peaks,
                               association_matrix,
                               knownhdf5_filename):
     """
@@ -241,7 +241,7 @@ def peak_position_comparisons(unknown_peaks, known_compound_peaks,
     
     Parameters:
         unknown_peaks (list like): list of unknown peaks from experimental file
-        known_compound_peaks (list like): list of known peaks from calibration file
+        known_peaks (list like): list of known peaks from calibration file
         association_matrix (list): binary list for determining if the peaks
                                   found in the known compound are present
                                   in the unknown spectrum.
@@ -258,7 +258,7 @@ def peak_position_comparisons(unknown_peaks, known_compound_peaks,
     if not isinstance(unknown_peaks, list):
         raise TypeError("""Passed value of `unknown_peaks` is not a list!
         Instead, it is: """ + str(type(unknown_peaks)))
-    if not isinstance(known_compound_peaks, list):
+    if not isinstance(known_peaks, list):
         raise TypeError("""Passed value of `known_compound_peaks` is not a list!
         Instead, it is: """ + str(type(known_compound_peaks)))
     if not isinstance(knownhdf5_filename, str):
@@ -298,7 +298,7 @@ def peak_position_comparisons(unknown_peaks, known_compound_peaks,
         position_assignment = []
         # We'll need an outer loop that walks through
         # all the different compound positions
-        for j, _ in enumerate(known_compound_peaks):
+        for j, _ in enumerate(known_peaks):
             if association_matrix[j][i] == 1:
                 position_assignment.append(known_compound_list[j])
             else:
@@ -480,7 +480,7 @@ def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
             peak_labels = []
             for i, _ in enumerate(unknown_peak_assignments):
                 peak_labels.append(str(unknown_peak_assignments[i]))
-        print(peak_labels)
+#         print(peak_labels)
         # plot spectra and peak labels
         fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True,
                                        gridspec_kw={'height_ratios': [3, 1]},
@@ -498,7 +498,7 @@ def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
         # Titles and labels
         ax2.set_xlabel('Wavenumber ($cm^{-1}$)', fontsize=14)
         ax1.set_xlim(min(x_data), max(x_data))
-        ax1.set_ylabel('Counts', fontsize=14, labelpad=20)
+        ax1.set_ylabel('Intensity (arb. units)', fontsize=14, labelpad=20)
         ax2.set_ylabel('Residuals', fontsize=14, labelpad=12)
         # scale residuals plot symmetrically about zero
         ylim = max(abs(min(residuals)), abs(max(residuals)))
@@ -509,7 +509,7 @@ def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
         ax1.tick_params(axis='both', which='both', labelsize=10, labelbottom=True)
         # add title
         ax1.set_title('{} spectra from {}'.format(key, unknownhdf5_filename),
-                      fontsize=18, pad=350)
+                      fontsize=18, pad=250)
         plt.show()
     knhdf5.close()
     unhdf5.close()
@@ -574,7 +574,7 @@ def add_label(hdf5_filename, key, peak, label):
                                   (1,), dtype=my_datatype)
     # apply custom dtype to data tuple
 #     print(dataset)
-    print(data)
+#     print(data)
 #     print(my_datatype)
     data_array = np.array(data, dtype=my_datatype)
     # write new values to the blank dataset
@@ -712,7 +712,7 @@ def process_score(unknown_peaks,known_peaks,k, precision, unknownname, knownname
 
     Parameters:
         unknown_peaks (list like): list of unknown peaks from experimental file
-        known_peaks (list like): list of unknown peaks from experimental file
+        known_compound_peaks (list like): list of known peaks from each compound from calibration file
         precision (int): precision tolerance of peak identification
         unknownname (string): name of unknown peak from calibration file
         knownname (string): name of known peak from calibration file
@@ -737,7 +737,7 @@ def score_table(unknown_peaks,known_peaks, precision,unknownname,knownname):
 
     Parameters:
         unknown_peaks (list like): list of unknown peaks from experimental file
-        known_peaks (list like): list of known peaks from calibration file
+        known_compound_peaks (list like): list of known peaks from each compound from calibration file
         precision (int): precision tolerance of peak identification
         unknownname (string): name of unknown peak from calibration file
         knownname (string): name of known peak from calibration file
