@@ -212,7 +212,7 @@ def plot_fit(x_data, y_data, fit_result, plot_components=False):
         raise TypeError('Passed value of `plot_components` is not a boolean! Instead, it is: '
                         + str(type(plot_components)))
     plt.figure(figsize=(15, 6))
-    plt.ylabel('Counts', fontsize=14)
+    plt.ylabel('Intensity (arb. units)', fontsize=14)
     plt.xlabel('Wavenumber (cm$^{-1}$)', fontsize=14)
     plt.xlim(min(x_data), max(x_data))
     plt.plot(x_data, y_data, 'r', alpha=1, linewidth=2, label='data')
