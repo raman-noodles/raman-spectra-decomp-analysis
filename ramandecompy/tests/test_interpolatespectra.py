@@ -14,9 +14,7 @@ Y_DATA = np.asarray(HDF5['{}/counts'.format(TARGET_COMPOUND)])
 TUPLE_LIST = list(zip(X_DATA, Y_DATA))
 
 HDF5_INTERPFILENAME = 'ramandecompy/tests/test_files/interpolated_spectra_calibration_file.hdf5'
-INTERPHDF5 = h5py.File(HDF5_INTERPFILENAME, 'r+')
 HDF5_CALFILENAME = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
-HDF5_2 = h5py.File(HDF5_CALFILENAME, 'r+')
 
 
 def test_interp_and_norm():
@@ -30,7 +28,7 @@ def test_interp_and_norm():
     assert isinstance(tuple_list[0][0], np.int64), 'first element of tuple is not a np.int64'
     x_data, y_data = zip(*tuple_list)
     assert max(y_data) <= 1, 'spectra was not normalized correctly'
-    assert x_data[0] == x_data[1], '1st and 2nd elements in x_data list are not equal'
+    assert len(x_data) == len(y_data), 'x and y data lengths do not match'
     try:
         interpolatespectra.interp_and_norm(4.2, TARGET_COMPOUND)
     except TypeError:
@@ -163,7 +161,9 @@ def test_interpolatedfit():
     # get list of compounds from hdf5 file
     y_data_list = []
     x_data_list = []
+    hdf5 = h5py.File(HDF5_CALFILENAME, 'r')
     compound_list = list(HDF5_2.keys())
+    hdf5.close()
     key = 'water'
     for _, target_compound in enumerate(compound_list):
         x_data, y_data, labels = interpolatespectra.generate_spectra_dataset(HDF5_CALFILENAME,
@@ -271,6 +271,3 @@ def test_combined_interpolatedfit():
                                                     'test.txt')
     except TypeError:
         print('A .txt was passed to the function, and it was handled well with a TypeError.')
-
-INTERPHDF5.close()
-HDF5_2.close()
