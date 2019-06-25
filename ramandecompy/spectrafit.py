@@ -9,8 +9,8 @@ Developed by the Raman-Noodles team (2019 DIRECT Cohort, University of Washingto
 
 import matplotlib.pyplot as plt
 import numpy as np
-import lmfit
 import h5py
+import lmfit
 from lmfit.models import PseudoVoigtModel
 from scipy.signal import find_peaks
 from sklearn.metrics import auc
@@ -18,7 +18,7 @@ from sklearn.metrics import auc
 
 def peak_detect(x_data, y_data, height=None, prominence=None, distance=None):
     """
-    Function that utilizes scipy to identify local maxima from input spectral data. Default
+    A function that utilizes scipy to identify local maxima from input spectral data. Default
     detection criteria are based upon normalized values for the y axis (counts) spectra data;
     however, the option remains to adjust the parameters to achieve the best fit, if the user
     so chooses. WARNING: This function may return unexpected results or unreliable results
@@ -86,7 +86,7 @@ def peak_detect(x_data, y_data, height=None, prominence=None, distance=None):
 
 def set_params(peaks):
     """
-    This module takes in the list of peaks from the peak detection modules, and then uses
+    This function takes in the list of peaks from the peak detection modules, and then uses
     that to initialize parameters for a set of Pseudo-Voigt models that are not yet fit.
     There is a single model for every peak.
 
@@ -119,6 +119,7 @@ def set_params(peaks):
             pars = peak.make_params()
         else:
             pars.update(peak.make_params())
+        # constraints on profile desciptors
         pars[prefix+'center'].set(value[0], vary=False)
         pars[prefix+'height'].set(min=0.1*value[1])
         pars[prefix+'sigma'].set(10, min=1, max=100)
@@ -170,7 +171,7 @@ def model_fit(x_data, y_data, mod, pars, report=False):
     if not isinstance(report, bool):
         raise TypeError('Passed value of `report` is not a boolean! Instead, it is: '
                         + str(type(report)))
-    # fit model
+    # fit model - powell regression, out is solved model
     out = mod.fit(y_data, pars, method='powell', x=x_data)
     if report:
         print(out.fit_report())
@@ -211,7 +212,7 @@ def plot_fit(x_data, y_data, fit_result, plot_components=False):
         raise TypeError('Passed value of `plot_components` is not a boolean! Instead, it is: '
                         + str(type(plot_components)))
     plt.figure(figsize=(15, 6))
-    plt.ylabel('Counts', fontsize=14)
+    plt.ylabel('Intensity (arb. units)', fontsize=14)
     plt.xlabel('Wavenumber (cm$^{-1}$)', fontsize=14)
     plt.xlim(min(x_data), max(x_data))
     plt.plot(x_data, y_data, 'r', alpha=1, linewidth=2, label='data')
@@ -256,6 +257,9 @@ def export_fit_data(x_data, y_data, out):
     if not isinstance(x_data, (list, np.ndarray)):
         raise TypeError('Passed value of `x_data` is not a list or numpy.ndarray! Instead, it is: '
                         + str(type(x_data)))
+    if not isinstance(y_data, (list, np.ndarray)):
+        raise TypeError('Passed value of `y_data` is not a list or numpy.ndarray! Instead, it is: '
+                        + str(type(y_data)))
     fit_peak_data = []
     for i in range(int(len(out.values)/6)):
         # create a list of zeroes of length 7
@@ -269,7 +273,7 @@ def export_fit_data(x_data, y_data, out):
         peak_param[5] = out.values[prefix+'height']
         peak_param[6] = auc(x_data, out.eval_components(x=x_data)[prefix])
         fit_peak_data.append(peak_param)
-    # calclate residuals 
+    # calculate residuals
     y_fit = out.best_fit
     residuals = y_fit - y_data
     return fit_peak_data, residuals
@@ -277,7 +281,7 @@ def export_fit_data(x_data, y_data, out):
 
 def fit_data(x_data, y_data):
     """
-    This wrapper function takes as an input only the x_data and y_data for a Raman spectra
+    This wrapper function and uses the above builder functions takes as an input only the x_data and y_data for a Raman spectra
     and returns a list of the fit result values in the form of the output of the
     spectrafit.export_fit_data function.
 
@@ -328,8 +332,8 @@ def build_custom_model(x_data, y_data, peaks, peaks_add, plot_fits):
         y_data (list like): The y-values of the spectra from which peaks will be detected.
         peaks (list): A list containing tuples of the x_data (wavenumber) and y_data (counts)
                       values of the peaks.
-        peaks_add (list): A list of tuples containing user specified peak locations to be added to the fit
-                      as well as interpolated values to provide an initial height guess.
+        peaks_add (list): A list of tuples containing user specified peak locations to be added to
+                          the fit as well as interpolated values to provide an initial height guess.
         plot_fits (boolean): A simple True/False boolean input that determins if the plot_fit
                       function should be used to display the resulting fit for visual inspection.
 
@@ -498,7 +502,7 @@ def superimpose_next(hdf5_filename, existing_key, new_key, plot_fits):
     This function is used within the `superimpose_set` function and extracts the
     relevant data from the hdf5 file, feeds it into the `apply_old_model` function,
     and saves the new fit result over the existing result.
-    
+
     Args:
         hdf5_filename (str): The name and location of the relevant hdf5 datafile.
         existing_key (str): The key within `hdf5_filename` that corresponds to the
@@ -507,16 +511,16 @@ def superimpose_next(hdf5_filename, existing_key, new_key, plot_fits):
                        that the existing_key fit will be superimposed upon.
         plot_fits (boolean): A simple True/False boolean input that determins if the plot_fit
                       function should be used to display the resulting fit for visual inspection.
-                      
+
     Returns:
         None
     """
     # handling input errors
     if not isinstance(hdf5_filename, str):
-        raise TypeError('Passed value of `cal_filename` is not a string! Instead, it is: '
+        raise TypeError('Passed value of `hdf5_filename` is not a string! Instead, it is: '
                         + str(type(hdf5_filename)))
     if not hdf5_filename.split('/')[-1].split('.')[-1] == 'hdf5':
-        raise TypeError('`cal_filename` is not type = .hdf5! Instead, it is: '
+        raise TypeError('`hdf5_filename` is not type = .hdf5! Instead, it is: '
                         + hdf5_filename.split('/')[-1].split('.')[-1])
     if not isinstance(existing_key, str):
         raise TypeError('Passed value of `existing_key` is not a string! Instead, it is: '
@@ -548,22 +552,26 @@ def superimpose_next(hdf5_filename, existing_key, new_key, plot_fits):
     for i, result in enumerate(fit_result):
         # create custom datatype
         my_datatype = np.dtype([('fraction', np.float),
-                        ('center', np.float),
-                        ('sigma', np.float),
-                        ('amplitude', np.float),
-                        ('fwhm', np.float),
-                        ('height', np.float),
-                        ('area under the curve', np.float)])
+                                ('center', np.float),
+                                ('sigma', np.float),
+                                ('amplitude', np.float),
+                                ('fwhm', np.float),
+                                ('height', np.float),
+                                ('area under the curve', np.float)])
         if len(result) == 7:
             if i < 9:
-                dataset = hdf5.create_dataset('{}/Peak_0{}'.format(new_key, i+1), (1,), dtype=my_datatype)
+                dataset = hdf5.create_dataset('{}/Peak_0{}'.format(new_key, i+1),
+                                              (1,), dtype=my_datatype)
             else:
-                dataset = hdf5.create_dataset('{}/Peak_{}'.format(new_key, i+1), (1,), dtype=my_datatype)
+                dataset = hdf5.create_dataset('{}/Peak_{}'.format(new_key, i+1),
+                                              (1,), dtype=my_datatype)
         elif len(result) == 8:
             if i < 9:
-                dataset = hdf5.create_dataset('{}/Peak_0{}*'.format(new_key, i+1), (1,), dtype=my_datatype)
+                dataset = hdf5.create_dataset('{}/Peak_0{}*'.format(new_key, i+1),
+                                              (1,), dtype=my_datatype)
             else:
-                dataset = hdf5.create_dataset('{}/Peak_{}*'.format(new_key, i+1), (1,), dtype=my_datatype)
+                dataset = hdf5.create_dataset('{}/Peak_{}*'.format(new_key, i+1),
+                                              (1,), dtype=my_datatype)
         else:
             print('fit_result for Peak_{} contains an inappropriate number of values'.format(i))
         # apply data to tuple
@@ -573,24 +581,41 @@ def superimpose_next(hdf5_filename, existing_key, new_key, plot_fits):
         dataset[...] = data_array
     hdf5.close()
 
-    
+
 def superimpose_set(hdf5_filename, target_key, plot_fits=True):
     """
     A wrapper function that can be used to apply a user adjusted fit from the shortest residence
     time spectra to all susequent residence times in a set of spectra decomposed at the same
     temperature.
-        
+
     Args:
         hdf5_filename (str): The name and location of the relevant hdf5 datafile.
         target_key (str): The key within `hdf5_filename` that corresponds to the
                             existing fit that will be superimposed on all susequent spectra.
         plot_fits (boolean): A simple True/False boolean input that determins if the plot_fit
                       function should be used to display the resulting fit for visual inspection.
-                      
+
     Returns:
         None
     """
+    # handling input errors
+    if not isinstance(hdf5_filename, str):
+        raise TypeError('Passed value of `cal_filename` is not a string! Instead, it is: '
+                        + str(type(hdf5_filename)))
+    if not hdf5_filename.split('/')[-1].split('.')[-1] == 'hdf5':
+        raise TypeError('`cal_filename` is not type = .hdf5! Instead, it is: '
+                        + hdf5_filename.split('/')[-1].split('.')[-1])
+    if not isinstance(target_key, str):
+        raise TypeError('Passed value of `target_key` is not a string! Instead, it is: '
+                        + str(type(target_key)))
+    if not isinstance(plot_fits, bool):
+        raise TypeError('Passed value of `plot_fits` is not a boolean! Instead, it is: '
+                        + str(type(plot_fits)))
     hdf5 = h5py.File(hdf5_filename, 'r')
+    if target_key in list(hdf5.keys()) == False:
+        raise KeyError("""Passed value of `target_key` is not
+        a valid key for {}""".format(hdf5_filename))
+    # extract relevant time and temp values
     temp, time = target_key.split('/')
     keys = list(hdf5[temp].keys())
     hdf5.close()

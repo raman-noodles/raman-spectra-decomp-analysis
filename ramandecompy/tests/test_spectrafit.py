@@ -3,16 +3,15 @@ This is the unit test module for spectrafit.py
 """
 
 import os
-import pickle
+from shutil import copyfile
 import numpy as np
 import pandas as pd
 import lmfit
-from shutil import copyfile
 from ramandecompy import spectrafit
 
 
-data_filename = 'ramandecompy/tests/test_files/Hydrogen_Baseline_Calibration.xlsx'
-DATA = pd.read_excel(data_filename, header=None, names=('x', 'y'))
+DATA_FILENAME = 'ramandecompy/tests/test_files/Hydrogen_Baseline_Calibration.xlsx'
+DATA = pd.read_excel(DATA_FILENAME, header=None, names=('x', 'y'))
 X_TEST = DATA['x'].values
 Y_TEST = DATA['y'].values
 
@@ -63,7 +62,8 @@ def test_set_params():
     """
     peaks = spectrafit.peak_detect(X_TEST, Y_TEST)[0]
     mod, pars = spectrafit.set_params(peaks)
-    assert isinstance(mod, (lmfit.models.PseudoVoigtModel, lmfit.model.CompositeModel)), 'mod is not a lmfit CompositeModel'
+    assert isinstance(mod, (lmfit.models.PseudoVoigtModel, lmfit.model.CompositeModel)), """
+    mod is not a lmfit CompositeModel"""
     assert isinstance(pars, lmfit.parameter.Parameters), 'pars are not lmfit Parameters'
     assert len(pars) == 6*len(peaks), 'incorrect ratio of parameters to peaks'
     try:
@@ -121,7 +121,7 @@ def test_plot_fit():
     peaks = spectrafit.peak_detect(X_TEST, Y_TEST)[0]
     mod, pars = spectrafit.set_params(peaks)
     out = spectrafit.model_fit(X_TEST, Y_TEST, mod, pars)
-    spectrafit.plot_fit(X_TEST, Y_TEST, out, plot_components=True)
+    spectrafit.plot_fit(X_TEST, Y_TEST, out, plot_components=False)
     try:
         spectrafit.plot_fit(1.2, Y_TEST, out)
     except TypeError:
@@ -158,25 +158,34 @@ def test_export_fit_data():
     assert np.asarray(fit_peak_data).shape == (int(len(out.values)/6), 7), """
     output is not the correct shape"""
     assert len(fit_peak_data) == int(len(out.values)/6), 'incorrect number of peaks exported'
+    assert len(residuals) == len(Y_TEST), 'residuals are not the correct shape'
     try:
-        spectrafit.export_fit_data(X_TEST, 'out')
+        spectrafit.export_fit_data(X_TEST, Y_TEST, 'out')
     except TypeError:
         print('A str was passed to the function, and was handled well with a TypeError.')
     try:
-        spectrafit.export_fit_data(4.2, out)
+        spectrafit.export_fit_data(X_TEST, ('tu', 'ple'), out)
+    except TypeError:
+        print('A tuple was passed to the function, and was handled well with a TypeError.')
+    try:
+        spectrafit.export_fit_data(4.2, Y_TEST, out)
     except TypeError:
         print('A float was passed to the function, and was handled well with a TypeError.')
-        
-        
+
+
 def test_fit_data():
     """
-    docstring
+    This test function ensures that the spectrafit.fit_data function performs without
+    error. It checks that the output types and shapes are correct before testing to
+    ensure that input errors are handled well.
     """
     fit_result, residuals = spectrafit.fit_data(X_TEST, Y_TEST)
     assert isinstance(fit_result, list), 'output is not a list'
-    for i,peak in enumerate(fit_result):
+    assert len(residuals) == len(Y_TEST), 'residuals are not the correct shape'
+    for i, peak in enumerate(fit_result):
         assert isinstance(peak, list), 'output element {} is not a np.ndarray'.format(i)
-        assert len(peak) in [7, 8], 'output element {} contains an incorrect number of values ({})'.format(i, len(peak))
+        assert len(peak) in [7, 8], """output element {} contains an
+        incorrect number of values ({})""".format(i, len(peak))
     assert len(fit_result) == 4, 'output contains an incorrect amount of detected peaks'
     try:
         spectrafit.fit_data(X_TEST, 'Y_TEST')
@@ -190,96 +199,121 @@ def test_fit_data():
 
 def test_build_custom_model():
     """
-    docstring
+    Test function for the `build_custom_model` function from spectrafit. It tests that the
+    function runs correctly by inputting the descriptors for the first three peaks in the
+    hydrogen calibration spectra and adds the 4th peak to the model (purposfully excluded).
+    It tests that the output contains the correct number of peaks and is the correct type.
+    It ensures that the number of residuals is equivilent to the number of input datapoints
+    and that they are all returned as floats. It also insures that the function properly
+    handles bad arguments.
     """
-    # first build a custom peak list that only contains the pseudo voight descriptors for the first 3 peaks
-    peaks =[(0.68764166, 4.52683284, 355.65041041, 8506.9345801, 9.05366569, 687.05133171, 8424.94459088),
-            (0.57765067, 4.40443189, 587.33331331, 21649.13312358, 8.80886378, 1878.91168914, 21593.07349362),
-            (0.65921506, 4.44539185, 816.00734735, 3733.9967507, 8.8907837, 310.71145822, 3726.8698975)]
+    # build a custom peak list that only contains the pseudo voight
+    # descriptors for the first 3 peaks
+    peaks = [(0.68764166, 4.52683284, 355.65041041, 8506.9345801,
+              9.05366569, 687.05133171, 8424.94459088),
+             (0.57765067, 4.40443189, 587.33331331, 21649.13312358,
+              8.80886378, 1878.91168914, 21593.07349362),
+             (0.65921506, 4.44539185, 816.00734735, 3733.9967507,
+              8.8907837, 310.71145822, 3726.8698975)]
     # not the "speculated" center and height location of the 4th peak
     peaks_add = [(1035, 256)]
-    fit_result, residuals = spectrafit.build_custom_model(X_TEST, Y_TEST, peaks, peaks_add, plot_fits=True)
+    fit_result, residuals = spectrafit.build_custom_model(X_TEST, Y_TEST,
+                                                          peaks, peaks_add, plot_fits=False)
     assert len(fit_result) == 4, '4th peak was not successfully added to the model'
     assert isinstance(fit_result, list), '`fit_result` is not a list'
     for i, element in enumerate(fit_result):
-        assert isinstance(element, list), 'element with index {} in fit_result is not a list'.format(i)
+        assert isinstance(element, list), """element with index {}
+        in fit_result is not a list""".format(i)
         if i <= 2:
             assert len(element) == 7, 'index {} in fit_result should have length 7'.format(i)
         else:
             assert len(element) == 8, 'index {} in fit_result should have length 8'.format(i)
-            assert element[-1] == 'user_added', 'user_added tag not successfully appended' 
+            assert element[-1] == 'user_added', 'user_added tag not successfully appended'
     assert len(residuals) == len(X_TEST), 'size of `residuals` does not match input data'
-    assert isinstance(residuals[0], np.float64), 'the 1st element in `residuals` is not a np.float64'
+    assert isinstance(residuals[0], np.float64), """
+    the 1st element in `residuals` is not a np.float64"""
     try:
         spectrafit.build_custom_model(4.2, Y_TEST, peaks, peaks_add, plot_fits=True)
     except TypeError:
-            print('A float was passed to the function, and was handled well with a TypeError.')
+        print('A float was passed to the function, and was handled well with a TypeError.')
     try:
         spectrafit.build_custom_model(X_TEST, 'Y_TEST', peaks, peaks_add, plot_fits=True)
     except TypeError:
-            print('A string was passed to the function, and was handled well with a TypeError.')
+        print('A string was passed to the function, and was handled well with a TypeError.')
     try:
         spectrafit.build_custom_model(X_TEST, Y_TEST, (1, 2, 3, 4, 5, 6), peaks_add, plot_fits=True)
     except TypeError:
-            print('A tuple was passed to the function, and was handled well with a TypeError.')
+        print('A tuple was passed to the function, and was handled well with a TypeError.')
     try:
         spectrafit.build_custom_model(X_TEST, Y_TEST, peaks, 4.2, plot_fits=1)
     except TypeError:
-            print('A float was passed to the function, and it was handled well with a TypeError.')
+        print('A float was passed to the function, and it was handled well with a TypeError.')
     try:
         spectrafit.build_custom_model(X_TEST, Y_TEST, peaks, peaks_add, plot_fits=1)
     except TypeError:
-            print('An int was passed to the function, and was handled well with a TypeError.')
+        print('An int was passed to the function, and was handled well with a TypeError.')
 
 
 def test_apply_old_model():
     """
-    docstring
+    Test function for the `apply_old_model` function from spectrafit. The function applies
+    a set of existing pseudo-Voigt descriptors to the model. It tests that the output
+    contains the correct number of peaks and is the correct type. It ensures that the number
+    of residuals is equivilent to the number of input datapoints and that they are all
+    returned as floats. It also insures that the function properly handles bad arguments.
     """
-    # first build a custom peak list that only contains the pseudo voight descriptors for each peak with
-    # slightly lower initial amplitudes
-    peaks =[(0.68764166, 4.52683284, 355.65041041, 8000, 9.05366569, 687.05133171, 8424.94459088),
-            (0.57765067, 4.40443189, 587.33331331, 18000, 8.80886378, 1878.91168914, 21593.07349362),
-            (0.65921506, 4.44539185, 816.00734735, 3000, 8.8907837, 310.71145822, 3726.8698975),
-            (0.91026426, 4.39010113, 1035.65477477, 2500, 8.78020227, 256.57385316, 3386.98656078)]
-    fit_result, residuals = spectrafit.apply_old_model(X_TEST, Y_TEST, peaks, plot_fits=True)
-    assert len(fit_result) == 4, '4th peak was not successfully added to the model'
+    # first build a custom peak list that only contains the pseudo voight descriptors
+    # for each peak with slightly lower initial amplitudes
+    peaks = [(0.68764166, 4.52683284, 355.65041041, 8000,
+              9.05366569, 687.05133171, 8424.94459088),
+             (0.57765067, 4.40443189, 587.33331331, 18000,
+              8.80886378, 1878.91168914, 21593.07349362),
+             (0.65921506, 4.44539185, 816.00734735, 3000,
+              8.8907837, 310.71145822, 3726.8698975),
+             (0.91026426, 4.39010113, 1035.65477477, 2500,
+              8.78020227, 256.57385316, 3386.98656078)]
+    fit_result, residuals = spectrafit.apply_old_model(X_TEST, Y_TEST, peaks, plot_fits=False)
+    assert len(fit_result) == 4, 'an incorrect number of peaks were added to the model'
     assert isinstance(fit_result, list), '`fit_result` is not a list'
     for i, element in enumerate(fit_result):
-        assert isinstance(element, list), 'element with index {} in fit_result is not a list'.format(i)
+        assert isinstance(element, list), """
+        element with index {} in fit_result is not a list""".format(i)
         assert len(element) == 7, 'index {} in fit_result should have length 7'.format(i)
     assert len(residuals) == len(X_TEST), 'size of `residuals` does not match input data'
-    assert isinstance(residuals[0], np.float64), 'the 1st element in `residuals` is not a np.float64'
+    assert isinstance(residuals[0], np.float64), """
+    the 1st element in `residuals` is not a np.float64"""
     try:
         spectrafit.apply_old_model(4.2, Y_TEST, peaks, plot_fits=True)
     except TypeError:
-            print('A float was passed to the function, and was handled well with a TypeError.')
+        print('A float was passed to the function, and was handled well with a TypeError.')
     try:
         spectrafit.apply_old_model(X_TEST, 'Y_TEST', peaks, plot_fits=True)
     except TypeError:
-            print('A string was passed to the function, and was handled well with a TypeError.')
+        print('A string was passed to the function, and was handled well with a TypeError.')
     try:
         spectrafit.apply_old_model(X_TEST, Y_TEST, (1, 2, 3, 4, 5, 6), plot_fits=True)
     except TypeError:
-            print('A tuple was passed to the function, and was handled well with a TypeError.')
+        print('A tuple was passed to the function, and was handled well with a TypeError.')
     try:
         spectrafit.apply_old_model(X_TEST, Y_TEST, peaks, plot_fits=1)
     except TypeError:
-            print('An int was passed to the function, and was handled well with a TypeError.')
+        print('An int was passed to the function, and was handled well with a TypeError.')
 
 
 def test_superimpose_next():
     """
-    docstring
+    This is a test function for the `superimpose_next` function from spectrafit. It tests
+    to make sure that the function runs without any errors and insures that the function
+    properly handles bad arguments.
     """
     # initialize inputs
     hdf5_filename = 'test_experiement_copy.hdf5'
     existing_key = '300C/25s'
-    new_key = '300C/25s'
+    new_key = '300C/35s'
     # create a copy of test_experiment.hdf5
     copyfile('ramandecompy/tests/test_files/test_experiment.hdf5', hdf5_filename)
     # run function
-    spectrafit.superimpose_next(hdf5_filename, existing_key, new_key, plot_fits=True)
+    spectrafit.superimpose_next(hdf5_filename, existing_key, new_key, plot_fits=False)
     try:
         spectrafit.superimpose_next(4.2, existing_key, new_key, plot_fits=True)
     except TypeError:
@@ -299,3 +333,33 @@ def test_superimpose_next():
     os.remove(hdf5_filename)
 
 
+def test_superimpose_set():
+    """
+    This is a test function for the `superimpose_set` function from spectrafit. It tests
+    to make sure that the function runs without any errors and insures that the function
+    properly handles bad arguments.
+    """
+    # initialize inputs
+    hdf5_filename = 'test_experiement_copy.hdf5'
+    target_key = '300C/25s'
+    # create a copy of test_experiment.hdf5
+    copyfile('ramandecompy/tests/test_files/test_experiment.hdf5', hdf5_filename)
+    # run function
+    spectrafit.superimpose_set(hdf5_filename, target_key, plot_fits=False)
+    try:
+        spectrafit.superimpose_set(4.2, target_key, plot_fits=True)
+    except TypeError:
+        print('A float was passed to the function, and was handled well with a TypeError.')
+    try:
+        spectrafit.superimpose_set(hdf5_filename, 7, plot_fits=True)
+    except TypeError:
+        print('An int was passed to the function, and was handled well with a TypeError.')
+    try:
+        spectrafit.superimpose_set(hdf5_filename, '420C/25s', plot_fits=True)
+    except KeyError:
+        print('An invalid key was passed to the function, and was handled well with a KeyError.')
+    try:
+        spectrafit.superimpose_set(hdf5_filename, target_key, plot_fits=(1, 'foo'))
+    except TypeError:
+        print('A tuple was passed to the function, and was handled well with a TypeError.')
+    os.remove(hdf5_filename)

@@ -9,10 +9,8 @@ Developed by the Raman-Noodles team (2019 DIRECT Cohort, University of Washingto
 
 
 import h5py
-import lineid_plot
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt
 from scipy import interpolate
 from ramandecompy import spectrafit
 
@@ -95,16 +93,18 @@ def add_calibration(hdf5_filename, data_filename, label=None):
         for i, result in enumerate(fit_result):
             # create custom datatype
             my_datatype = np.dtype([('fraction', np.float),
-                        ('center', np.float),
-                        ('sigma', np.float),
-                        ('amplitude', np.float),
-                        ('fwhm', np.float),
-                        ('height', np.float),
-                        ('area under the curve', np.float)])
+                                    ('center', np.float),
+                                    ('sigma', np.float),
+                                    ('amplitude', np.float),
+                                    ('fwhm', np.float),
+                                    ('height', np.float),
+                                    ('area under the curve', np.float)])
             if i < 9:
-                dataset = cal_file.create_dataset('{}/Peak_0{}'.format(label, i+1), (1,), dtype=my_datatype)
+                dataset = cal_file.create_dataset('{}/Peak_0{}'.format(label, i+1),
+                                                  (1,), dtype=my_datatype)
             else:
-                dataset = cal_file.create_dataset('{}/Peak_0{}'.format(label, i+1), (1,), dtype=my_datatype)
+                dataset = cal_file.create_dataset('{}/Peak_0{}'.format(label, i+1),
+                                                  (1,), dtype=my_datatype)
             # apply data to tuple
             data = tuple(result[:7])
             data_array = np.array(data, dtype=my_datatype)
@@ -118,22 +118,25 @@ def add_calibration(hdf5_filename, data_filename, label=None):
         for i, result in enumerate(fit_result):
             # create custom datatype
             my_datatype = np.dtype([('fraction', np.float),
-                        ('center', np.float),
-                        ('sigma', np.float),
-                        ('amplitude', np.float),
-                        ('fwhm', np.float),
-                        ('height', np.float),
-                        ('area under the curve', np.float)])
+                                    ('center', np.float),
+                                    ('sigma', np.float),
+                                    ('amplitude', np.float),
+                                    ('fwhm', np.float),
+                                    ('height', np.float),
+                                    ('area under the curve', np.float)])
             if i < 9:
-                dataset = cal_file.create_dataset('{}/Peak_0{}'.format(label, i+1), (1,), dtype=my_datatype)
+                dataset = cal_file.create_dataset('{}/Peak_0{}'.format(label, i+1),
+                                                  (1,), dtype=my_datatype)
             else:
-                dataset = cal_file.create_dataset('{}/Peak_{}'.format(label, i+1), (1,), dtype=my_datatype)
+                dataset = cal_file.create_dataset('{}/Peak_{}'.format(label, i+1),
+                                                  (1,), dtype=my_datatype)
             # apply data to tuple
             data = tuple(result[:7])
             data_array = np.array(data, dtype=my_datatype)
             # write new values to the blank dataset
             dataset[...] = data_array
-    print('Data from {} fit with compound pseudo-Voigt model. Results saved to {}.'.format(data_filename, hdf5_filename))
+    print("""Data from {} fit with compound pseudo-Voigt model.
+     Results saved to {}.""".format(data_filename, hdf5_filename))
     cal_file.close()
 
 
@@ -190,7 +193,7 @@ def add_experiment(hdf5_filename, exp_filename):
     # peak detection and data fitting
     fit_result, residuals = spectrafit.fit_data(data['wavenumber'].values, data['counts'].values)
     # extract experimental parameters from filename
-    specs = exp_filename.split('/')[-1].split('.')[:-1]
+    specs = exp_filename.split('/')[-1].split('.')[-2]
     if len(specs) > 1:
         spec = ''
         for _, element in enumerate(specs):
@@ -206,22 +209,25 @@ def add_experiment(hdf5_filename, exp_filename):
     for i, result in enumerate(fit_result):
         # create custom datatype
         my_datatype = np.dtype([('fraction', np.float),
-                        ('center', np.float),
-                        ('sigma', np.float),
-                        ('amplitude', np.float),
-                        ('fwhm', np.float),
-                        ('height', np.float),
-                        ('area under the curve', np.float)])
+                                ('center', np.float),
+                                ('sigma', np.float),
+                                ('amplitude', np.float),
+                                ('fwhm', np.float),
+                                ('height', np.float),
+                                ('area under the curve', np.float)])
         if i < 9:
-            dataset = exp_file.create_dataset('{}/{}/Peak_0{}'.format(temp, time, i+1), (1,), dtype=my_datatype)
+            dataset = exp_file.create_dataset('{}/{}/Peak_0{}'.format(temp, time, i+1),
+                                              (1,), dtype=my_datatype)
         else:
-            dataset = exp_file.create_dataset('{}/{}/Peak_{}'.format(temp, time, i+1), (1,), dtype=my_datatype)
+            dataset = exp_file.create_dataset('{}/{}/Peak_{}'.format(temp, time, i+1),
+                                              (1,), dtype=my_datatype)
         # apply data to tuple
         data = tuple(result[:7])
         data_array = np.array(data, dtype=my_datatype)
         # write new values to the blank dataset
         dataset[...] = data_array
-    print('Data from {} fit with compound pseudo-Voigt model. Results saved to {}.'.format(exp_filename, hdf5_filename))
+    print("""Data from {} fit with compound pseudo-Voigt model.
+     Results saved to {}.""".format(exp_filename, hdf5_filename))
     exp_file.close()
 
 
@@ -270,7 +276,7 @@ def adjust_peaks(hdf5_file, key, add_list=None, drop_list=None, plot_fits=False)
                             + str(type(drop_list)))
     if not isinstance(plot_fits, bool):
         raise TypeError('Passed value of `plot_fits` is not a boolean! Instead, it is: '
-                        + str(type(plot_fit)))
+                        + str(type(plot_fits)))
     hdf5 = h5py.File(hdf5_file, 'r+')
     # extract raw x-y data
     x_data = np.asarray(hdf5['{}/{}'.format(key, 'wavenumber')])
@@ -299,7 +305,8 @@ def adjust_peaks(hdf5_file, key, add_list=None, drop_list=None, plot_fits=False)
     else:
         peaks_add = []
     # build new model
-    fit_result, residuals = spectrafit.build_custom_model(x_data, y_data, peaks, peaks_add, plot_fits)
+    fit_result, residuals = spectrafit.build_custom_model(x_data, y_data,
+                                                          peaks, peaks_add, plot_fits)
     # delete old fit data
     del hdf5[key]
     # write data to .hdf5
@@ -309,22 +316,26 @@ def adjust_peaks(hdf5_file, key, add_list=None, drop_list=None, plot_fits=False)
     for i, result in enumerate(fit_result):
         # create custom datatype
         my_datatype = np.dtype([('fraction', np.float),
-                        ('center', np.float),
-                        ('sigma', np.float),
-                        ('amplitude', np.float),
-                        ('fwhm', np.float),
-                        ('height', np.float),
-                        ('area under the curve', np.float)])
+                                ('center', np.float),
+                                ('sigma', np.float),
+                                ('amplitude', np.float),
+                                ('fwhm', np.float),
+                                ('height', np.float),
+                                ('area under the curve', np.float)])
         if len(result) == 7:
             if i < 9:
-                dataset = hdf5.create_dataset('{}/Peak_0{}'.format(key, i+1), (1,), dtype=my_datatype)
+                dataset = hdf5.create_dataset('{}/Peak_0{}'.format(key, i+1),
+                                              (1,), dtype=my_datatype)
             else:
-                dataset = hdf5.create_dataset('{}/Peak_{}'.format(key, i+1), (1,), dtype=my_datatype)
+                dataset = hdf5.create_dataset('{}/Peak_{}'.format(key, i+1),
+                                              (1,), dtype=my_datatype)
         elif len(result) == 8:
             if i < 9:
-                dataset = hdf5.create_dataset('{}/Peak_0{}*'.format(key, i+1), (1,), dtype=my_datatype)
+                dataset = hdf5.create_dataset('{}/Peak_0{}*'.format(key, i+1),
+                                              (1,), dtype=my_datatype)
             else:
-                dataset = hdf5.create_dataset('{}/Peak_{}*'.format(key, i+1), (1,), dtype=my_datatype)
+                dataset = hdf5.create_dataset('{}/Peak_{}*'.format(key, i+1),
+                                              (1,), dtype=my_datatype)
         else:
             print('fit_result for Peak_{} contains an inappropriate number of values'.format(i))
         # apply data to tuple

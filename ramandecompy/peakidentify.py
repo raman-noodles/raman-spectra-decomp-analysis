@@ -1,4 +1,4 @@
-"""This function takes in compounds from a dictionary from shoyu, and, using spectrafit,
+"""This function takes in compounds from a hdf5 file, and, using spectrafit,
 identifies peaks found in both the fed-in known spectra, as well as the unknown spectra
 to be analyzed. From that identification, it then classifies the peaks in the unknown
 spectra based on the fed-in known spectra.
@@ -15,8 +15,29 @@ import pandas as pd
 
 def peak_assignment(unknownhdf5_filename, key, knownhdf5_filename,
                     precision=10, exportlabelinput=True, plot=True):
-    """This function is a wrapper function from which all classification
-    of peaks occurs."""
+    """
+    
+    This function is a wrapper function from which all classification
+    of peaks occurs.
+    
+    Parameters:
+        unknownhdf5_filename (string): filename of experimental file
+        key (string): key within `hdf5_filename` of experimental file
+        knownhdf5_filename (string): filename of calibration file
+        precision (int/float): precision tolerance of peak identification
+        exportlabelinput (bool): A simple True/False boolean input that
+                                determines if the export labels should be
+                                used from external functions
+                                or the internal unknown peak_assignments
+        plot (boolean): A simple True/False boolean input that determines
+                        if the plotting functions should be used to display
+                        the resulting fit for peak assignment.
+
+    Returns:
+        df (DataFrame): DataFrame which contains the peak fitted data and peak descriptors
+                        of the classified spectra based on the fed-in known spectra.
+    
+    """
 
     #Handling errors in inputs.
     if not isinstance(knownhdf5_filename, str):
@@ -122,7 +143,7 @@ def peak_assignment(unknownhdf5_filename, key, knownhdf5_filename,
                                                          known_peaks,
                                                          assignment_matrix,
                                                          knownhdf5_filename)
-    print(unknown_peak_assignments)
+#     print(unknown_peak_assignments)
     peak_labels = []
     for i, _ in enumerate(unknown_peak_assignments):
         peak_labels.append(str(unknown_peak_assignments[i]))
@@ -131,7 +152,7 @@ def peak_assignment(unknownhdf5_filename, key, knownhdf5_filename,
         frames.append(add_label(unknownhdf5_filename,
                                 key, peak, peak_labels[j]))
          
-    df = pd.concat(frames,axis=1, join='outer', join_axes=None, ignore_index=False,
+    df = pd.concat(frames,axis=1, join='outer', join_axes=None, ignore_index=True,
               keys=None, levels=None, names=None, verify_integrity=False,
               copy=True,sort=True)
     df =df.T
@@ -155,9 +176,23 @@ def peak_assignment(unknownhdf5_filename, key, knownhdf5_filename,
     return df
 
 def compare_unknown_to_known(unknown_peaks, known_peaks, precision):
-    """This function takes in peak positions for the spectrum to be
+    """
+    This function takes in peak positions for the spectrum to be
     analyzed and a single known compound and determines if the peaks
-    found in the known compound are present in the unknown spectrum."""
+    found in the known compound are present in the unknown spectrum.
+    
+    Parameters:
+        unknown_peaks (list like): list of unknown peaks from experimental file
+        known_peaks (list like): list of known peaks from calibration file
+        precision (int): precision tolerance of peak identification 
+
+    Returns:
+        assignment_matrix (list): binary list for determining if the peaks
+                                  found in the known compound are present
+                                  in the unknown spectrum.
+    
+    
+    """
 
     #Handling errors in inputs.
     if not isinstance(unknown_peaks, list):
@@ -197,17 +232,33 @@ def compare_unknown_to_known(unknown_peaks, known_peaks, precision):
 
     return assignment_matrix
 
-def peak_position_comparisons(unknown_peaks, known_compound_peaks,
+def peak_position_comparisons(unknown_peaks, known_peaks,
                               association_matrix,
                               knownhdf5_filename):
-    """This function takes in an association matrix and turns the numbers
-    given by said matrix into a text label."""
+    """
+    This function takes in an association matrix and turns the numbers
+    given by said matrix into a text label.
+    
+    Parameters:
+        unknown_peaks (list like): list of unknown peaks from experimental file
+        known_peaks (list like): list of known peaks from calibration file
+        association_matrix (list): binary list for determining if the peaks
+                                  found in the known compound are present
+                                  in the unknown spectrum.
+        knownhdf5_filename (string): filename of calibration file
+
+    Returns:
+        unknown_peak_assignment (list): list of text labels associated with the
+                                        binary numbers given by association matrix
+    
+    
+    """
 
     #Handling errors in inputs.
     if not isinstance(unknown_peaks, list):
         raise TypeError("""Passed value of `unknown_peaks` is not a list!
         Instead, it is: """ + str(type(unknown_peaks)))
-    if not isinstance(known_compound_peaks, list):
+    if not isinstance(known_peaks, list):
         raise TypeError("""Passed value of `known_compound_peaks` is not a list!
         Instead, it is: """ + str(type(known_compound_peaks)))
     if not isinstance(knownhdf5_filename, str):
@@ -247,7 +298,7 @@ def peak_position_comparisons(unknown_peaks, known_compound_peaks,
         position_assignment = []
         # We'll need an outer loop that walks through
         # all the different compound positions
-        for j, _ in enumerate(known_compound_peaks):
+        for j, _ in enumerate(known_peaks):
             if association_matrix[j][i] == 1:
                 position_assignment.append(known_compound_list[j])
             else:
@@ -262,9 +313,24 @@ def peak_position_comparisons(unknown_peaks, known_compound_peaks,
 
 
 def percentage_of_peaks_found(known_peaks, association_matrix, knownhdf5_filename):
-    """This function takes in a list of classified peaks, and returns a percentage of
+    """
+    
+    This function takes in a list of classified peaks, and returns a percentage of
     how many of the material's peaks are found in the unknown spectrum.
-    This can be used as a metric of confidence."""
+    This can be used as a metric of confidence.
+    
+    Parameters:
+        known_peaks (list like): list of known peaks from calibration file
+        association_matrix (list): binary list for determining if the peaks
+                                  found in the known compound are present
+                                  in the unknown spectrum.
+        knownhdf5_filename (string): filename of calibration file
+
+    Returns:
+        percentage_dict(dict): DataFrame 
+    
+    
+    """
 
     #Handle bad inputs
     if not isinstance(known_peaks, list):
@@ -311,8 +377,33 @@ def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
                               unknown_peak_assignments, unknownhdf5_filename,
                               knownhdf5_filename, key, peak_labels,
                               exportlabelinput=True, plot = True):
-    """This function plots a set of unknown peaks, and plots the assigned
-    classification given by the functions within peakassignment"""
+    """
+    This function plots a set of unknown peaks, and plots the assigned
+    classification given by the functions within peakassignment
+    
+    Parameters:
+        unknown_x (list like): list of unknown x data for wavenumbers from experimental file
+        unknown_y (list like): list of unknown y data for wavenumbers from experimental file
+        unknown_peaks (list like): list of unknown peaks from experimental file
+        unknown_peak_assignment (list): list of text labels associated with the
+                                        binary numbers given by association matrix
+        unknownhdf5_filename (string): filename of experimental file
+        knownhdf5_filename (string): filename of calibration file
+        key (string): key within `hdf5_filename` of experimental file
+        peak_labels (list): List of strings from unknown_peak_assignment
+                            that are used in lineidplot.
+        exportlabelinput (bool): A simple True/False boolean input that
+                                determines if the export labels should be
+                                used from external functions
+                                or the internal unknown peak_assignments
+        plot (boolean): A simple True/False boolean input that determines
+                        if the plotting functions should be used to display
+                        the resulting fit for peak assignment.
+
+    Returns: 
+        None, just plots
+    
+    """
 
     #Handling errors in inputs.
     if not isinstance(unknown_peaks, list):
@@ -389,7 +480,7 @@ def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
             peak_labels = []
             for i, _ in enumerate(unknown_peak_assignments):
                 peak_labels.append(str(unknown_peak_assignments[i]))
-        print(peak_labels)
+#         print(peak_labels)
         # plot spectra and peak labels
         fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True,
                                        gridspec_kw={'height_ratios': [3, 1]},
@@ -407,7 +498,7 @@ def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
         # Titles and labels
         ax2.set_xlabel('Wavenumber ($cm^{-1}$)', fontsize=14)
         ax1.set_xlim(min(x_data), max(x_data))
-        ax1.set_ylabel('Counts', fontsize=14, labelpad=20)
+        ax1.set_ylabel('Intensity (arb. units)', fontsize=14, labelpad=20)
         ax2.set_ylabel('Residuals', fontsize=14, labelpad=12)
         # scale residuals plot symmetrically about zero
         ylim = max(abs(min(residuals)), abs(max(residuals)))
@@ -418,13 +509,30 @@ def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
         ax1.tick_params(axis='both', which='both', labelsize=10, labelbottom=True)
         # add title
         ax1.set_title('{} spectra from {}'.format(key, unknownhdf5_filename),
-                      fontsize=18, pad=350)
+                      fontsize=18, pad=250)
         plt.show()
     knhdf5.close()
     unhdf5.close()
 
 def add_label(hdf5_filename, key, peak, label):
-    """Function that adds a label to a peak dataset in the hdf5 file
+    """
+    
+    Function that adds a label to a peak dataset in the hdf5 file.It
+    has to be iterated over every single peak.
+    
+    Parameters:
+        hdf5_filename (string): filename of experimental file
+        key (string): key within `hdf5_filename` of experimental file
+        peak (string): string name of 'Peak_0#" associated with the peak list
+                       containing tuples of the x_data (wavenumber) and
+                       y_data (counts) values of the peaks.
+        label (string): string name from unknown_peak_assignment
+                            that are used in lineidplot.
+
+    Returns:
+        df (DataFrame): DataFrame which contains the peak fitted data and peak descriptors
+                        of each classified peak based on the fed-in known spectra.
+    
     """
     #Handling errors in inputs.
     if not isinstance(hdf5_filename, str):
@@ -434,10 +542,7 @@ def add_label(hdf5_filename, key, peak, label):
         raise TypeError("""`hdf5_filename` is not type = .hdf5!
         Instead, it is: """ + hdf5_filename.split('/')[-1].split('.')[-1])
     if not isinstance(key, str):
-        raise TypeError("""Passed value of `key` is not a int!
-        Instead, it is: """ + str(type(key)))
-    if not isinstance(key, str):
-        raise TypeError("""Passed value of `key` is not a int!
+        raise TypeError("""Passed value of `key` is not a str!
         Instead, it is: """ + str(type(key)))
     if not isinstance(peak, str):
         raise TypeError("""Passed value of `peak` is not a string!
@@ -469,7 +574,7 @@ def add_label(hdf5_filename, key, peak, label):
                                   (1,), dtype=my_datatype)
     # apply custom dtype to data tuple
 #     print(dataset)
-    print(data)
+#     print(data)
 #     print(my_datatype)
     data_array = np.array(data, dtype=my_datatype)
     # write new values to the blank dataset
@@ -600,8 +705,21 @@ def score_sort(row_i, row_j, k, precision):
     sortedscores.sort()
 
     return sortedscores
+
 def process_score(unknown_peaks,known_peaks,k, precision, unknownname, knownname):
-    "documentation"
+    """
+    Returns DataFrame with peaks and scores normalized over different peak highest scores
+
+    Parameters:
+        unknown_peaks (list like): list of unknown peaks from experimental file
+        known_compound_peaks (list like): list of known peaks from each compound from calibration file
+        precision (int): precision tolerance of peak identification
+        unknownname (string): name of unknown peak from calibration file
+        knownname (string): name of known peak from calibration file
+
+    Returns:
+        compdf (DataFrame): DataFrame with peaks and scores normalized over different peak highest scores
+    """
     if k<len(known_peaks)+1:
         compdf=pd.DataFrame(data=score_sort(unknown_peaks,known_peaks,k, precision)[0][0][:],
                             columns=[str(unknownname)+'_vs_'+str(knownname)+'_peak_Scores normalized over the #'+
@@ -612,8 +730,21 @@ def process_score(unknown_peaks,known_peaks,k, precision, unknownname, knownname
                             columns=[str(unknownname)+'_vs_'+str(knownname)+'_peak_Scores Unnormalized'])
         compdf=compdf.assign(Peaks=score_sort(unknown_peaks,known_peaks,1, precision)[0][1][:])
     return compdf
+
 def score_table(unknown_peaks,known_peaks, precision,unknownname,knownname):
-    "documentation"
+    """
+    Returns table of scores from process score dataFrame
+
+    Parameters:
+        unknown_peaks (list like): list of unknown peaks from experimental file
+        known_compound_peaks (list like): list of known peaks from each compound from calibration file
+        precision (int): precision tolerance of peak identification
+        unknownname (string): name of unknown peak from calibration file
+        knownname (string): name of known peak from calibration file
+
+    Returns:
+        result (DataFrame): sorted score table
+    """
     k_range = range(1,len(known_peaks)+2)
     frames = [ process_score(unknown_peaks,known_peaks,k, precision,unknownname,knownname) for k in k_range ]
     result = pd.concat(frames,axis=1, join='outer', join_axes=None, ignore_index=False,
