@@ -6,25 +6,19 @@ with peak fitting descriptors to be used in either molar decomposition
 or machine learning applications.
  """
 
-import math
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
-import lineid_plot
 import pandas as pd
 from scipy import interpolate
 from ramandecompy import spectrafit
-from ramandecompy import peakidentify
-from ramandecompy import dataprep
-from ramandecompy import datavis
-from ramandecompy import dataimport
 
 
 def interp_and_norm(hdf5_filename, compound):
     """
     This function interpolates and normalizes wavenumber and counts data for the specified
     compound in an hdf5 calibration file.
-    
+
     Args:
         hdf5_filename (str): The name and location of the relevant hdf5 calibration datafile.
         compound (str): The compound key in the hdf5 calibration datafile.
@@ -60,13 +54,13 @@ def interp_and_norm(hdf5_filename, compound):
     return tuple_list
 
 
-def apply_scaling(tuple_list, j, i ,target_index):
+def apply_scaling(tuple_list, j, i, target_index):
     """
     A function that applies a random scaling to a calibration spectra after
     it has been interpolated and normalized. Every other `j` index will contain
-    the target compound corresponding to the 'target_index' in the list of 
+    the target compound corresponding to the 'target_index' in the list of
     calibration spectra.
-    
+
     Args:
         tuple_list (list): A list of x-y data tuples for the calibration spectra
         j (int): This index is used to determine whether or not the target compound
@@ -76,7 +70,7 @@ def apply_scaling(tuple_list, j, i ,target_index):
         i (int): This index is used to determine which compound in the list the scaling
                  should be applied to.
         target_index (int): The index in the compound list that corresponds to the target
-    
+
     Returns:
         scaled_tuple_list (list). A list of randomly scaled x-y data tuples for the
                                   specific the calibration spectra.
@@ -112,7 +106,7 @@ def apply_scaling(tuple_list, j, i ,target_index):
         if i == target_index:
             y_data_scaled = y_data*0
         else:
-            y_data_scaled = y_data*np.random.uniform() 
+            y_data_scaled = y_data*np.random.uniform()
     else:
         pass
     # repack tuple_list
@@ -126,17 +120,18 @@ def generate_spectra_dataset(hdf5_filename, target_compound, spectra_count):
     and specifies a specific component that will be contained in 50% of spectra and omitted from
     the remaining 50%. In this way machine learning methods can be used for component identification
     when all possible components of a mixture are known and calibration files exist.
-    
+
     Args:
         hdf5_filename (str): The name and location of the relevant hdf5 calibration datafile.
         target_compound (str): The compound key in the hdf5 calibration datafile.
         spectra_count (int): The desired number of spectra to generate.
 
     Returns:
-        x_data (list): A list containing identical x_data points for each spectra. Useful for plotting
+        x_data (list): A list containing identical x_data points for each spectra.
+                       Useful for plotting.
         y_data (list): A list containing the y_data points for each generated spectra.
-        labels (list): A list of 0s and 1s where 0 corresponds to no target_compound present and 1 
-                       indicating the target_compound is present in the compound. 
+        labels (list): A list of 0s and 1s where 0 corresponds to no target_compound present and 1
+                       indicating the target_compound is present in the compound.
     """
     # handling input errors
     if not isinstance(hdf5_filename, str):
@@ -152,7 +147,7 @@ def generate_spectra_dataset(hdf5_filename, target_compound, spectra_count):
         raise TypeError('Passed value of `spectra_count` is not an int! Instead, it is: '
                         + str(type(spectra_count)))
     if spectra_count <= 0:
-            raise ValueError('`spectra_count` must be an integer with a value greater than zero')
+        raise ValueError('`spectra_count` must be an integer with a value greater than zero')
     hdf5 = h5py.File(hdf5_filename, 'r')
     # get list of compounds from hdf5 file
     compound_list = list(hdf5.keys())
@@ -168,7 +163,7 @@ def generate_spectra_dataset(hdf5_filename, target_compound, spectra_count):
     x_data = []
     y_data = []
     label = []
-    for j in range(spectra_count): 
+    for j in range(spectra_count):
         # apply scaling to interpolated list
         for i, tuple_list in enumerate(interp_list):
             if i == 0:
@@ -177,7 +172,7 @@ def generate_spectra_dataset(hdf5_filename, target_compound, spectra_count):
                 summed_tuples = scaled_tuple_list
             else:
                 # apply scaling
-                scaled_tuple_list = apply_scaling(tuple_list, j, i, target_index)    
+                scaled_tuple_list = apply_scaling(tuple_list, j, i, target_index)
                 summed_tuples = summed_tuples + scaled_tuple_list
         # sort by wavenumber
         combined = sorted(summed_tuples)
@@ -265,7 +260,7 @@ def interpolatedfit(hdf5_filename, key, x_data, y_data, label, num):
     Returns:
         df (DataFrame): DataFrame which contains the peak fitted data and peak descriptors
                         of the classified interpolated spectra for each iteration of spectra_counts
-                        for each target compound in the compound list of the calibration file. 
+                        for each target compound in the compound list of the calibration file.
     """
     # handling input errors
     if not isinstance(hdf5_filename, str):
@@ -291,7 +286,7 @@ def interpolatedfit(hdf5_filename, key, x_data, y_data, label, num):
         Instead, it is: """ + str(type(num)))
     # r+ is read/write mode and will fail if the file does not exist
     exp_file = h5py.File(hdf5_filename, 'r+')
-    # peak detection and data fitting   
+    # peak detection and data fitting
     fit_result, residuals = spectrafit.fit_data(x_data[num], y_data[num])
     # write data to .hdf5
     exp_file['{}/{}/wavenumber'.format(key, num)] = x_data[num]
@@ -302,16 +297,18 @@ def interpolatedfit(hdf5_filename, key, x_data, y_data, label, num):
     for i, result in enumerate(fit_result):
         # create custom datatype
         my_datatype = np.dtype([('fraction', np.float),
-                        ('center', np.float),
-                        ('sigma', np.float),
-                        ('amplitude', np.float),
-                        ('fwhm', np.float),
-                        ('height', np.float),
-                        ('area under the curve', np.float)])
+                                ('center', np.float),
+                                ('sigma', np.float),
+                                ('amplitude', np.float),
+                                ('fwhm', np.float),
+                                ('height', np.float),
+                                ('area under the curve', np.float)])
         if i < 9:
-            dataset = exp_file.create_dataset('{}/{}/Peak_0{}'.format(key, num, i+1), (1,), dtype=my_datatype)
+            dataset = exp_file.create_dataset('{}/{}/Peak_0{}'.format(key, num, i+1),
+                                              (1,), dtype=my_datatype)
         else:
-            dataset = exp_file.create_dataset('{}/{}/Peak_{}'.format(key, num, i+1), (1,), dtype=my_datatype)
+            dataset = exp_file.create_dataset('{}/{}/Peak_{}'.format(key, num, i+1),
+                                              (1,), dtype=my_datatype)
         # apply data to tuple
         data = tuple(result[:7])
         data_array = np.array(data, dtype=my_datatype)
@@ -320,17 +317,17 @@ def interpolatedfit(hdf5_filename, key, x_data, y_data, label, num):
     print("""Data from fit with compound pseudo-Voigt model.
           Results saved to {}.""".format(hdf5_filename))
     exp_file.close()
-    df = pd.DataFrame(data)
-    return df
+    dataframe = pd.DataFrame(data)
+    return dataframe
 
 
 def combined_interpolatedfit(hdf5_interpfilename, hdf5_calfilename, spectra_count):
     """
     This function combines the interpolated spectra generated previously and spectrafits them.
-    It returns a list of DataFrames which contains the peak fitted data and peak descriptors of the 
-    interpolated spectra for each iteration of spectra_counts for each target compound in 
-    the compound list of the calibration file. Therefore, this function iterates over of spectra_counts
-    for each target compound in the compound list of the calibration file
+    It returns a list of DataFrames which contains the peak fitted data and peak descriptors of the
+    interpolated spectra for each iteration of spectra_counts for each target compound in
+    the compound list of the calibration file. Therefore, this function iterates over of
+    spectra_counts for each target compound in the compound list of the calibration file
 
     Args:
         hdf5_interpfilename (str): the filename and location of an existing hdf5 file to add the
@@ -338,7 +335,6 @@ def combined_interpolatedfit(hdf5_interpfilename, hdf5_calfilename, spectra_coun
         hdf5_calfilename (str): the filename and location of an existing hdf5 file with
                              calibration data to compare.
         spectra_count (int): number of spectra to be counted.
-                             
 
     Returns:
         frames (list): list of DataFrames which contain the peak fitted datapeak descriptors
@@ -347,7 +343,7 @@ def combined_interpolatedfit(hdf5_interpfilename, hdf5_calfilename, spectra_coun
     """
     if not isinstance(hdf5_interpfilename, str):
         raise TypeError("""Passed value of `hdf5_interpfilename` is not a string!
-        Instead, it is: """+ str(type(knownhdf5_filename)))
+        Instead, it is: """+ str(type(knownhdf5_interpfilename)))
     if not hdf5_interpfilename.split('/')[-1].split('.')[-1] == 'hdf5':
         raise TypeError("""`hdf5_interpfilename` is not type = .hdf5!
         Instead, it is: """+ hdf5_interpfilename.split('/')[-1].split('.')[-1])
@@ -369,11 +365,14 @@ def combined_interpolatedfit(hdf5_interpfilename, hdf5_calfilename, spectra_coun
     print(compound_list)
     for _, target_compound in enumerate(compound_list):
         # Generate interpolated spectra
-        x_data, y_data, labels = generate_spectra_dataset(hdf5_calfilename, target_compound, spectra_count)
+        x_data, y_data, labels = generate_spectra_dataset(hdf5_calfilename,
+                                                          target_compound,
+                                                          spectra_count)
         y_data_list.append(y_data)
         x_data_list.append(x_data)
         for i, label in enumerate(labels):
             # Generate peak fitted dataframes and descriptors
-            interpdf = interpolatedfit(hdf5_interpfilename, 'interp_'+target_compound, x_data, y_data, label, i) 
+            interpdf = interpolatedfit(hdf5_interpfilename, 'interp_'+target_compound,
+                                       x_data, y_data, label, i)
             frames.append(interpdf)
     return frames
