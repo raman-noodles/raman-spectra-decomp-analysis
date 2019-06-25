@@ -13,7 +13,7 @@ def test_data_import():
     This function tests the operation of the peak_assignment
     function in peakidentify.py
     """
-    dataprep.new_hdf5('exp_test')
+    dataprep.new_hdf5('exp_test_3')
     dataprep.add_experiment('exp_test.hdf5', 'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
     exp_file = h5py.File('exp_test.hdf5', 'r')
     # test generated file
@@ -37,4 +37,4 @@ def test_data_import():
         dataprep.add_experiment('exp_test.txt', 'ramandecompy/tests/test_files/CarbonMonoxide_Baseline_Calibration')
     except TypeError:
         print('A .txt file was passed to the function, and it was handled will with a TypeError.')
-    os.remove('exp_test.hdf5')
+    os.remove('exp_test_3.hdf5')

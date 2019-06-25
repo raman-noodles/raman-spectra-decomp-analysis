@@ -159,31 +159,37 @@ def polygon_under_graph(xlist, ylist):
 
 def plot_temp(hdf5_filename, temp):
     """
-    docstring
+    A function that generates a 3D plot including all the residence time data for that temp
     """
     # open hdf5_file
     hdf5 = h5py.File(hdf5_filename, 'r')
     # intialize 3D plot
-    fig = plt.figure(figsize=(20,6))
+    fig = plt.figure(figsize=(12,4))
     ax = fig.add_subplot(111, projection='3d')
     # plot raw spectra data from hdf5 file
+    y_ticks = []
     for _, time in enumerate(list(hdf5['{}C'.format(temp)].keys())):
         x_data = list(hdf5['{}C/{}/wavenumber'.format(temp, time)])
         y_data = list(hdf5['{}C/{}/counts'.format(temp, time)]) 
         ax.plot(x_data, y_data, zs=int(time[:-1]), zdir='y', c='blue', linewidth=0.75, alpha=0.7)
+        y_ticks.append(int(time[:-1]))
     # assign orientation and labels
-    ax.view_init(30, -100)
-    ax.set_xlabel('Wavenumber', fontsize=12, labelpad=20)
-    ax.set_ylabel('Residence Time', fontsize=12, labelpad=10)
-    ax.set_zlabel('Counts', fontsize=12, labelpad=10)
-    ax.set_title('Spectra @ {}C'.format(temp), fontsize=18)
+    ax.view_init(19, -96)
+    ax.set_xlabel('Wavenumber ($cm^{-1}$)', fontsize=8, labelpad=20)
+    ax.set_xlim(min(x_data), max(x_data))
+    ax.set_ylabel('Residence Time (s)', fontsize=8, labelpad=10)
+    ax.set_zlabel('Intensity (arb. units)', fontsize=8, labelpad=10)
+    plt.tick_params(labelsize=6)
+    ax.set_yticks(y_ticks)
+    # create a title
+    ax.set_title('Spectra @ {}C'.format(temp), fontsize=14)
     hdf5.close()
     return fig, ax
 
 
 def plot_3D_component(ax, hdf5_filename, temp, peak_number):
     """
-    docstring
+    A function that plots the pseudo-Voight profile for a specific peak (by number)
     """
     # open hdf5_file
     hdf5 = h5py.File(hdf5_filename, 'r')

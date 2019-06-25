@@ -70,7 +70,7 @@ def test_add_experiment():
     proper number of peaks were saved as well as the wavenumber, counts, and residuals.
     Lastly it ensures that input errors are handled well.
     """
-    dataprep.new_hdf5('exp_test')
+    dataprep.new_hdf5('exp_test_1')
     dataprep.add_experiment('exp_test.hdf5',
                             'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
     exp_file = h5py.File('exp_test.hdf5', 'r')
@@ -98,7 +98,7 @@ def test_add_experiment():
         test_files/CarbonMonoxide_Baseline_Calibration""")
     except TypeError:
         print('A .txt file was passed to the function, and it was handled will with a TypeError.')
-    os.remove('exp_test.hdf5')
+    os.remove('exp_test_1.hdf5')
 
 
 def test_adjust_peaks():
@@ -108,7 +108,7 @@ def test_adjust_peaks():
     errors are handled well.
     """
     # generate test hdf5 file
-    dataprep.new_hdf5('exp_test')
+    dataprep.new_hdf5('exp_test_2')
     dataprep.add_experiment('exp_test.hdf5', 'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
     # peaks to add and drop form auto-fitting
     add_list = [1270, 1350, 1385]
@@ -139,7 +139,7 @@ def test_adjust_peaks():
         dataprep.adjust_peaks('exp_test.hdf5', '300C/25s', add_list, drop_list, plot_fits=3)
     except TypeError:
         print('An int was passed to the function, and it was handled well with a TypeError.')
-    os.remove('exp_test.hdf5')
+    os.remove('exp_test_2.hdf5')
 
 
 def test_view_hdf5():
