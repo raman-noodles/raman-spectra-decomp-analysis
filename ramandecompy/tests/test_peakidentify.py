@@ -12,13 +12,13 @@ hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.
 hdf5_expfilename = 'ramandecompy/tests/test_files/peakidentify_experiment_test.hdf5'
 key = '300C/25s'
 calhdf5 = h5py.File(hdf5_calfilename, 'r')
-exphdf5 = h5py.File(hdf5_expfilename, 'r') 
+exphdf5 = h5py.File(hdf5_expfilename, 'r+') 
 hdf5_filename = 'ramandecompy/tests/test_files/peakidentify_add_label_test.hdf5'
 key = '300C/25s'
 peak = 'Peak_01'
 label = '[Hydrogen]'
 # open hdf5 file as read/write
-hdf5 = h5py.File(hdf5_filename, 'r')
+hdf5 = h5py.File(hdf5_filename, 'r+')
 
 def test_peak_assignment():
     """
@@ -30,7 +30,7 @@ def test_peak_assignment():
     hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'ramandecompy/tests/test_files/peakidentify_experiment_test.hdf5'
     key = '300C/25s'
-    calhdf5 = h5py.File(hdf5_calfilename, 'r+')
+    calhdf5 = h5py.File(hdf5_calfilename, 'r')
     exphdf5 = h5py.File(hdf5_expfilename, 'r+')
     unknown_x = list(exphdf5['{}/wavenumber'.format(key)])
     unknown_y = list(exphdf5['{}/counts'.format(key)])
@@ -93,7 +93,7 @@ def test_compare_unknown_to_known():
     hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'ramandecompy/tests/test_files/peakidentify_experiment_test.hdf5'
     key = '300C/25s'
-    calhdf5 = h5py.File(hdf5_calfilename, 'r+')
+    calhdf5 = h5py.File(hdf5_calfilename, 'r')
     exphdf5 = h5py.File(hdf5_expfilename, 'r+')
     unknown_x = list(exphdf5['{}/wavenumber'.format(key)])
     unknown_y = list(exphdf5['{}/counts'.format(key)])
@@ -170,7 +170,7 @@ def test_peak_position_comparisons():
     hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'ramandecompy/tests/test_files/peakidentify_experiment_test.hdf5'
     key = '300C/25s'
-    calhdf5 = h5py.File(hdf5_calfilename, 'r+')
+    calhdf5 = h5py.File(hdf5_calfilename, 'r')
     exphdf5 = h5py.File(hdf5_expfilename, 'r+')
     unknown_x = list(exphdf5['{}/wavenumber'.format(key)])
     unknown_y = list(exphdf5['{}/counts'.format(key)])
@@ -298,7 +298,7 @@ def test_percentage_of_peaks_found():
     hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'ramandecompy/tests/test_files/peakidentify_experiment_test.hdf5'
     key = '300C/25s'
-    calhdf5 = h5py.File(hdf5_calfilename, 'r+')
+    calhdf5 = h5py.File(hdf5_calfilename, 'r')
     exphdf5 = h5py.File(hdf5_expfilename, 'r+')
     unknown_x = list(exphdf5['{}/wavenumber'.format(key)])
     unknown_y = list(exphdf5['{}/counts'.format(key)])
@@ -411,7 +411,7 @@ def test_plotting_peak_assignments():
     hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'ramandecompy/tests/test_files/peakidentify_experiment_test.hdf5'
     key = '300C/25s'
-    calhdf5 = h5py.File(hdf5_calfilename, 'r+')
+    calhdf5 = h5py.File(hdf5_calfilename, 'r')
     exphdf5 = h5py.File(hdf5_expfilename, 'r+')
     unknown_x = list(exphdf5['{}/wavenumber'.format(key)])
     unknown_y = list(exphdf5['{}/counts'.format(key)])
@@ -759,7 +759,7 @@ def test_process_score():
     hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'ramandecompy/tests/test_files/peakidentify_experiment_test.hdf5'
     key = '300C/25s'
-    calhdf5 = h5py.File(hdf5_calfilename, 'r+')
+    calhdf5 = h5py.File(hdf5_calfilename, 'r')
     exphdf5 = h5py.File(hdf5_expfilename, 'r+')
     unknown_x = list(exphdf5['{}/wavenumber'.format(key)])
     unknown_y = list(exphdf5['{}/counts'.format(key)])
@@ -846,7 +846,7 @@ def test_score_table():
     hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'ramandecompy/tests/test_files/peakidentify_experiment_test.hdf5'
     key = '300C/25s'
-    calhdf5 = h5py.File(hdf5_calfilename, 'r+')
+    calhdf5 = h5py.File(hdf5_calfilename, 'r')
     exphdf5 = h5py.File(hdf5_expfilename, 'r+')
     unknown_x = list(exphdf5['{}/wavenumber'.format(key)])
     unknown_y = list(exphdf5['{}/counts'.format(key)])
