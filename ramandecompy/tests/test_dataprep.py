@@ -71,9 +71,9 @@ def test_add_experiment():
     Lastly it ensures that input errors are handled well.
     """
     dataprep.new_hdf5('exp_test_1')
-    dataprep.add_experiment('exp_test.hdf5',
+    dataprep.add_experiment('exp_test_1.hdf5',
                             'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
-    exp_file = h5py.File('exp_test.hdf5', 'r')
+    exp_file = h5py.File('exp_test_1.hdf5', 'r')
     # test generated file
     assert len(exp_file) == 1, 'incorrect number of 1st order groups'
     assert list(exp_file.keys())[0] == '300C', '1st order group name incorrect'
@@ -90,11 +90,11 @@ def test_add_experiment():
     except TypeError:
         print('A float was passed to the function, and it was handled well with a TypeError.')
     try:
-        dataprep.add_experiment('exp_test.hdp5', 4.2)
+        dataprep.add_experiment('exp_test_1.hdp5', 4.2)
     except TypeError:
         print('A float was passed to the function, and it was handled well with a TypeError.')
     try:
-        dataprep.add_experiment('exp_test.txt', """ramandecompy/tests/
+        dataprep.add_experiment('exp_test_1.txt', """ramandecompy/tests/
         test_files/CarbonMonoxide_Baseline_Calibration""")
     except TypeError:
         print('A .txt file was passed to the function, and it was handled will with a TypeError.')
@@ -109,34 +109,34 @@ def test_adjust_peaks():
     """
     # generate test hdf5 file
     dataprep.new_hdf5('exp_test_2')
-    dataprep.add_experiment('exp_test.hdf5', 'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
+    dataprep.add_experiment('exp_test_2.hdf5', 'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
     # peaks to add and drop form auto-fitting
     add_list = [1270, 1350, 1385]
     drop_list = ['Peak_01']
-    dataprep.adjust_peaks('exp_test.hdf5', '300C/25s', add_list, drop_list)
+    dataprep.adjust_peaks('exp_test_2.hdf5', '300C/25s', add_list, drop_list)
     try:
         dataprep.adjust_peaks(4.2, '300C/25s', add_list, drop_list, plot_fits=True)
     except TypeError:
         print('A float was passed to the function, and it was handled well with a TypeError.')
     try:
-        dataprep.adjust_peaks('exp_test.txt', '300C/25s', add_list, drop_list, plot_fits=True)
+        dataprep.adjust_peaks('exp_test_2.txt', '300C/25s', add_list, drop_list, plot_fits=True)
     except TypeError:
         print('A .txt was passed to the function, and it was handled well with a TypeError.')
     try:
-        dataprep.adjust_peaks('exp_test.hdf5', ['300C/25s', '400C/25s'],
+        dataprep.adjust_peaks('exp_test_2.hdf5', ['300C/25s', '400C/25s'],
                               add_list, drop_list, plot_fits=True)
     except TypeError:
         print('A list was passed to the function, and it was handled well with a TypeError.')
     try:
-        dataprep.adjust_peaks('exp_test.hdf5', '300C/25s', 'add_list', drop_list, plot_fits=True)
+        dataprep.adjust_peaks('exp_test_2.hdf5', '300C/25s', 'add_list', drop_list, plot_fits=True)
     except TypeError:
         print('A str was passed to the function, and it was handled well with a TypeError.')
     try:
-        dataprep.adjust_peaks('exp_test.hdf5', '300C/25s', add_list, 'drop_list', plot_fits=True)
+        dataprep.adjust_peaks('exp_test_2.hdf5', '300C/25s', add_list, 'drop_list', plot_fits=True)
     except TypeError:
         print('A str was passed to the function, and it was handled well with a TypeError.')
     try:
-        dataprep.adjust_peaks('exp_test.hdf5', '300C/25s', add_list, drop_list, plot_fits=3)
+        dataprep.adjust_peaks('exp_test_2.hdf5', '300C/25s', add_list, drop_list, plot_fits=3)
     except TypeError:
         print('An int was passed to the function, and it was handled well with a TypeError.')
     os.remove('exp_test_2.hdf5')

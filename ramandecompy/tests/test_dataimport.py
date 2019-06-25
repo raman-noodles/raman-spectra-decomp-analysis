@@ -14,8 +14,8 @@ def test_data_import():
     function in peakidentify.py
     """
     dataprep.new_hdf5('exp_test_3')
-    dataprep.add_experiment('exp_test.hdf5', 'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
-    exp_file = h5py.File('exp_test.hdf5', 'r')
+    dataprep.add_experiment('exp_test_3.hdf5', 'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
+    exp_file = h5py.File('exp_test_3.hdf5', 'r')
     # test generated file
     assert len(exp_file) == 1, 'incorrect number of 1st order groups'
     assert list(exp_file.keys())[0] == '300C', '1st order group name incorrect'
@@ -30,11 +30,11 @@ def test_data_import():
     except TypeError:
         print('A float was passed to the function, and it was handled well with a TypeError.')
     try:
-        dataprep.add_experiment('exp_test.hdp5', 4.2)
+        dataprep.add_experiment('exp_test_3.hdp5', 4.2)
     except TypeError:
         print('A float was passed to the function, and it was handled well with a TypeError.')
     try:
-        dataprep.add_experiment('exp_test.txt', 'ramandecompy/tests/test_files/CarbonMonoxide_Baseline_Calibration')
+        dataprep.add_experiment('exp_test_3.txt', 'ramandecompy/tests/test_files/CarbonMonoxide_Baseline_Calibration')
     except TypeError:
         print('A .txt file was passed to the function, and it was handled will with a TypeError.')
     os.remove('exp_test_3.hdf5')

@@ -11,14 +11,15 @@ from ramandecompy import dataprep
 hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
 hdf5_expfilename = 'ramandecompy/tests/test_files/peakidentify_experiment_test.hdf5'
 key = '300C/25s'
-calhdf5 = h5py.File(hdf5_calfilename, 'r+')
-exphdf5 = h5py.File(hdf5_expfilename, 'r+') 
+calhdf5 = h5py.File(hdf5_calfilename, 'r')
+exphdf5 = h5py.File(hdf5_expfilename, 'r') 
 hdf5_filename = 'ramandecompy/tests/test_files/peakidentify_add_label_test.hdf5'
 key = '300C/25s'
 peak = 'Peak_01'
 label = '[Hydrogen]'
 # open hdf5 file as read/write
-hdf5 = h5py.File(hdf5_filename, 'r+')
+hdf5 = h5py.File(hdf5_filename, 'r')
+
 def test_peak_assignment():
     """
     This function tests the operation of the peak_assignment
@@ -76,6 +77,8 @@ def test_peak_assignment():
     except TypeError:
         print("An invalid plot value was passed to the function, and it "
               "was handled well with a TypeError.")
+    calhdf5.close()
+    exphdf5.close()
     
     # make assertions
 
@@ -152,6 +155,9 @@ def test_compare_unknown_to_known():
                                                              precision))
     assert dif_comp == 0, ("Peak Assignment Error. Passed values should "
                            "have no matching assignments.")
+    calhdf5.close()
+    exphdf5.close()
+    
 
 def test_peak_position_comparisons():
     """
@@ -277,6 +283,8 @@ def test_peak_position_comparisons():
     not correctly assigning peaks when association matrix = 1"""
     assert test_peak_labels[1][0] == 'Unassigned', """The function is
     not correctly handling a lack of peak assignments"""
+    calhdf5.close()
+    exphdf5.close()
     
 
 def test_percentage_of_peaks_found():
@@ -388,6 +396,8 @@ def test_percentage_of_peaks_found():
                                                          hdf5_calfilename)
     assert acet_dict_1[key] == 100, """The function is not correctly
     calculating percentages when all peaks are found"""
+    calhdf5.close()
+    exphdf5.close()
     
     # make assertions
     
@@ -554,7 +564,9 @@ def test_plotting_peak_assignments():
     except TypeError:
         print("""The function correctly handled the case when an int
         was passed in the hdf5_calfilename""")
-    # make assertions
+    calhdf5.close()
+    exphdf5.close()
+    
     
 def test_add_label():
     """
@@ -591,7 +603,7 @@ def test_add_label():
     except TypeError:
         print("An invalid label was passed to the function, "
               +"and it was handled well with a TypeError.")
-    # make assertions
+    hdf5.close()
     
 
 def test_peak_1d_score():
@@ -755,7 +767,7 @@ def test_process_score():
     unknown_y = np.asarray(unknown_y)
     known_compound_list = list(calhdf5.keys())
     precision = 10
-    key5 = 'H2O'
+    key5 = 'water'
     unknown_peaks = []
     for i, _ in enumerate(list(exphdf5['{}'.format(key)])[:-3]):
         if i < 9:
@@ -767,7 +779,7 @@ def test_process_score():
         H2O_peaks.append(list(calhdf5['{}/{}'.format(key5, peak)])[0][2])
     precision = 10
     unknownname = 'Formic3.6wt%'
-    knownname = 'H2O'
+    knownname = 'water'
     k=1
     # run good examples
     peakidentify.process_score(unknown_peaks,H2O_peaks,k, precision,unknownname,knownname)
@@ -821,8 +833,11 @@ def test_process_score():
 
         print("An invalid knownname from process_score was passed to the function, "
               "and was handled correctly.")
-    # make assertions
+    calhdf5.close()
+    exphdf5.close()
     return
+
+
 def test_score_table():
     """
     Evaluates the functionality of the score_table function
@@ -839,7 +854,7 @@ def test_score_table():
     unknown_y = np.asarray(unknown_y)
     known_compound_list = list(calhdf5.keys())
     precision = 10
-    key5 = 'H2O'
+    key5 = 'water'
     unknown_peaks = []
     for i, _ in enumerate(list(exphdf5['{}'.format(key)])[:-3]):
         if i < 9:
@@ -897,7 +912,8 @@ def test_score_table():
 
         print("An invalid knownname from score_table was passed to the function, "
               "and was handled correctly.")
-    # make assertions
+    calhdf5.close()
+    exphdf5.close()
                             
 exphdf5.close()
 calhdf5.close()
