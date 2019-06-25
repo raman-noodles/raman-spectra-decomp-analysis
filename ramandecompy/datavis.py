@@ -94,7 +94,17 @@ def plot_fit(hdf5_filename, key, color='blue'):
     for _, peak in enumerate(list(hdf5[key])[:-3]):
         center = hdf5['{}/{}'.format(key, peak)][0][2]
         peak_centers.append(center)
-        peak_labels.append(peak)
+        # check to see if peakidentify labels are present
+        if len(list(hdf5['{}/{}'.format(key, peak)])[0]) == 7:
+            peak_labels.append(peak)
+            peakidentify = False
+        # use peakidentify labels
+        elif len(list(hdf5['{}/{}'.format(key, peak)])[0]) == 8:
+            peak_labels.append(str(hdf5['{}/{}'.format(key, peak)][0][7]))
+            peakidentify = True
+        # something is wrong if this prints
+        else:
+            print('invalid number of values in dataset')
     # plot spectra and peak labels
     fig, (ax1, ax2) = plt.subplots(2, 1, sharex=True, gridspec_kw={'height_ratios': [3, 1]},
                                figsize=(15,6))
@@ -111,8 +121,16 @@ def plot_fit(hdf5_filename, key, color='blue'):
     fit = y_data+residuals
     ax1.plot(x_data, fit, color='blue', linewidth=1.5, linestyle='--')
     ax2.plot(x_data, residuals, color='teal')
-    lineid_plot.plot_line_ids(x_data, y_data, peak_centers, peak_labels,
-                              box_axes_space=0.12, plot_kwargs={'linewidth':0.75}, ax=ax1)
+    if peakidentify == False:
+        lineid_plot.plot_line_ids(x_data, y_data, peak_centers, peak_labels,
+                                  box_axes_space=0.12, plot_kwargs={'linewidth':0.75}, ax=ax1)
+        plt.title('{} spectra from {}'.format(key, hdf5_filename.split('/')[-1]), fontsize=18, pad=350)
+    elif peakidentify == True:
+        lineid_plot.plot_line_ids(x_data, y_data, peak_centers, peak_labels,
+                                  box_axes_space=0.30, plot_kwargs={'linewidth':0.75}, ax=ax1)
+        plt.title('{} spectra from {}'.format(key, hdf5_filename.split('/')[-1]), fontsize=18, pad=500)
+    else:
+        pass
     # set facecolor
     ax1.set_facecolor=(.95, .95, .95)
     ax2.set_facecolor=(.95, .95, .95)
@@ -123,8 +141,6 @@ def plot_fit(hdf5_filename, key, color='blue'):
     ax2.grid(which='major', axis='y', linestyle='-')
     # force tick labels for top plot
     ax1.tick_params(axis='both', which='both', labelsize=10, labelbottom=True)
-    # add title
-    plt.title('{} spectra from {}'.format(key, hdf5_filename.split('/')[-1]), fontsize=18, pad=350)
     # add custom legend
     ax1.text(0.2, 0.4, 'Data', color='Red', fontsize=12, transform=plt.gcf().transFigure)
     ax1.text(0.19, 0.4, '(       ,         )', color='black', fontsize=14, transform=plt.gcf().transFigure)

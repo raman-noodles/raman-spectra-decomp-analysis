@@ -1,24 +1,24 @@
-"""This function takes in compounds calibration data files to generate interpolated data
+"""
+This function takes in compounds calibration data files to generate interpolated data
 made from randomized combinations of calibration peak data, and, using spectrafit,
 identifies peaks found in the fed-in known calibration peak spectra. It returns DataFrames
 with peak fitting descriptors to be used in either molar decomposition
 or machine learning applications.
  """
-import math
+
 import h5py
 import numpy as np
 import matplotlib.pyplot as plt
-import lineid_plot
 import pandas as pd
 from scipy import interpolate
 from ramandecompy import spectrafit
-from ramandecompy import peakidentify
-from ramandecompy import dataprep
+
 
 def interp_and_norm(hdf5_filename, compound):
     """
     This function interpolates and normalizes wavenumber and counts data for the specified
     compound in an hdf5 calibration file.
+
     Args:
         hdf5_filename (str): The name and location of the relevant hdf5 calibration datafile.
         compound (str): The compound key in the hdf5 calibration datafile.
@@ -60,6 +60,7 @@ def apply_scaling(tuple_list, j, i, target_index):
     it has been interpolated and normalized. Every other `j` index will contain
     the target compound corresponding to the 'target_index' in the list of
     calibration spectra.
+
     Args:
         tuple_list (list): A list of x-y data tuples for the calibration spectra
         j (int): This index is used to determine whether or not the target compound
@@ -69,6 +70,7 @@ def apply_scaling(tuple_list, j, i, target_index):
         i (int): This index is used to determine which compound in the list the scaling
                  should be applied to.
         target_index (int): The index in the compound list that corresponds to the target
+
     Returns:
         scaled_tuple_list (list). A list of randomly scaled x-y data tuples for the
                                   specific the calibration spectra.
@@ -118,10 +120,12 @@ def generate_spectra_dataset(hdf5_filename, target_compound, spectra_count):
     and specifies a specific component that will be contained in 50% of spectra and omitted from
     the remaining 50%. In this way machine learning methods can be used for component identification
     when all possible components of a mixture are known and calibration files exist.
+
     Args:
         hdf5_filename (str): The name and location of the relevant hdf5 calibration datafile.
         target_compound (str): The compound key in the hdf5 calibration datafile.
         spectra_count (int): The desired number of spectra to generate.
+
     Returns:
         x_data (list): A list containing identical x_data points for each spectra.
                        Useful for plotting.
@@ -197,8 +201,10 @@ def keyfinder(hdf5_filename):
     This function prints out a display of the list containing hdf5 key with
     two layers. It is generally used with the large file of all the experimental
     data from the dataimport function
+
     Args:
         hdf5_filename (str): the filename and location of an existing hdf5 file for inspection.
+
     Returns:
         keys (list): list containing hdf5 key with two layers.
     """
@@ -311,4 +317,3 @@ def interpolatedfit(hdf5_filename, key, x_data, y_data, num):
     exp_file.close()
     dataframe = pd.DataFrame(data)
     return dataframe
-
