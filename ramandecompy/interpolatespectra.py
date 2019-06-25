@@ -148,7 +148,7 @@ def generate_spectra_dataset(hdf5_filename, target_compound, spectra_count):
                         + str(type(spectra_count)))
     if spectra_count <= 0:
         raise ValueError('`spectra_count` must be an integer with a value greater than zero')
-    hdf5 = h5py.File(hdf5_filename, 'r+')
+    hdf5 = h5py.File(hdf5_filename, 'r')
     # get list of compounds from hdf5 file
     compound_list = list(hdf5.keys())
     # create list of interpolated spectra
