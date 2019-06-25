@@ -2,6 +2,7 @@
 Module used to unit test the functionality and outputs of the interpolatespectra.py module
 """
 
+import os
 import h5py
 import numpy as np
 from ramandecompy import interpolatespectra
@@ -17,6 +18,7 @@ TUPLE_LIST = list(zip(X_DATA, Y_DATA))
 
 HDF5_INTERPFILENAME = 'ramandecompy/tests/test_files/interpolated_spectra_calibration_file.hdf5'
 HDF5_CALFILENAME = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
+HDF5_2 = h5py.File(HDF5_CALFILENAME, 'r')
 
 
 def test_interp_and_norm():
@@ -132,16 +134,16 @@ def test_keyfinder():
     function in interpolatespectra.py
     """
     # run function
-    interpolatespectra.keyfinder('ramandecompy/tests/test_files/dataimport_experiment_files.hdf5')
-    exp_file = h5py.File('ramandecompy/tests/test_files/dataimport_experiment_files.hdf5', 'r')
+    interpolatespectra.keyfinder('ramandecompy/tests/test_files/test_experiment.hdf5')
+    exp_file = h5py.File('ramandecompy/tests/test_files/test_experiment.hdf5', 'r')
     # make assertions
-    assert len(exp_file) == 10, 'incorrect number of 1st order groups'
+    assert len(exp_file) == 1, 'incorrect number of 1st order groups'
     assert list(exp_file.keys())[0] == '300C', '1st order group name incorrect'
     assert len(exp_file['300C']) == 5, 'incorrect number of 2nd order groups'
     assert list(exp_file['300C'].keys())[0] == '25s', '2nd order group name incorrect'
     assert '300C/25s/wavenumber' in exp_file, 'x data (wavenumber) not stored correctly'
     assert '300C/25s/counts' in exp_file, 'y data (counts) not stored correctly'
-    assert len(exp_file['300C/25s']) == 19, 'incorrect number of peaks + raw_data stored'
+    assert len(exp_file['300C/25s']) == 21, 'incorrect number of peaks + raw_data stored'
     # test inputs
     try:
         interpolatespectra.keyfinder(4.2)
@@ -158,8 +160,8 @@ def test_interpolatedfit():
     This function tests the operation of the interpolatedfit
     function in interpolatespectra.py
     """
-    # first a function that will return a normalized interpolated spectra
-    spectra_count = 1
+    dataprep.new_hdf5('ramandecompy/tests/test_files/interpolated_spectra_calibration_file')
+    spectra_count = 2
     # get list of compounds from hdf5 file
     y_data_list = []
     x_data_list = []
@@ -174,51 +176,52 @@ def test_interpolatedfit():
         y_data_list.append(y_data)
         x_data_list.append(x_data)
     # example i and label value
-    i = 3
+    i = 1
     label = 1
     # Run function
     for j, label_test in enumerate(labels):
-        interpolatespectra.interpolatedfit(HDF5_INTERPFILENAME, key, x_data, y_data, label_test, j)
+        interpolatespectra.interpolatedfit(HDF5_INTERPFILENAME, key, x_data, y_data, j)
     # test inputs
     try:
-        interpolatespectra.interpolatedfit(4.2, key, x_data, y_data, label, i)
+        interpolatespectra.interpolatedfit(4.2, key, x_data, y_data, i)
     except TypeError:
         print('A float was passed to the function, and it was handled well with a TypeError.')
     try:
-        interpolatespectra.interpolatedfit('test.txt', key, x_data, y_data, label, i)
+        interpolatespectra.interpolatedfit('test.txt', key, x_data, y_data, i)
     except TypeError:
         print('A .txt was passed to the function, and it was handled well with a TypeError.')
     try:
-        interpolatespectra.interpolatedfit(HDF5_INTERPFILENAME, 4.2, x_data, y_data, label, i)
+        interpolatespectra.interpolatedfit(HDF5_INTERPFILENAME, 4.2, x_data, y_data, i)
     except TypeError:
         print('A float was passed to the function, and it was handled well with a TypeError.')
     try:
         interpolatespectra.interpolatedfit(HDF5_INTERPFILENAME,
-                                           'test.txt', x_data, y_data, label, i)
+                                           'test.txt', x_data, y_data, i)
     except TypeError:
         print('A .txt was passed to the function, and it was handled well with a TypeError.')
     try:
-        interpolatespectra.interpolatedfit(HDF5_INTERPFILENAME, key, 4.2, y_data, label, i)
+        interpolatespectra.interpolatedfit(HDF5_INTERPFILENAME, key, 4.2, y_data, i)
     except TypeError:
         print('A float was passed to the function, and it was handled well with a TypeError.')
     try:
-        interpolatespectra.interpolatedfit(HDF5_INTERPFILENAME, key, 'x_data', y_data, label, i)
+        interpolatespectra.interpolatedfit(HDF5_INTERPFILENAME, key, 'x_data', y_data, i)
     except TypeError:
         print('A float was passed to the function, and it was handled well with a TypeError.')
     try:
-        interpolatespectra.interpolatedfit(HDF5_INTERPFILENAME, key, x_data, 4.2, label, i)
+        interpolatespectra.interpolatedfit(HDF5_INTERPFILENAME, key, x_data, 4.2, i)
     except TypeError:
         print('A float was passed to the function, and it was handled well with a TypeError.')
     try:
-        interpolatespectra.interpolatedfit(HDF5_INTERPFILENAME, key, x_data, 'y_data', label, i)
+        interpolatespectra.interpolatedfit(HDF5_INTERPFILENAME, key, x_data, 'y_data', i)
     except TypeError:
         print('A .txt was passed to the function, and it was handled well with a TypeError.')
     try:
         interpolatespectra.interpolatedfit(HDF5_INTERPFILENAME,
-                                           key, x_data, y_data, 4.2, len(labels))
+                                           key, x_data, y_data, 4.2)
     except TypeError:
         print('A float was passed to the function, and it was handled well with a TypeError.')
     try:
-        interpolatespectra.interpolatedfit(HDF5_INTERPFILENAME, key, x_data, y_data, labels, 'num')
+        interpolatespectra.interpolatedfit(HDF5_INTERPFILENAME, key, x_data, y_data,'num')
     except TypeError:
         print('A .txt was passed to the function, and it was handled well with a TypeError.')
+    os.remove('ramandecompy/tests/test_files/interpolated_spectra_calibration_file.hdf5')
