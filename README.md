@@ -32,7 +32,7 @@ The project can be thought of as broken down into 3 steps:
 These sections have their own wiki documents and filled juypter notebooks with more detail included throught, see those for more detail on the individual steps.
 
 ### User Flow and Example of Using Raman Noodles
-A user will be able to follow the steps to apply Raman-Noodles to YOUR *Formic Acid* data set. An example of using the software can be seen in the [Example Use Case Wiki Page](https://github.com/raman-noodles/Raman-noodles/wiki/Full-Example-of-Raman-Noodle-Suite)
+A user will be able to follow the steps to apply Raman-Noodles to YOUR *Formic Acid* data set. An example of using the software can be seen in the [Example Use Case Wiki Page](https://github.com/raman-noodles/ramandecompy/wiki/Full-Example-of-Raman-Noodle-Suite)
 
 ### Testing of Raman Noodles and Travis-CI
 In order to have manageable code we are using Travis' Open Source continuious itegration testing. One thing to note is that on March 1, 2018 Travis-CI switched their model for open source software, the press release about this can be read [here](https://blog.travis-ci.com/2018-05-02-open-source-projects-on-travis-ci-com-with-github-apps)
@@ -45,20 +45,18 @@ There is a way to merge the `travis-ci.org` (open source repos only) to `travis-
 
 
 ### Future Work
-The team will continue working on this project in Spring of 2019 as apart of DIRECT program. Future tasks include:
-1. Increasing fuctionality of code for different substances beyond Formic Acid. 
-  * Increasing the size of the library of component Raman Spectra
-  * Creating and using an open internal database stored and accessable via a Google Drive Team folder. 
-2. Applying kinetic analysis to data sets to view the change in decomposition and formation of species given different boundary conditions (temperature, resonance time, and strech goal of pressure)
+Next steps would include automatic baseline subtraction of spectra to decrease pre-processing time, molar formation calculations to predict reaction pathways, and increased robustness of machine learning for component selection including unsupervised methods.
+
 
 ### Conclusion
-In conclusion, our team successfully created a fast functioning open source code base that saves hours of research time in data cleaning and analysis of Raman Spectra. We have also set a strong base for the next step of our focus which is on calculating decomposition of substances using Lorentzian peak information that will be applied to machine learning optimum temperatures and pressures in a gasification reactor system.
+In conclusion our team successfully created a platform code base for researchers to visualize and analyze their Raman spectra in a fast, automated manor - reducing post-processing time by days and enabling future work to continue on a solid base of open source tools.
 
   * This software has passed tests to sucessfully identify and analyze the identification of components in mixture Raman data.
 
   * This work sets up a free and user friendly platform for researchers to be able to analyze their own Raman Spectra.
 
 ### Acknowledgements
-* Dave Beck, Chad Curtis, and Kelly Thornton
-* Data sets were taken from publicly available from the NIST WebBook Database and Mendeley Data, “Raman Spectra of Formic Acid Gasification Products in Subcritical and Supercritical Water”
-* Only open source packages were used in this work
+* Project Sponsor: Igor Novosselov
+* Additional assistance: Dave Beck, and Kelly Thornton
+* Data sets from publicly available from Mendeley Data, “Raman Spectra of Formic Acid Gasification Products in Subcritical and Supercritical Water”
+* Only open source packages were used in this work.
