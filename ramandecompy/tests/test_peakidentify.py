@@ -259,7 +259,7 @@ def test_peak_position_comparisons():
                                                          association_matrix_0,
                                                          hdf5_calfilename)[0]
 
-    assert zero_output[0] == 'Acetaldehyde', """The function is not properly
+    assert zero_output[0] == 'FormicAcid', """The function is not properly
     handling unassigned peaks."""
 
     #Test the function to make sure that it has the right functionality
@@ -279,7 +279,7 @@ def test_peak_position_comparisons():
     print(test_peak_labels[0][0])
     print(test_peak_labels[1][0])
 
-    assert test_peak_labels[0][0] == 'Acetaldehyde', """The funciton is
+    assert test_peak_labels[0][0] == 'FormicAcid', """The funciton is
     not correctly assigning peaks when association matrix = 1"""
     assert test_peak_labels[1][0] == 'Unassigned', """The function is
     not correctly handling a lack of peak assignments"""
@@ -339,7 +339,7 @@ def test_percentage_of_peaks_found():
                                            hdf5_calfilename)
     try:
         peakidentify.percentage_of_peaks_found([[0], [1], [2], [3], [4],
-                                                [5],[6],[7],[8]],
+                                                [5],[6],[7],[8],[9]],
                                                 association_matrix,
                                                 hdf5_calfilename)
     except TypeError:
@@ -373,7 +373,7 @@ def test_percentage_of_peaks_found():
     #Test for function output.
     hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
     acet_peaks = []
-    key = 'Acetaldehyde'
+    key = 'acetaldehyde'
     for _, peak in enumerate(list(calhdf5[key])[:-3]):
         acet_peaks.append(list(calhdf5['{}/{}'.format(key, peak)])[0][2])
     print(acet_peaks)
