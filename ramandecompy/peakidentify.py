@@ -259,8 +259,8 @@ def peak_position_comparisons(unknown_peaks, known_peaks,
         raise TypeError("""Passed value of `unknown_peaks` is not a list!
         Instead, it is: """ + str(type(unknown_peaks)))
     if not isinstance(known_peaks, list):
-        raise TypeError("""Passed value of `known_compound_peaks` is not a list!
-        Instead, it is: """ + str(type(known_compound_peaks)))
+        raise TypeError("""Passed value of `known_peaks` is not a list!
+        Instead, it is: """ + str(type(known_peaks)))
     if not isinstance(knownhdf5_filename, str):
         raise TypeError("""Passed value of `knownhdf5_filename` is not a string!
         Instead, it is: """+ str(type(knownhdf5_filename)))

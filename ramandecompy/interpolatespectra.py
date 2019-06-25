@@ -148,7 +148,7 @@ def generate_spectra_dataset(hdf5_filename, target_compound, spectra_count):
                         + str(type(spectra_count)))
     if spectra_count <= 0:
         raise ValueError('`spectra_count` must be an integer with a value greater than zero')
-    hdf5 = h5py.File(hdf5_filename, 'r')
+    hdf5 = h5py.File(hdf5_filename, 'r+')
     # get list of compounds from hdf5 file
     compound_list = list(hdf5.keys())
     # create list of interpolated spectra
@@ -237,14 +237,13 @@ def keyfinder(hdf5_filename):
     return keys
 
 
-def interpolatedfit(hdf5_filename, key, x_data, y_data, label, num):
+def interpolatedfit(hdf5_filename, key, x_data, y_data, num):
     """
     This function adds interpolated Raman calibration data to an existing hdf5 file. It uses the
     spectrafit.fit_data function to fit the data before saving the fit result and
     the raw data to the hdf5 file. It returns a DataFrame which contains the peak fitted data
     and peak descriptors of the interpolated spectra for each iteration of spectra_counts for
     each target compound in the compound list of the calibration file.
-
     Args:
         hdf5_filename (str): the filename and location of an existing hdf5 file to add the
                              generated interpolated spectra data to.
@@ -256,7 +255,6 @@ def interpolatedfit(hdf5_filename, key, x_data, y_data, label, num):
         label (int): The binary values of the generated interpolated spectra
                             that describe 1 if target compound fitted and 0 if not.
         num (int): iteration of spectra counted.
-
     Returns:
         df (DataFrame): DataFrame which contains the peak fitted data and peak descriptors
                         of the classified interpolated spectra for each iteration of spectra_counts
@@ -278,9 +276,9 @@ def interpolatedfit(hdf5_filename, key, x_data, y_data, label, num):
     if not isinstance(y_data, (list, np.ndarray)):
         raise TypeError('Passed value of `y_data` is not a list or numpy.ndarray! Instead, it is: '
                         + str(type(y_data)))
-    if not isinstance(label, int):
-        raise TypeError('Passed value of `label` is not a int! Instead, it is: '
-                        + str(type(label)))
+#     if not isinstance(label, int):
+#         raise TypeError('Passed value of `label` is not a int! Instead, it is: '
+#                         + str(type(label)))
     if not isinstance(num, int):
         raise TypeError("""Passed value of `num` is not an int!
         Instead, it is: """ + str(type(num)))
@@ -319,60 +317,3 @@ def interpolatedfit(hdf5_filename, key, x_data, y_data, label, num):
     exp_file.close()
     dataframe = pd.DataFrame(data)
     return dataframe
-
-
-def combined_interpolatedfit(hdf5_interpfilename, hdf5_calfilename, spectra_count):
-    """
-    This function combines the interpolated spectra generated previously and spectrafits them.
-    It returns a list of DataFrames which contains the peak fitted data and peak descriptors of the
-    interpolated spectra for each iteration of spectra_counts for each target compound in
-    the compound list of the calibration file. Therefore, this function iterates over of
-    spectra_counts for each target compound in the compound list of the calibration file
-
-    Args:
-        hdf5_interpfilename (str): the filename and location of an existing hdf5 file to add the
-                             interpolated data to.
-        hdf5_calfilename (str): the filename and location of an existing hdf5 file with
-                             calibration data to compare.
-        spectra_count (int): number of spectra to be counted.
-
-    Returns:
-        frames (list): list of DataFrames which contain the peak fitted datapeak descriptors
-        of the classified interpolated spectra for each iteration of spectra_counts for
-        each target compound in the compound list of the calibration file.
-    """
-    if not isinstance(hdf5_interpfilename, str):
-        raise TypeError("""Passed value of `hdf5_interpfilename` is not a string!
-        Instead, it is: """+ str(type(knownhdf5_interpfilename)))
-    if not hdf5_interpfilename.split('/')[-1].split('.')[-1] == 'hdf5':
-        raise TypeError("""`hdf5_interpfilename` is not type = .hdf5!
-        Instead, it is: """+ hdf5_interpfilename.split('/')[-1].split('.')[-1])
-    if not isinstance(hdf5_calfilename, str):
-        raise TypeError("""Passed value of `hdf5_calfilename` is not a string!
-        Instead, it is: """+ str(type(hdf5_calfilename)))
-    if not hdf5_calfilename.split('/')[-1].split('.')[-1] == 'hdf5':
-        raise TypeError("""`hdf5_calfilename` is not type = .hdf5!
-        Instead, it is: """+ hdf5_calfilename.split('/')[-1].split('.')[-1])
-    if not isinstance(spectra_count, int):
-        raise TypeError("""Passed value of `spectra_count` is not an int!
-        Instead, it is: """ + str(type(spectra_count)))
-    hdf5 = h5py.File(hdf5_calfilename, 'r+')
-    # get list of compounds from hdf5 file
-    y_data_list = []
-    x_data_list = []
-    frames = []
-    compound_list = list(hdf5.keys())
-    print(compound_list)
-    for _, target_compound in enumerate(compound_list):
-        # Generate interpolated spectra
-        x_data, y_data, labels = generate_spectra_dataset(hdf5_calfilename,
-                                                          target_compound,
-                                                          spectra_count)
-        y_data_list.append(y_data)
-        x_data_list.append(x_data)
-        for i, label in enumerate(labels):
-            # Generate peak fitted dataframes and descriptors
-            interpdf = interpolatedfit(hdf5_interpfilename, 'interp_'+target_compound,
-                                       x_data, y_data, label, i)
-            frames.append(interpdf)
-    return frames
