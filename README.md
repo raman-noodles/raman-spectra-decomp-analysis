@@ -37,11 +37,11 @@ A user will be able to follow the steps to apply Raman-Noodles to YOUR *Formic A
 ### Testing of Raman Noodles and Travis-CI
 In order to have manageable code we are using Travis' Open Source continuious itegration testing. One thing to note is that on March 1, 2018 Travis-CI switched their model for open source software, the press release about this can be read [here](https://blog.travis-ci.com/2018-05-02-open-source-projects-on-travis-ci-com-with-github-apps)
 
-So we do have [our team repo viewable on travis-ci.com](https://travis-ci.com/raman-noodles/Raman-noodles) **_BUT_** it will ultimately re-direct you to the _old_ platform for open source software on `travis-ci.org`.
+So we do have [our team repo viewable on travis-ci.com](https://travis-ci.org/raman-noodles/raman-spectra-decomp-analysis) **_BUT_** it will ultimately re-direct you to the _old_ platform for open source software on `travis-ci.org`.
 
 There is a way to merge the `travis-ci.org` (open source repos only) to `travis-ci.com` (now private repos **and** (closed beta) open source repos) as can be seen by following [this link](https://docs.travis-ci.com/user/migrate/open-source-on-travis-ci-com/#existing-open-source-repositories-on-travis-ciorg) but at this time our team has decided to not join the closed beta as the current (old) method of the dashboard being located on `travis-ci.org` works just fine.
 
-#### [Link to our active Travis-CI build dashboard](https://travis-ci.org/raman-noodles/Raman-noodles)
+#### [Link to our active Travis-CI build dashboard](https://travis-ci.org/raman-noodles/raman-spectra-decomp-analysis)
 
 
 ### Future Work
