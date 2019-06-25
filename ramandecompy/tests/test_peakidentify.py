@@ -5,6 +5,7 @@ Module used to unit test the functionality and outputs of the peakidentify.py mo
 import os
 import h5py
 import numpy as np
+import pandas as pd
 from ramandecompy import peakidentify
 from ramandecompy import dataprep
 hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
@@ -19,8 +20,11 @@ label = '[Hydrogen]'
 # open hdf5 file as read/write
 hdf5 = h5py.File(hdf5_filename, 'r+')
 def test_peak_assignment():
-    """This function tests the operation of the peak_assignment
-    function in peakidentify.py"""
+    """
+    This function tests the operation of the peak_assignment
+    function in peakidentify.py
+    
+    """
     #First, generate a testing dataset.
     hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'ramandecompy/tests/test_files/peakidentify_experiment_test.hdf5'
@@ -72,11 +76,16 @@ def test_peak_assignment():
     except TypeError:
         print("An invalid plot value was passed to the function, and it "
               "was handled well with a TypeError.")
+    
+    # make assertions
 
 
 def test_compare_unknown_to_known():
-    """This function tests the operation of the compare_unknown_to_known
-    function in peakidentify.py"""
+    """
+    This function tests the operation of the compare_unknown_to_known
+    function in peakidentify.py
+    
+    """
     #First, generate a testing dataset.
     hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'ramandecompy/tests/test_files/peakidentify_experiment_test.hdf5'
@@ -145,9 +154,11 @@ def test_compare_unknown_to_known():
                            "have no matching assignments.")
 
 def test_peak_position_comparisons():
-    """This function tests the operation of the peak_position_comparisons
+    """
+    This function tests the operation of the peak_position_comparisons
     function in peakidentify. Said function returns a list of strings that
-    contain text assignments of each peak in the unknown spectrum."""
+    contain text assignments of each peak in the unknown spectrum.
+    """
 
     #First, generate a testing dataset.
     hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
@@ -266,10 +277,14 @@ def test_peak_position_comparisons():
     not correctly assigning peaks when association matrix = 1"""
     assert test_peak_labels[1][0] == 'Unassigned', """The function is
     not correctly handling a lack of peak assignments"""
+    
 
 def test_percentage_of_peaks_found():
-    """This function tests the operation of the
-    percentage_of_peaks_found function in peakidentify.py"""
+    """
+    This function tests the operation of the
+    percentage_of_peaks_found function in peakidentify.py
+    
+    """
 
     #First, generate a testing dataset.
     hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
@@ -374,9 +389,14 @@ def test_percentage_of_peaks_found():
     assert acet_dict_1[key] == 100, """The function is not correctly
     calculating percentages when all peaks are found"""
     
+    # make assertions
+    
 def test_plotting_peak_assignments():
-    """This function tests the operation of the peak_assignment
-    function in peakidentify.py"""
+    """
+    This function tests the operation of the peak_assignment
+    function in peakidentify.py
+    
+    """
     #First, generate a testing dataset.
     hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
     hdf5_expfilename = 'ramandecompy/tests/test_files/peakidentify_experiment_test.hdf5'
@@ -534,6 +554,7 @@ def test_plotting_peak_assignments():
     except TypeError:
         print("""The function correctly handled the case when an int
         was passed in the hdf5_calfilename""")
+    # make assertions
     
 def test_add_label():
     """
@@ -542,7 +563,14 @@ def test_add_label():
     key = '300C/25s'
     peak = 'Peak_01'
     label = '[Hydrogen]'
-    peakidentify.add_label(hdf5_filename, key, peak, label)
+    hdf5 = h5py.File(hdf5_filename, 'r+') 
+    data = peakidentify.add_label(hdf5_filename, key, peak, label)
+    # make assertions
+    assert len(data) == 8,'incorrect length of dataframe'
+    assert list(hdf5['{}/{}'.format(key, peak)])[0][-1] == '[Hydrogen]','Wrong string output'
+    assert isinstance(hdf5['{}/{}'.format(key, peak)][0],np.void), """incorrect key/peak
+                                                                    formatting with hdf5 file"""
+    assert isinstance(data,pd.DataFrame), 'incorrect output type'
     try:
         peakidentify.add_label('hdf5_filename', key, peak, label)
     except TypeError:
@@ -563,9 +591,13 @@ def test_add_label():
     except TypeError:
         print("An invalid label was passed to the function, "
               +"and it was handled well with a TypeError.")
+    # make assertions
+    
 
 def test_peak_1d_score():
-    """Evaluates the functionality of the peak_1D_score function"""
+    """
+    Evaluates the functionality of the peak_1D_score function
+    """
     # Initialize the test arguments
     row_i = [0, 1]
     row_j = [2, 1]
@@ -603,7 +635,9 @@ def test_peak_1d_score():
 
 
 def test_score_max():
-    """Evaluates the functionality of the score_max function"""
+    """
+    Evaluates the functionality of the score_max function
+    """
     # Initialize the test arguments
     k = 2
     row_i = [0, 3]
@@ -650,7 +684,9 @@ def test_score_max():
 
 
 def test_score_sort():
-    """Evaluates the functionality of the score_sort function"""
+    """
+    Evaluates the functionality of the score_sort function
+    """
     # Initialize the test arguments
     row_i = [0, 1]
     row_j = [2, 1]
@@ -702,26 +738,167 @@ def test_score_sort():
         is sorted from smallest to largest"""
         assert arrsortedscores[0][0][i] <= arrsortedscores[0][0][i+1], """Output
         values is sorted from smallest to largest"""
-def test_process_score(unknown_peaks,known_peaks,k, precision, unknownname, knownname):
-    "documentation"
-#     if k<len(known_peaks)+1:
-#         compdf=pd.DataFrame(data=score_sort(unknown_peaks,known_peaks,k, precision)[0][0][:],
-#                             columns=[str(unknownname)+'_vs_'+str(knownname)+'_peak_Scores normalized over the #'+
-#                                      str(k) + ' highest score in the peak set'])
-#         compdf=compdf.assign(Peaks=score_sort(unknown_peaks,known_peaks,1, precision)[0][1][:])
-#     else:
-#         compdf=pd.DataFrame(data=score_sort(unknown_peaks,known_peaks,k, precision)[0][0][:],
-#                             columns=[str(unknownname)+'_vs_'+str(knownname)+'_peak_Scores Unnormalized'])
-#         compdf=compdf.assign(Peaks=score_sort(unknown_peaks,known_peaks,1, precision)[0][1][:])
+        
+def test_process_score():
+    """
+    Evaluates the functionality of the process_score function
+    and the input type errors are handled.
+    """
+    hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
+    hdf5_expfilename = 'ramandecompy/tests/test_files/peakidentify_experiment_test.hdf5'
+    key = '300C/25s'
+    calhdf5 = h5py.File(hdf5_calfilename, 'r+')
+    exphdf5 = h5py.File(hdf5_expfilename, 'r+')
+    unknown_x = list(exphdf5['{}/wavenumber'.format(key)])
+    unknown_y = list(exphdf5['{}/counts'.format(key)])
+    unknown_x = np.asarray(unknown_x)
+    unknown_y = np.asarray(unknown_y)
+    known_compound_list = list(calhdf5.keys())
+    precision = 10
+    key5 = 'H2O'
+    unknown_peaks = []
+    for i, _ in enumerate(list(exphdf5['{}'.format(key)])[:-3]):
+        if i < 9:
+            unknown_peaks.append(list(exphdf5['{}/Peak_0{}'.format(key, i+1)])[0][2])
+        else:
+            unknown_peaks.append(list(exphdf5['{}/Peak_{}'.format(key, i+1)])[0][2])
+    H2O_peaks = []
+    for _,peak in enumerate(list(calhdf5[key5])[:-3]):
+        H2O_peaks.append(list(calhdf5['{}/{}'.format(key5, peak)])[0][2])
+    precision = 10
+    unknownname = 'Formic3.6wt%'
+    knownname = 'H2O'
+    k=1
+    # run good examples
+    peakidentify.process_score(unknown_peaks,H2O_peaks,k, precision,unknownname,knownname)
+    #run bad inputs
+    try:
+
+        peakidentify.process_score('unknown_peaks',H2O_peaks,k, precision,unknownname,knownname)
+
+    except TypeError:
+
+        print("An invalid unknown_peaks from process_score was passed to the function, "
+              "and was handled correctly.")
+    try:
+
+        peakidentify.process_score(unknown_peaks,'known_peaks',k, precision,unknownname,knownname)
+
+    except TypeError:
+
+        print("An invalid known_peaks from process_score was passed to the function, "
+              "and was handled correctly.")
+    try:
+
+        peakidentify.process_score(unknown_peaks,H2O_peaks,'k', precision,unknownname,knownname)
+
+    except TypeError:
+
+        print("An invalid k value from process_score was passed to the function, "
+              "and was handled correctly.")
+        
+    try:
+
+        peakidentify.process_score(unknown_peaks,H2O_peaks,k, 'precision',unknownname,knownname)
+
+    except TypeError:
+
+        print("An invalid precision from process_score was passed to the function, "
+              "and was handled correctly.")
+    try:
+
+        peakidentify.process_score(unknown_peaks,H2O_peaks,k, precision,3,knownname)
+
+    except TypeError:
+
+        print("An invalid unknownname from process_score was passed to the function, "
+              "and was handled correctly.")
+    try:
+
+        peakidentify.process_score(unknown_peaks,H2O_peaks,k, precision,unknownname,3)
+
+    except TypeError:
+
+        print("An invalid knownname from process_score was passed to the function, "
+              "and was handled correctly.")
+    # make assertions
     return
-def test_score_table(unknown_peaks,known_peaks, precision,unknownname,knownname):
-    "documentation"
-#     k_range = range(1,len(known_peaks)+2)
-#     frames = [ process_score(unknown_peaks,known_peaks,k, precision,unknownname,knownname) for k in k_range ]
-#     result = pd.concat(frames,axis=1, join='outer', join_axes=None, ignore_index=False,
-#               keys=None, levels=None, names=None, verify_integrity=False,
-#               copy=True,sort=True)
-    return                           
+def test_score_table():
+    """
+    Evaluates the functionality of the score_table function
+    and the input type errors are handled.
+    """
+    hdf5_calfilename = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
+    hdf5_expfilename = 'ramandecompy/tests/test_files/peakidentify_experiment_test.hdf5'
+    key = '300C/25s'
+    calhdf5 = h5py.File(hdf5_calfilename, 'r+')
+    exphdf5 = h5py.File(hdf5_expfilename, 'r+')
+    unknown_x = list(exphdf5['{}/wavenumber'.format(key)])
+    unknown_y = list(exphdf5['{}/counts'.format(key)])
+    unknown_x = np.asarray(unknown_x)
+    unknown_y = np.asarray(unknown_y)
+    known_compound_list = list(calhdf5.keys())
+    precision = 10
+    key5 = 'H2O'
+    unknown_peaks = []
+    for i, _ in enumerate(list(exphdf5['{}'.format(key)])[:-3]):
+        if i < 9:
+            unknown_peaks.append(list(exphdf5['{}/Peak_0{}'.format(key, i+1)])[0][2])
+        else:
+            unknown_peaks.append(list(exphdf5['{}/Peak_{}'.format(key, i+1)])[0][2])
+    H2O_peaks = []
+    for _,peak in enumerate(list(calhdf5[key5])[:-3]):
+        H2O_peaks.append(list(calhdf5['{}/{}'.format(key5, peak)])[0][2])
+    precision = 10
+    unknownname = 'Formic3.6wt%'
+    knownname = 'H2O'
+    k=1
+    # run good examples
+    peakidentify.score_table(unknown_peaks,H2O_peaks, precision,unknownname,knownname)
+    #run bad inputs
+    try:
+
+        peakidentify.score_table('unknown_peaks',H2O_peaks,precision,unknownname,knownname)
+
+    except TypeError:
+
+        print("An invalid unknown_peaks from score_max was passed to the function, "
+              "and was handled correctly.")
+    try:
+
+        peakidentify.score_table(unknown_peaks,'H2O_peaks',precision,unknownname,knownname)
+
+    except TypeError:
+
+        print("An invalid known_peaks from score_table was passed to the function, "
+              "and was handled correctly.")
+        
+    try:
+
+        peakidentify.score_table(unknown_peaks,H2O_peaks,'precision',unknownname,knownname)
+
+    except TypeError:
+
+        print("An invalid precision from score_table was passed to the function, "
+              "and was handled correctly.")
+    try:
+
+        peakidentify.score_table(unknown_peaks,H2O_peaks,precision,3,knownname)
+
+    except TypeError:
+
+        print("An invalid unknownname from score_table was passed to the function, "
+              "and was handled correctly.")
+    try:
+
+        peakidentify.score_table(unknown_peaks,H2O_peaks,precision,unknownname,3)
+
+    except TypeError:
+
+        print("An invalid knownname from score_table was passed to the function, "
+              "and was handled correctly.")
+    # make assertions
+                            
 exphdf5.close()
 calhdf5.close()
 hdf5.close()
