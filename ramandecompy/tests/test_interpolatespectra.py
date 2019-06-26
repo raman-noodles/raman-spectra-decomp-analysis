@@ -18,7 +18,7 @@ TUPLE_LIST = list(zip(X_DATA, Y_DATA))
 
 HDF5_INTERPFILENAME = 'ramandecompy/tests/test_files/interpolated_spectra_calibration_file.hdf5'
 HDF5_CALFILENAME = 'ramandecompy/tests/test_files/peakidentify_calibration_test.hdf5'
-HDF5_2 = h5py.File(HDF5_CALFILENAME, 'r')
+HDF5_2 = h5py.File(HDF5_CALFILENAME, 'r+')
 
 
 def test_interp_and_norm():
