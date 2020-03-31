@@ -32,7 +32,7 @@ The project can be thought of as broken down into 3 steps:
 These sections have their own wiki documents and filled juypter notebooks with more detail included throught, see those for more detail on the individual steps.
 
 ### User Flow and Example of Using Raman Noodles
-A user will be able to follow the steps to apply Raman-Noodles to YOUR *Formic Acid* data set. An example of using the software can be seen in the [Example Use Case Wiki Page](https://github.com/raman-noodles/ramandecompy/wiki/Full-Example-of-Raman-Noodle-Suite)
+A user will be able to follow the steps to apply Raman-Noodles to YOUR *Formic Acid* data set. An example of using the software can be seen in the [Example Use Case Wiki Page](https://github.com/raman-noodles/raman-spectra-decomp-analysis/wiki/Use-Cases)
 
 ### Testing of Raman Noodles and Travis-CI
 In order to have manageable code we are using Travis' Open Source continuious itegration testing. One thing to note is that on March 1, 2018 Travis-CI switched their model for open source software, the press release about this can be read [here](https://blog.travis-ci.com/2018-05-02-open-source-projects-on-travis-ci-com-with-github-apps)
