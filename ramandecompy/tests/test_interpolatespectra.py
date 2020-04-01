@@ -29,7 +29,7 @@ def test_interp_and_norm():
     tuple_list = interpolatespectra.interp_and_norm(HDF5_FILENAME, TARGET_COMPOUND)
     assert isinstance(tuple_list, list), '`tuple_list` is not a list'
     assert isinstance(tuple_list[0], tuple), 'first element of `tuple_list` is not a tuple'
-    assert isinstance(tuple_list[0][0], np.int32), 'first element of tuple is not a np.int64'
+    assert isinstance(tuple_list[0][0], np.int64), 'first element of tuple is not a np.int64'
     x_data, y_data = zip(*tuple_list)
     assert max(y_data) <= 1, 'spectra was not normalized correctly'
     assert len(x_data) == len(y_data), 'x and y data lengths do not match'
