@@ -8,6 +8,11 @@ def test_new_hdf5():
     """
     A function that tests that there are no errors in the `new_hdf5` function from dataprep.
     """
+    # check to ensure that the test file does not already exist and remove if it does
+    if os.path.exists('function_test.hdf5'):
+        os.remove('function_test.hdf5')
+    else:
+        pass
     dataprep.new_hdf5('function_test')
     # test inputs
     try:
@@ -25,6 +30,11 @@ def test_add_calibration():
     peaks were saved as well as the wavenumber, counts, and residuals. It tests both the custom and
     automatic labeling functionality before finally ensuring that input errors are handled well.
     """
+    # check to ensure that the test file does not already exist and remove if it does
+    if os.path.exists('test.hdf5'):
+        os.remove('test.hdf5')
+    else:
+        pass
     dataprep.new_hdf5('test')
     dataprep.add_calibration('test.hdf5',
                              'ramandecompy/tests/test_files/Methane_Baseline_Calibration.xlsx',
@@ -70,6 +80,11 @@ def test_add_experiment():
     proper number of peaks were saved as well as the wavenumber, counts, and residuals.
     Lastly it ensures that input errors are handled well.
     """
+    # check to ensure that the test file does not already exist and remove if it does
+    if os.path.exists('exp_test_1.hdf5'):
+        os.remove('exp_test_1.hdf5')
+    else:
+        pass
     dataprep.new_hdf5('exp_test_1')
     dataprep.add_experiment('exp_test_1.hdf5',
                             'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
@@ -107,6 +122,11 @@ def test_adjust_peaks():
     see that no errors occur when running the function before then checking to ensure that input
     errors are handled well.
     """
+    # check to ensure that the test file does not already exist and remove if it does
+    if os.path.exists('exp_test_2.hdf5'):
+        os.remove('exp_test_2.hdf5')
+    else:
+        pass
     # generate test hdf5 file
     dataprep.new_hdf5('exp_test_2')
     dataprep.add_experiment('exp_test_2.hdf5', 'ramandecompy/tests/test_files/FA_3.6wt%_300C_25s.csv')
