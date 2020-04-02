@@ -1,7 +1,7 @@
 #code base taken from: https://docs.travis-ci.com/user/languages/python/
 language: python
 python:
-  - "3.8"
+  - "3.7"
 # command to install dependencies
 install:
 #  - travis_retry pip install $PIP_DEPS
