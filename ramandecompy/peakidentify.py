@@ -150,9 +150,8 @@ def peak_assignment(unknownhdf5_filename, key, knownhdf5_filename,
     frames = []
     for j, peak in enumerate(list(unhdf5['{}'.format(key)])[:-3]):
         frames.append(add_label(unknownhdf5_filename,
-                                key, peak, peak_labels[j]))
-         
-    df = pd.concat(frames,axis=1, join='outer', join_axes=None, ignore_index=True,
+                                key, peak, peak_labels[j]))     
+    df = pd.concat(frames,axis=1, join='outer', ignore_index=True,
               keys=None, levels=None, names=None, verify_integrity=False,
               copy=True,sort=True)
     df =df.T
@@ -747,7 +746,7 @@ def score_table(unknown_peaks,known_peaks, precision,unknownname,knownname):
     """
     k_range = range(1,len(known_peaks)+2)
     frames = [ process_score(unknown_peaks,known_peaks,k, precision,unknownname,knownname) for k in k_range ]
-    result = pd.concat(frames,axis=1, join='outer', join_axes=None, ignore_index=False,
+    result = pd.concat(frames,axis=1, join='outer', ignore_index=False,
               keys=None, levels=None, names=None, verify_integrity=False,
               copy=True,sort=True)
     return result
