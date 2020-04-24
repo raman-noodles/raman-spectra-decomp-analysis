@@ -13,8 +13,12 @@ import pandas as pd
 
 # Will probably need to create an additional function
 
-def peak_assignment(unknownhdf5_filename, key, knownhdf5_filename,
-                    precision=10, exportlabelinput=True, plot=True):
+
+
+def peak_assignment(unknownhdf5_filename, key, knownhdf5_filename, 
+                    external_peak_labels,
+                    precision=10, externallabelinput=True,
+                    plot=True):
     """
     
     This function is a wrapper function from which all classification
@@ -24,9 +28,10 @@ def peak_assignment(unknownhdf5_filename, key, knownhdf5_filename,
         unknownhdf5_filename (string): filename of experimental file
         key (string): key within `hdf5_filename` of experimental file
         knownhdf5_filename (string): filename of calibration file
+        external_peak_labels (list): optional input peak labels from external functions
         precision (int/float): precision tolerance of peak identification
-        exportlabelinput (bool): A simple True/False boolean input that
-                                determines if the export labels should be
+        externallabelinput (bool): A simple True/False boolean input that
+                                determines if the external labels should be
                                 used from external functions
                                 or the internal unknown peak_assignments
         plot (boolean): A simple True/False boolean input that determines
@@ -55,12 +60,21 @@ def peak_assignment(unknownhdf5_filename, key, knownhdf5_filename,
     if not isinstance(key, str):
         raise TypeError("""Passed value of `key` is not a int!
         Instead, it is: """ + str(type(key)))
+    if not isinstance(external_peak_labels, list):
+        raise TypeError("""Passed value of `external_peak_labels` is not a list!
+        Instead, it is: """ + str(type(external_peak_labels)))
+    # Now we need to check the elements within the external_peak_labels
+    # to make sure they are correct.
+    for i, _ in enumerate(external_peak_labels):
+        if not isinstance(external_peak_labels[i], str):
+            raise TypeError("""Passed value within `external_peak_labels` is not a string!
+            Instead, it is: """ + str(type(external_peak_labels[i])))
     if not isinstance(precision, (float, int)):
         raise TypeError("""Passed value of `precision` is not a float or int!
         Instead, it is: """ + str(type(precision)))
-    if not isinstance(exportlabelinput, bool):
-        raise TypeError("""Passed value of `exportlabelinput` is not a Boolean!
-        Instead, it is: """ + str(type(exportlabelinput)))
+    if not isinstance(externallabelinput, bool):
+        raise TypeError("""Passed value of `externallabelinput` is not a Boolean!
+        Instead, it is: """ + str(type(externallabelinput)))
     if not isinstance(plot, bool):
         raise TypeError("""Passed value of `plot` is not a Boolean!
         Instead, it is: """ + str(type(plot)))
@@ -156,15 +170,31 @@ def peak_assignment(unknownhdf5_filename, key, knownhdf5_filename,
               copy=True,sort=True)
     df =df.T
     if plot:
-        plotting_peak_assignments(unknown_x,
-                                  unknown_y,
-                                  unknown_peaks,
-                                  unknown_peak_assignments,
-                                  unknownhdf5_filename,
-                                  knownhdf5_filename,
-                                  key,
-                                  peak_labels,
-                                  exportlabelinput)
+        if externallabelinput:
+            print('external labelling only')
+            plotting_peak_assignments(unknown_x,
+                                      unknown_y,
+                                      unknown_peaks,
+                                      unknown_peak_assignments,
+                                      unknownhdf5_filename,
+                                      knownhdf5_filename,
+                                      key,
+                                      external_peak_labels,
+                                      externallabelinput)
+        else:
+            peak_labels = []
+            for i, _ in enumerate(unknown_peak_assignments):
+                peak_labels.append(str(unknown_peak_assignments[i]))
+#         print(peak_labels)
+            plotting_peak_assignments(unknown_x,
+                                      unknown_y,
+                                      unknown_peaks,
+                                      unknown_peak_assignments,
+                                      unknownhdf5_filename,
+                                      knownhdf5_filename,
+                                      key,
+                                      peak_labels,
+                                      externallabelinput)
 
     percentages = percentage_of_peaks_found(known_peaks[len(known_compound_list)-1],
                                             assignment_matrix,
@@ -173,7 +203,6 @@ def peak_assignment(unknownhdf5_filename, key, knownhdf5_filename,
     knhdf5.close()
     unhdf5.close()
     return df
-
 def compare_unknown_to_known(unknown_peaks, known_peaks, precision):
     """
     This function takes in peak positions for the spectrum to be
@@ -375,7 +404,7 @@ def percentage_of_peaks_found(known_peaks, association_matrix, knownhdf5_filenam
 def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
                               unknown_peak_assignments, unknownhdf5_filename,
                               knownhdf5_filename, key, peak_labels,
-                              exportlabelinput=True, plot = True):
+                              externallabelinput=True, plot = True):
     """
     This function plots a set of unknown peaks, and plots the assigned
     classification given by the functions within peakassignment
@@ -389,10 +418,11 @@ def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
         unknownhdf5_filename (string): filename of experimental file
         knownhdf5_filename (string): filename of calibration file
         key (string): key within `hdf5_filename` of experimental file
-        peak_labels (list): List of strings from unknown_peak_assignment
+        peak_labels (list): List of strings from internal function
+                            unknown_peak_assignment
                             that are used in lineidplot.
-        exportlabelinput (bool): A simple True/False boolean input that
-                                determines if the export labels should be
+        externallabelinput (bool): A simple True/False boolean input that
+                                determines if the external labels should be
                                 used from external functions
                                 or the internal unknown peak_assignments
         plot (boolean): A simple True/False boolean input that determines
@@ -435,7 +465,7 @@ def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
     if not isinstance(peak_labels, list):
         raise TypeError("""Passed value of `peak_labels` is not a list!
         Instead, it is: """ + str(type(peak_labels)))
-    # Now we need to check the elements within the known_compound_list
+    # Now we need to check the elements within the peak_labels
     # to make sure they are correct.
     for i, _ in enumerate(peak_labels):
         if not isinstance(peak_labels[i], str):
@@ -473,8 +503,8 @@ def plotting_peak_assignments(unknown_x, unknown_y, unknown_peaks,
     y_data = list(unhdf5['{}/counts'.format(key)])
 #     plt.plot(unknown_x, unknown_y, color='black', label='Unknown Spectrum')
     if plot:
-        if exportlabelinput:
-            print('export labelling only')
+        if externallabelinput:
+            print('external labelling with plot')
         else:
             peak_labels = []
             for i, _ in enumerate(unknown_peak_assignments):
@@ -525,8 +555,9 @@ def add_label(hdf5_filename, key, peak, label):
         peak (string): string name of 'Peak_0#" associated with the peak list
                        containing tuples of the x_data (wavenumber) and
                        y_data (counts) values of the peaks.
-        label (string): string name from unknown_peak_assignment
-                            that are used in lineidplot.
+        label (string): string name of  an individual label from internal
+                        function unknown_peak_assignment
+                        that is used in lineidplot.
 
     Returns:
         df (DataFrame): DataFrame which contains the peak fitted data and peak descriptors
