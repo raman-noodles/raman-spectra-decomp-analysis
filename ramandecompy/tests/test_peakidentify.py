@@ -37,14 +37,17 @@ def test_peak_assignment():
     unknown_x = np.asarray(unknown_x)
     unknown_y = np.asarray(unknown_y)
     precision = 10
+    external_peak_labels = []
     peakidentify.peak_assignment(hdf5_expfilename,
                                  key, hdf5_calfilename,
+                                 external_peak_labels,
                                  precision, False, plot = False)
     #Various try statements to make sure that bad inputs are handled correctly.
 
     try:
         peakidentify.peak_assignment(hdf5_expfilename,
                                      key, hdf5_calfilename,
+                                     external_peak_labels,
                                      precision, False, plot = False)
 
     except TypeError:
@@ -54,6 +57,16 @@ def test_peak_assignment():
     try:
         peakidentify.peak_assignment(hdf5_expfilename,
                                      key, hdf5_calfilename,
+                                     'external_peak_labels',
+                                     precision, False, plot = False)
+
+    except TypeError:
+        print("An invalid external_peak_labels value was passed to the function, and "
+              "it was handled well with a TypeError.")
+    try:
+        peakidentify.peak_assignment(hdf5_expfilename,
+                                     key, hdf5_calfilename,
+                                     external_peak_labels,
                                      'precision', False, plot = False)
 
     except TypeError:
@@ -63,15 +76,17 @@ def test_peak_assignment():
     try:
         peakidentify.peak_assignment(hdf5_expfilename,
                                      key, hdf5_calfilename,
+                                     external_peak_labels,
                                      precision, 'False', plot = False)
 
     except TypeError:
-        print("An invalid export label value was passed to the function, and it "
+        print("An invalid export_label_input value was passed to the function, and it "
               "was handled well with a TypeError.")
 
     try:
         peakidentify.peak_assignment(hdf5_expfilename,
                                      key, hdf5_calfilename,
+                                     external_peak_labels,
                                      precision, False, 'False')
 
     except TypeError:
