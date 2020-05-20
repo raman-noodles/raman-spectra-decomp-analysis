@@ -1,13 +1,12 @@
 
 # raman-spectra-decomp-analysis
-Code to calculate decomposition of materials using Raman spectroscopy. 
+Code to wrangle Raman spectra, visualize Raman spectra, identify components in a mixture Raman spectra, and ultimately identify decomposition or presence of materials using Raman spectroscopy. 
 [![Binder](https://mybinder.org/badge_logo.svg)](https://mybinder.org/v2/gh/raman-noodles/raman-spectra-decomp-analysis/master)
 <img src="https://travis-ci.org/raman-noodles/raman-spectra-decomp-analysis.svg?branch=master">
 <p align="center">
  <img src="https://github.com/raman-noodles/Raman-noodles/blob/master/docs/Raman%20Noodles%20Logo.PNG">
 </p>
 
-## This is the UW DIRECT Spring 2019 Capstone Project GitHub Repo
 **Team members (alphabetical by first name): Brandon Kern, Elizabeth Rasmussen, Parker Steichen**
 
 ### Overall Project Objective
